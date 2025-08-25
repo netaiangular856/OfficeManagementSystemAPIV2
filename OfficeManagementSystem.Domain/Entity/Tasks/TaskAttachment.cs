@@ -1,4 +1,5 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Documents;
 
 namespace OfficeManagementSystem.Domain.Entity.Tasks
 {
@@ -7,10 +8,8 @@ namespace OfficeManagementSystem.Domain.Entity.Tasks
         public int Id { get; set; }
         public int TaskItemId { get; set; }
         public TaskItem Task { get; set; } = default!;
-        public string FilePath { get; set; } = default!;
-        public string? FileType { get; set; }
-        public string UploadedByUserId { get; set; } = default!;
-        public AppUser UploadedBy { get; set; } = default!;
-        public DateTime UploadedAt { get; set; }
+
+        public int DocumentId { get; set; }
+        public Document Document { get; set; } = default!;
     }
 }

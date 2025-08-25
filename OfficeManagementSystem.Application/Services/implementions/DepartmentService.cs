@@ -1,5 +1,6 @@
 using AutoMapper;
 using LinqKit;
+using MailKit.Search;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Application.DTOs;
@@ -97,9 +98,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filter = filter == null ? parentFilter : filter.And(parentFilter);
                 }
 
-                var departments = await _unitOfWork.DepartmentRepository.GetAllWithDetailsAsync(
-                    filter,
-                    q => q.OrderBy(d => d.Order));
+                //var departments = await _unitOfWork.DepartmentRepository.GetAllWithDetailsAsync(
+                //    filter,
+                //    q => q.OrderBy(d => d.Order));
+
+                var departments = await _unitOfWork.DepartmentRepository
+                    .GetAllAsync(filter,orderBy:m => m.OrderByDescending(m => m.Order));
 
                 var totalCount = departments.Count();
                 var items = departments

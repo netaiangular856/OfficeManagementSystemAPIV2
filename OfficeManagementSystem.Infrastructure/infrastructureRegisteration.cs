@@ -44,8 +44,11 @@ namespace OfficeManagementSystem.Infrastructure
             services.AddScoped<ITaskAttachmentService, TaskAttachmentService>();
 
 
+
             //IUnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ISendNotificationService, SendNotificationService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.AddScoped<IImageMangementService, ImageMangementService>();
             services.AddScoped<IAttachmentFileService, AttachmentFileService>();

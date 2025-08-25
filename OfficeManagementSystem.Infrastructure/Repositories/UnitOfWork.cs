@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OfficeManagementSystem.Domain.Entity.Documents;
+using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using OfficeManagementSystem.Infrastructure.Data;
 using System;
@@ -19,6 +21,12 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public ITaskUpdateRepository TaskUpdateRepository { get; }
         public ITaskAttachmentRepository TaskAttachmentRepository { get; }
 
+        public IGenericRepository<Document> DocumentRepository { get; }
+
+        public INotificationRepository NotificationRepository { get; }
+
+        public IGenericRepository<UserNotification> UserNotifications { get; }
+
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -26,6 +34,10 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             TaskRepository = new TaskRepository(_context);
             TaskUpdateRepository = new TaskUpdateRepository(_context);
             TaskAttachmentRepository = new TaskAttachmentRepository(_context);
+            DocumentRepository = new GenericRepository<Document>(_context);
+            NotificationRepository = new NotificationRepository(_context);
+            UserNotifications=new GenericRepository<UserNotification>(_context);
+
         }
 
         public Task<int> SaveAsync()

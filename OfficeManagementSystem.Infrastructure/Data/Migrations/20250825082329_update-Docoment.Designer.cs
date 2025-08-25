@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeManagementSystem.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using OfficeManagementSystem.Infrastructure.Data;
 namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250825082329_update-Docoment")]
+    partial class updateDocoment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -902,62 +905,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("Recommendations", (string)null);
                 });
 
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.UserNotification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("NotificationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NotificationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserNotifications");
-                });
-
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>
                 {
                     b.Property<int>("Id")
@@ -1520,25 +1467,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.UserNotification", b =>
-                {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Notifications.Notification", "Notification")
-                        .WithMany("UserNotifications")
-                        .HasForeignKey("NotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Notification");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.PartnerContact", b =>
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Partners.Partner", "Partner")
@@ -1666,11 +1594,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.MeetingPlace", b =>
                 {
                     b.Navigation("Bookings");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.Notification", b =>
-                {
-                    b.Navigation("UserNotifications");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>

@@ -159,13 +159,13 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/{id}/attachments
         [HttpPost("{id}/attachments")]
-        public async Task<ActionResult<ApiResponse<TaskAttachmentDto>>> UploadAttachment(int id, IFormFile file)
+        public async Task<ActionResult<ApiResponse<TaskAttachmentDto>>> UploadAttachment(int id, [FromForm]UplodeTaskDto UplodeDto)
         {
-            if (file == null || file.Length == 0)
+            if (UplodeDto.File == null || UplodeDto.File.Length == 0)
                 return BadRequest(ApiResponse<TaskAttachmentDto>.ErrorResponse("No file provided"));
 
             var currentUserId = GetCurrentUserId();
-            var result = await _taskAttachmentService.UploadAttachmentAsync(id, file, currentUserId);
+            var result = await _taskAttachmentService.UploadAttachmentAsync(id, UplodeDto, currentUserId);
             
             if (!result.Success)
                 return BadRequest(result);

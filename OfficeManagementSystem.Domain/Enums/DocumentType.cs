@@ -14,6 +14,7 @@ namespace OfficeManagementSystem.Domain.Enums
         Report,
         Image,
         Scan,
+        Task,
         Other
     }
 

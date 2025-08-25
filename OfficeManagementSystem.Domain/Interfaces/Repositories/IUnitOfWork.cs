@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OfficeManagementSystem.Domain.Entity.Documents;
+using OfficeManagementSystem.Domain.Entity.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +14,10 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         ITaskRepository TaskRepository { get; }
         ITaskUpdateRepository TaskUpdateRepository { get; }
         ITaskAttachmentRepository TaskAttachmentRepository { get; }
+
+        IGenericRepository<Document> DocumentRepository { get; }
+        INotificationRepository NotificationRepository { get; }
+        IGenericRepository<UserNotification> UserNotifications { get; }
         Task<int> SaveAsync();
     }
 }

@@ -3,9 +3,13 @@ using Microsoft.AspNetCore.Http;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Tasks;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Reflection.Metadata;
+using Document = OfficeManagementSystem.Domain.Entity.Documents.Document;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -22,7 +26,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _attachmentFileService = attachmentFileService;
         }
 
-        public async Task<ApiResponse<TaskAttachmentDto>> UploadAttachmentAsync(int taskId, IFormFile file, string currentUserId)
+        public async Task<ApiResponse<TaskAttachmentDto>> UploadAttachmentAsync(int taskId, UplodeTaskDto UplodeDto, string currentUserId)
         {
             try
             {
@@ -31,23 +35,47 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (task == null)
                     return ApiResponse<TaskAttachmentDto>.ErrorResponse("Task not found");
 
-                // Save file
-                var filePath = await _attachmentFileService.SaveAttachmentAsync(file, "Tasks");
+                // Save file to storage
+                var filePath = await _attachmentFileService.SaveAttachmentAsync(UplodeDto.File, "Tasks");
 
-                // Create attachment record
+                // Create Document record
+                var document = new Document
+                {
+                    Title = Path.GetFileNameWithoutExtension(UplodeDto.File.FileName),
+                    Type = DocumentType.Task, // Õÿ enum „‰«”» ⁄‰œﬂ
+                    StoragePath = filePath,
+                    Description = UplodeDto.Description,
+                    CreatedByUserId = currentUserId,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                await _unitOfWork.DocumentRepository.AddAsync(document);
+                await _unitOfWork.SaveAsync();
+
+                // Create TaskAttachment record linking task & document
                 var attachment = new TaskAttachment
                 {
                     TaskItemId = taskId,
-                    FilePath = filePath,
-                    FileType = Path.GetExtension(file.FileName).ToLowerInvariant(),
-                    UploadedByUserId = currentUserId,
-                    UploadedAt = DateTime.UtcNow
+                    DocumentId = document.Id
                 };
 
                 await _unitOfWork.TaskAttachmentRepository.AddAsync(attachment);
                 await _unitOfWork.SaveAsync();
 
-                var attachmentDto = _mapper.Map<TaskAttachmentDto>(attachment);
+                // Prepare DTO
+                var attachmentDto = new TaskAttachmentDto
+                {
+                    Id = attachment.Id,
+                    TaskItemId = taskId,
+                    FilePath = document.StoragePath,
+                    FileType = Path.GetExtension(UplodeDto.File.FileName).ToLowerInvariant(),
+                    FileName = UplodeDto.File.FileName,
+                    UploadedByUserId = document.CreatedByUserId,
+                    UploadedByName = task.CreatedBy?.UserName ?? string.Empty, // √Ê Â« Â« „‰ «·‹ UserService
+                    UploadedAt = document.CreatedAt,
+                    Description=document.Description,
+                };
+
                 return ApiResponse<TaskAttachmentDto>.SuccessResponse(attachmentDto, "Attachment uploaded successfully");
             }
             catch (Exception ex)
@@ -66,7 +94,21 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<List<TaskAttachmentDto>>.ErrorResponse("Task not found");
 
                 var attachments = await _unitOfWork.TaskAttachmentRepository.GetAttachmentsByTaskIdAsync(taskId);
-                var attachmentDtos = _mapper.Map<List<TaskAttachmentDto>>(attachments);
+
+
+                // Include Document info in DTO
+                var attachmentDtos = attachments.Select(a => new TaskAttachmentDto
+                {
+                    Id = a.Id,
+                    TaskItemId = a.TaskItemId,
+                    FilePath = a.Document.StoragePath,
+                    FileType = Path.GetExtension(a.Document.Title).ToLowerInvariant(),
+                    FileName = a.Document.Title,
+                    UploadedByUserId = a.Document.CreatedByUserId,
+                    UploadedByName = (a.Document.CreatedBy != null) ? $"{a.Document.CreatedBy.FirstName} {a.Document.CreatedBy.LastName}" : "",
+                    UploadedAt = a.Document.CreatedAt,
+                    Description = a.Document.Description,
+                }).ToList();
 
                 return ApiResponse<List<TaskAttachmentDto>>.SuccessResponse(attachmentDtos, "Task attachments retrieved successfully");
             }
@@ -91,10 +133,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<bool>.ErrorResponse("Attachment not found");
 
                 // Delete file from storage
-                _attachmentFileService.DeleteAttachment(attachment.FilePath);
+                _attachmentFileService.DeleteAttachment(attachment.Document.StoragePath);
 
-                // Delete from database
+                // Delete document + attachment
                 await _unitOfWork.TaskAttachmentRepository.DeleteAsync(attachmentId);
+                await _unitOfWork.DocumentRepository.DeleteAsync(attachment.DocumentId);
                 await _unitOfWork.SaveAsync();
 
                 return ApiResponse<bool>.SuccessResponse(true, "Attachment deleted successfully");
@@ -105,4 +148,5 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
     }
+
 }

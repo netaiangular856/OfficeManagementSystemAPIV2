@@ -35,9 +35,7 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
             // Task Attachment mappings
-            CreateMap<TaskAttachment, TaskAttachmentDto>()
-                .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.UploadedBy != null ? src.UploadedBy.UserName : null))
-                .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => Path.GetFileName(src.FilePath)));
+            CreateMap<TaskAttachment, TaskAttachmentDto>();
         }
     }
 }

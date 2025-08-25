@@ -12,19 +12,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.FilePath)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            builder.Property(x => x.FileType)
-                .HasMaxLength(100);
-
-            builder.Property(x => x.UploadedByUserId)
-                .IsRequired()
-                .HasMaxLength(450);
-
-            builder.Property(x => x.UploadedAt)
-                .HasDefaultValueSql("GETUTCDATE()");
 
             // Relationships
             builder.HasOne(x => x.Task)
@@ -32,15 +19,15 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .HasForeignKey(x => x.TaskItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.UploadedBy)
-                .WithMany()
-                .HasForeignKey(x => x.UploadedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(x => x.Document)
+            .WithMany(x => x.TaskAttachments)
+            .HasForeignKey(x => x.DocumentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
 
             // Indexes
             builder.HasIndex(x => x.TaskItemId);
-            builder.HasIndex(x => x.UploadedByUserId);
-            builder.HasIndex(x => x.UploadedAt);
+            builder.HasIndex(x => x.DocumentId);
         }
     }
 }

@@ -20,13 +20,13 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .IsRequired()
                 .HasMaxLength(1000);
 
-            builder.Property(x => x.MimeType)
-                .IsRequired()
-                .HasMaxLength(200);
 
             builder.Property(x => x.CreatedByUserId)
                 .IsRequired()
                 .HasMaxLength(450);
+
+            builder.Property(x => x.Description)
+                .HasMaxLength(500);
 
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");

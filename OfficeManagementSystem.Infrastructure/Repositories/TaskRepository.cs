@@ -32,7 +32,8 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .Include(t => t.Updates)
                     .ThenInclude(u => u.CreatedBy)
                 .Include(t => t.Attachments)
-                    .ThenInclude(a => a.UploadedBy)
+                    .ThenInclude(a => a.Document)
+                        .ThenInclude(m => m.CreatedBy)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -48,16 +49,19 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public async Task<IEnumerable<TaskAttachment>> GetTaskAttachmentsAsync(int taskId)
         {
             return await _context.TaskAttachments
-                .Include(a => a.UploadedBy)
+                .Include(a => a.Document)
+                    .ThenInclude(m => m.CreatedBy)
                 .Where(a => a.TaskItemId == taskId)
-                .OrderByDescending(a => a.UploadedAt)
+                .OrderByDescending(a => a.Document.CreatedAt)
                 .ToListAsync();
         }
 
         public async Task<TaskAttachment?> GetTaskAttachmentAsync(int taskId, int attachmentId)
         {
             return await _context.TaskAttachments
-                .Include(a => a.UploadedBy)
+
+                .Include(a => a.Document)
+                    .ThenInclude(m=> m.CreatedBy)
                 .FirstOrDefaultAsync(a => a.TaskItemId == taskId && a.Id == attachmentId);
         }
     }

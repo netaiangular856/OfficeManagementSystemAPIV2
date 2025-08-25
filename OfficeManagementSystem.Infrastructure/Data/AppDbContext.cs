@@ -5,6 +5,7 @@ using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity.Meeting;
+using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 
@@ -51,6 +52,10 @@ namespace OfficeManagementSystem.Infrastructure.Data
         public virtual DbSet<TaskItem> Tasks { get; set; }
         public virtual DbSet<TaskAttachment> TaskAttachments { get; set; }
         public virtual DbSet<TaskUpdate> TaskUpdates { get; set; }
+
+        //Notifications
+        public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<UserNotification> UserNotifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

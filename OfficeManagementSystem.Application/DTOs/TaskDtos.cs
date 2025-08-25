@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using System.ComponentModel.DataAnnotations;
@@ -115,7 +116,14 @@ namespace OfficeManagementSystem.Application.DTOs
         public string FileName { get; set; } = string.Empty;
         public string UploadedByUserId { get; set; } = string.Empty;
         public string UploadedByName { get; set; } = string.Empty;
+        public string? Description { get; set; }
         public DateTime UploadedAt { get; set; }
+    }
+
+    public class UplodeTaskDto
+    {
+        public IFormFile File { get; set; }
+        public string? Description { get; set; }
     }
 
     // Bulk Operations DTOs

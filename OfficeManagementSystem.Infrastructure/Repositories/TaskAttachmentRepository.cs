@@ -14,16 +14,18 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public async Task<IEnumerable<TaskAttachment>> GetAttachmentsByTaskIdAsync(int taskId)
         {
             return await _context.TaskAttachments
-                .Include(a => a.UploadedBy)
+                .Include(a => a.Document)
+                    .ThenInclude(d => d.CreatedBy) // ÚÔÇä ÊÌíÈ ÇÓã ÇáÔÎÕ Çááí ÑÝÚ
                 .Where(a => a.TaskItemId == taskId)
-                .OrderByDescending(a => a.UploadedAt)
+                .OrderByDescending(a => a.Document.CreatedAt)
                 .ToListAsync();
         }
 
         public async Task<TaskAttachment?> GetAttachmentByTaskIdAndIdAsync(int taskId, int attachmentId)
         {
             return await _context.TaskAttachments
-                .Include(a => a.UploadedBy)
+                .Include(a => a.Document)
+                    .ThenInclude(d => d.CreatedBy)
                 .FirstOrDefaultAsync(a => a.TaskItemId == taskId && a.Id == attachmentId);
         }
     }

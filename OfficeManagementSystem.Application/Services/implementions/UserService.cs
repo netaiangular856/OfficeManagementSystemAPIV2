@@ -67,6 +67,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 var userDtos = _mapper.Map<List<UserDto>>(users);
 
+                for (int i = 0; i < users.Count; i++)
+                {
+                    var roles = await _userManager.GetRolesAsync(users[i]);
+                    userDtos[i].Roles = roles.ToList();
+                }
+
                 var paginatedResult = new PaginatedResult<UserDto>
                 {
                     TotalCount = totalCount,

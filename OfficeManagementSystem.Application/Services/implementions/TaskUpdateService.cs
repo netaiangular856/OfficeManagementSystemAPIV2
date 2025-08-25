@@ -12,11 +12,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ISendNotificationService _notificationService;
 
-        public TaskUpdateService(IUnitOfWork unitOfWork, IMapper mapper)
+        public TaskUpdateService(IUnitOfWork unitOfWork, IMapper mapper,ISendNotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<TaskUpdateDto>> CreateTaskUpdateAsync(int taskId, CreateTaskUpdateDto createUpdateDto, string currentUserId)
@@ -36,6 +38,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 await _unitOfWork.SaveAsync();
 
                 var taskUpdateDto = _mapper.Map<TaskUpdateDto>(taskUpdate);
+
+                await _notificationService.SendNotificationAsync(
+                "New Task Update",
+                $"A new task Update has been Added to task {task.Title},Please check your task list for details.",
+                new List<string> { task.AssigneeUserId },
+                "Task"
+                );
+
                 return ApiResponse<TaskUpdateDto>.SuccessResponse(taskUpdateDto, "Task update created successfully");
             }
             catch (Exception ex)

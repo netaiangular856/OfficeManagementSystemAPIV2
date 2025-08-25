@@ -5,6 +5,7 @@ using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Threading.Tasks;
 using TaskStatus = OfficeManagementSystem.Domain.Enums.Tasks.TaskStatus;
 
 namespace OfficeManagementSystem.Application.Services.implementions
@@ -13,11 +14,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ISendNotificationService _notificationService;
 
-        public TaskService(IUnitOfWork unitOfWork, IMapper mapper)
+        public TaskService(IUnitOfWork unitOfWork, IMapper mapper,ISendNotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<TaskDto>> CreateTaskAsync(CreateTaskDto createTaskDto, string currentUserId)
@@ -32,6 +35,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 await _unitOfWork.SaveAsync();
 
                 var taskDto = _mapper.Map<TaskDto>(task);
+                await _notificationService.SendNotificationAsync(
+                    "New Task Assigned",
+                    $"A new task has been assigned to you: {task.Title} deadline : {task.DueDate},Please check your task list for details.",
+                    new List<string> { task.AssigneeUserId },
+                    "Task"
+                );
                 return ApiResponse<TaskDto>.SuccessResponse(taskDto, "Task created successfully");
             }
             catch (Exception ex)
@@ -44,7 +53,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var allTasks = await _unitOfWork.TaskRepository.GetTasksWithDetailsAsync();
+                var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(includeProperties: "Dept,Assignee,CreatedBy");
                 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -268,6 +277,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 await _unitOfWork.SaveAsync();
+
+                await _notificationService.SendNotificationAsync(
+                "Tasks Reassigned",
+                $"A new tasks has been reassigned to you,Please check your task list for details.",
+                new List<string> { bulkReassignDto.NewAssigneeUserId },
+                "Task"
+                );
 
                 return ApiResponse<bool>.SuccessResponse(true, $"{tasks.Count} tasks reassigned successfully");
             }
