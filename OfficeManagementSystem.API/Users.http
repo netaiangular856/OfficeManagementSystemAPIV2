@@ -1,0 +1,125 @@
+### User Management API Tests
+
+@baseUrl = https://localhost:7001
+@authToken = {{login.response.body.data.token}}
+
+### Login to get token
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "Admin123!"
+}
+
+### Get all users with pagination
+GET {{baseUrl}}/api/v1/users?page=1&pageSize=10&search=
+Authorization: Bearer {{authToken}}
+
+### Get user by ID
+GET {{baseUrl}}/api/v1/users/user-id-here
+Authorization: Bearer {{authToken}}
+
+### Get current user profile
+GET {{baseUrl}}/api/v1/users/profile
+Authorization: Bearer {{authToken}}
+
+### Create new user
+POST {{baseUrl}}/api/v1/users
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "email": "newuser@example.com",
+    "password": "Password123!",
+    "firstName": "New",
+    "lastName": "User",
+    "role": "User",
+    "departmentId": 1,
+    "phoneNumber": "+1234567890",
+    "timeZone": "Asia/Dubai"
+}
+
+### Update user
+PUT {{baseUrl}}/api/v1/users/user-id-here
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "firstName": "Updated",
+    "lastName": "Name",
+    "departmentId": 1,
+    "phoneNumber": "+1234567890",
+    "timeZone": "Asia/Dubai"
+}
+
+### Update user role
+PUT {{baseUrl}}/api/v1/users/user-id-here/role
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "role": "Admin"
+}
+
+### Update user status (enable/disable)
+PATCH {{baseUrl}}/api/v1/users/user-id-here/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "isActive": false
+}
+
+### Update current user profile (including image)
+PUT {{baseUrl}}/api/v1/users/profile
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+Updated First Name
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Updated Last Name
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phoneNumber"
+
++1234567890
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="newImage"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./profile.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update user profile (Admin only)
+PUT {{baseUrl}}/api/v1/users/user-id-here/profile
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+Admin Updated First Name
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Admin Updated Last Name
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phoneNumber"
+
++1234567890
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="newImage"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./profile.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Delete user (logical deletion)
+DELETE {{baseUrl}}/api/v1/users/user-id-here
+Authorization: Bearer {{authToken}}

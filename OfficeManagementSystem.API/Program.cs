@@ -1,0 +1,87 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using OfficeManagementSystem.Infrastructure;
+using OfficeManagementSystem.Infrastructure.Data;
+using OfficeManagementSystem.Infrastructure.Data.Seed;
+using System.ComponentModel;
+namespace OfficeManagementSystem.API
+{
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+
+            var builder = WebApplication.CreateBuilder(args);
+
+            // ======= Infrastructure Config (DI, DbContext, Identity, etc) =======
+            builder.Services.infrastructureConfiguration(builder.Configuration);
+
+            // ======= Controllers =======
+            builder.Services.AddControllers();
+
+            // ======= CORS Policy =======
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins", policy =>
+                {
+                    policy.WithOrigins(
+                        "http://localhost:3000",
+                        "https://localhost:3000",
+                        "http://localhost:4200",
+                        "https://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
+            // ======= Swagger =======
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Office Management API",
+                    Version = "v1"
+                });
+            });
+
+            var app = builder.Build();
+
+            // ======= Swagger UI =======
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Office Management API V1");
+                options.RoutePrefix = string.Empty; // Swagger on root URL
+            });
+
+            // ======= Middleware =======
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+            app.UseCors("AllowSpecificOrigins");
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            // ======= Map Controllers =======
+            app.MapControllers();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<AppDbContext>();
+                    await context.Database.MigrateAsync();
+                    await RoleSeeder.SeedRoles(services);
+                    await SeedEmail.SeedAsync(services);
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception if needed
+                }
+            }
+            app.Run();
+        }
+    }
+}

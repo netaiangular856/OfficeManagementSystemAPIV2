@@ -1,0 +1,63 @@
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using OfficeManagementSystem.Domain.Entity;
+using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Documents;
+using OfficeManagementSystem.Domain.Entity.Letters;
+using OfficeManagementSystem.Domain.Entity.Meeting;
+using OfficeManagementSystem.Domain.Entity.Partners;
+using OfficeManagementSystem.Domain.Entity.Tasks;
+
+namespace OfficeManagementSystem.Infrastructure.Data
+{
+    public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
+    {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
+        // Auth
+        public virtual DbSet<Permission> Permissions { get; set; }
+        public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
+        // Core
+        public virtual DbSet<Department> Departments { get; set; }
+
+        public virtual DbSet<Employee> Employees { get; set; }
+
+        public virtual DbSet<EmployeeNote> EmployeeNotes { get; set; }
+
+        // Documents
+        public virtual DbSet<Document> Documents { get; set; }
+
+        // Letters
+        public virtual DbSet<Letter> Letters { get; set; }
+        public virtual DbSet<LetterAttachment> LetterAttachments { get; set; }
+
+        // Partners
+        public virtual DbSet<Partner> Partners { get; set; }
+        public virtual DbSet<PartnerContact> PartnerContacts { get; set; }
+
+        // Meetings
+        public virtual DbSet<Meeting> Meetings { get; set; }
+        public virtual DbSet<MeetingAttendee> MeetingAttendees { get; set; }
+        public virtual DbSet<MeetingAttachment> MeetingAttachments { get; set; }
+        public virtual DbSet<MeetingBooking> MeetingBookings { get; set; }
+        public virtual DbSet<MeetingMinutes> MeetingMinutes { get; set; }
+        public virtual DbSet<MeetingPlace> MeetingPlaces { get; set; }
+        public virtual DbSet<Recommendation> Recommendations { get; set; }
+
+        // Tasks
+        public virtual DbSet<TaskItem> Tasks { get; set; }
+        public virtual DbSet<TaskAttachment> TaskAttachments { get; set; }
+        public virtual DbSet<TaskUpdate> TaskUpdates { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Apply all configurations from the Config folder
+            builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        }
+    }
+}

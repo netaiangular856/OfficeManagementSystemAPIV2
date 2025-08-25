@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MimeKit" Version="4.13.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OfficeManagementSystem.Domain\OfficeManagementSystem.Domain.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

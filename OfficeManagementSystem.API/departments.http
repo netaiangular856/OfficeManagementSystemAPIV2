@@ -1,0 +1,81 @@
+@BaseUrl = https://localhost:7001
+@ContentType = application/json
+
+### =========================
+### Organization / Departments (hierarchy with Parent/Path)
+### =========================
+
+### Create Department
+POST {{BaseUrl}}/api/v1/departments
+Content-Type: {{ContentType}}
+
+{
+  "code": "IT",
+  "nameAr": "قسم تقنية المعلومات",
+  "nameEn": "Information Technology Department",
+  "type": 0,
+  "parentId": null,
+  "order": 1,
+  "managerUserId": null
+}
+
+### Create Child Department
+POST {{BaseUrl}}/api/v1/departments
+Content-Type: {{ContentType}}
+
+{
+  "code": "DEV",
+  "nameAr": "قسم التطوير",
+  "nameEn": "Development Department",
+  "type": 0,
+  "parentId": 1,
+  "order": 1,
+  "managerUserId": null
+}
+
+### Get All Departments
+GET {{BaseUrl}}/api/v1/departments?page=1&pageSize=10&searchTerm=&type=&isActive=true&parentId=
+
+### Get Departments Tree
+GET {{BaseUrl}}/api/v1/departments/tree
+
+### Get Department by ID
+GET {{BaseUrl}}/api/v1/departments/1
+
+### Update Department
+PUT {{BaseUrl}}/api/v1/departments/1
+Content-Type: {{ContentType}}
+
+{
+  "code": "IT-UPDATED",
+  "nameAr": "قسم تقنية المعلومات محدث",
+  "nameEn": "Updated Information Technology Department",
+  "type": 0,
+  "parentId": null,
+  "order": 1,
+  "managerUserId": null,
+  "isActive": true
+}
+
+### Move Department
+POST {{BaseUrl}}/api/v1/departments/2/move
+Content-Type: {{ContentType}}
+
+{
+  "newParentId": null,
+  "newOrder": 2
+}
+
+### Assign Manager to Department
+POST {{BaseUrl}}/api/v1/departments/1/manager
+Content-Type: {{ContentType}}
+
+{
+  "managerUserId": "user-guid-here"
+}
+
+### Delete Department
+DELETE {{BaseUrl}}/api/v1/departments/2
+
+### Search Departments
+GET {{BaseUrl}}/api/v1/departments?searchTerm=تقنية&type=0&isActive=true&page=1&pageSize=10
