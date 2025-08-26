@@ -9,6 +9,7 @@ namespace OfficeManagementSystem.Domain.Enums.Meeting
     public enum PlaceType
     {
         InternalRoom,
-        ExternalVenue
+        ExternalVenue,
+        Other
     }
 }

@@ -12,12 +12,15 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Notes);
+            // áæ åÊÍÊÝÙ ÈÜ AttachmentsCount (ÛíÑ ãÝÖøá ÍÇáíÇð)
+            builder.Ignore(x => x.AttachmentsCount); // Ãæ ÇÔØÈ ÇáÎÇÕíÉ ãä ÇáãæÏíá
 
+            builder.Property(x => x.Notes);
             builder.Property(x => x.SummaryAI);
 
-            // Indexes
+            // Unique Úáì MeetingId (1:1)
             builder.HasIndex(x => x.MeetingId).IsUnique();
         }
     }
+
 }

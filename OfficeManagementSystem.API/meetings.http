@@ -1,0 +1,196 @@
+### Meeting Management API Tests
+
+### Variables
+@baseUrl = https://localhost:7001
+@authToken = your_jwt_token_here
+
+### 1. Create Meeting Place
+POST {{baseUrl}}/api/v1/meeting-places
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "قاعة الاجتماعات الرئيسية",
+  "type": 0,
+  "location": "الطابق الأول",
+  "capacity": 20,
+  "contactInfoJson": "{\"phone\":\"+966-11-123-4567\"}"
+}
+
+### 2. Get All Meeting Places
+GET {{baseUrl}}/api/v1/meeting-places
+Authorization: Bearer {{authToken}}
+
+### 3. Create Meeting
+POST {{baseUrl}}/api/v1/meetings
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "اجتماع إدارة المشروع",
+  "agenda": "مناقشة تقدم المشروع والتخطيط للمرحلة القادمة",
+  "type": 0,
+  "locationMode": 0,
+  "startAt": "2024-01-15T10:00:00",
+  "endAt": "2024-01-15T11:30:00",
+  "placeId": 1,
+  "attendees": [
+    {
+      "kind": 0,
+      "userId": "user1",
+      "role": 0,
+      "notes": "مدير المشروع"
+    },
+    {
+      "kind": 1,
+      "displayName": "أحمد محمد",
+      "organization": "شركة التقنية",
+      "email": "ahmed@tech.com",
+      "role": 0
+    }
+  ]
+}
+
+### 4. Get All Meetings
+GET {{baseUrl}}/api/v1/meetings?search=اجتماع&type=0&status=0&from=2024-01-01&to=2024-12-31&pageSize=10&pageNumber=1
+Authorization: Bearer {{authToken}}
+
+### 5. Get Meeting by ID
+GET {{baseUrl}}/api/v1/meetings/1
+Authorization: Bearer {{authToken}}
+
+### 6. Update Meeting
+PUT {{baseUrl}}/api/v1/meetings/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "title": "اجتماع إدارة المشروع - محدث",
+  "agenda": "مناقشة تقدم المشروع والتخطيط للمرحلة القادمة - محدث",
+  "type": 0,
+  "locationMode": 0,
+  "startAt": "2024-01-15T10:00:00",
+  "endAt": "2024-01-15T11:30:00",
+  "placeId": 1
+}
+
+### 7. Update Meeting Status
+PATCH {{baseUrl}}/api/v1/meetings/1/status
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "status": 1
+}
+
+### 8. Get Meeting Attendees
+GET {{baseUrl}}/api/v1/meetings/1/attendees
+Authorization: Bearer {{authToken}}
+
+### 9. Add Attendee to Meeting
+POST {{baseUrl}}/api/v1/meetings/1/attendees
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "kind": 0,
+  "userId": "user2",
+  "role": 1,
+  "notes": "مطور برمجيات"
+}
+
+### 10. Update Attendee
+PUT {{baseUrl}}/api/v1/meetings/1/attendees/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "kind": 0,
+  "userId": "user1",
+  "role": 0,
+  "attendanceStatus": 1,
+  "notes": "مدير المشروع - محدث"
+}
+
+### 11. Remove Attendee
+DELETE {{baseUrl}}/api/v1/meetings/1/attendees/1
+Authorization: Bearer {{authToken}}
+
+### 12. Get Meeting Attachments
+GET {{baseUrl}}/api/v1/meetings/1/attachments
+Authorization: Bearer {{authToken}}
+
+### 13. Add Attachment to Meeting
+POST {{baseUrl}}/api/v1/meetings/1/attachments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "documentId": 1
+}
+
+### 14. Remove Attachment
+DELETE {{baseUrl}}/api/v1/meetings/1/attachments/1
+Authorization: Bearer {{authToken}}
+
+### 15. Get Meeting Minutes
+GET {{baseUrl}}/api/v1/meetings/1/minutes
+Authorization: Bearer {{authToken}}
+
+### 16. Create Meeting Minutes
+POST {{baseUrl}}/api/v1/meetings/1/minutes
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "notes": "تم مناقشة تقدم المشروع واتخاذ قرارات مهمة",
+  "summaryAI": "ملخص الاجتماع: تم مناقشة التقدم والتخطيط للمرحلة القادمة"
+}
+
+### 17. Update Meeting Minutes
+PUT {{baseUrl}}/api/v1/meetings/1/minutes
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "notes": "تم مناقشة تقدم المشروع واتخاذ قرارات مهمة - محدث",
+  "summaryAI": "ملخص الاجتماع: تم مناقشة التقدم والتخطيط للمرحلة القادمة - محدث"
+}
+
+### 18. Get Meeting Recommendations
+GET {{baseUrl}}/api/v1/meetings/1/recommendations
+Authorization: Bearer {{authToken}}
+
+### 19. Add Recommendation
+POST {{baseUrl}}/api/v1/meetings/1/recommendations
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "text": "يجب زيادة الموارد المخصصة للمشروع"
+}
+
+### 20. Update Recommendation
+PUT {{baseUrl}}/api/v1/recommendations/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "text": "يجب زيادة الموارد المخصصة للمشروع - محدث"
+}
+
+### 21. Remove Recommendation
+DELETE {{baseUrl}}/api/v1/recommendations/1
+Authorization: Bearer {{authToken}}
+
+### 22. Get Available Places
+GET {{baseUrl}}/api/v1/meeting-places/available?startAt=2024-01-15T10:00:00&endAt=2024-01-15T11:30:00
+Authorization: Bearer {{authToken}}
+
+### 23. Delete Meeting
+DELETE {{baseUrl}}/api/v1/meetings/1
+Authorization: Bearer {{authToken}}
+
+### 24. Delete Meeting Place
+DELETE {{baseUrl}}/api/v1/meeting-places/1
+Authorization: Bearer {{authToken}}

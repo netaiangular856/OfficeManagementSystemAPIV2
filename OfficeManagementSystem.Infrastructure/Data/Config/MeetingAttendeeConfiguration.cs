@@ -12,19 +12,19 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.UserId)
-                .IsRequired()
-                .HasMaxLength(450);
+            // ÃØæÇá ãÝíÏÉ
+            builder.Property(x => x.UserId).HasMaxLength(450);
+            builder.Property(x => x.DisplayName).HasMaxLength(300);
+            builder.Property(x => x.Organization).HasMaxLength(300);
+            builder.Property(x => x.JobTitle).HasMaxLength(200);
+            builder.Property(x => x.Department).HasMaxLength(200);
+            builder.Property(x => x.Notes).HasMaxLength(1000);
 
-            builder.Property(x => x.RoleInMeeting)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("required");
+            builder.Property(x => x.Kind).IsRequired();
+            builder.Property(x => x.Role).IsRequired();
+            builder.Property(x => x.AttendanceStatus).IsRequired();
 
-            builder.Property(x => x.Notes)
-                .HasMaxLength(1000);
-
-            // Relationships
+            // ÚáÇÞÇÊ
             builder.HasOne(x => x.Meeting)
                 .WithMany(x => x.Attendees)
                 .HasForeignKey(x => x.MeetingId)
@@ -33,15 +33,13 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.HasOne(x => x.User)
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull); // Ãæ Restrict ÍÓÈ ÓíÇÓÊß
 
-            // Indexes
+            // ÝåÇÑÓ ÚÇãÉ
             builder.HasIndex(x => x.MeetingId);
             builder.HasIndex(x => x.UserId);
             builder.HasIndex(x => x.AttendanceStatus);
-
-            // Unique constraint
-            builder.HasIndex(x => new { x.MeetingId, x.UserId }).IsUnique();
         }
     }
+
 }

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.Domain.Enums.Meeting
 {
-    public enum MeetingStatus
+    public enum AttendeeRole
     {
-        Scheduled,
-        InProgress,
-        Done,
-        Cancelled
+        Required,
+        Optional,
+        Speaker
     }
 }

@@ -102,7 +102,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Id = a.Id,
                     TaskItemId = a.TaskItemId,
                     FilePath = a.Document.StoragePath,
-                    FileType = Path.GetExtension(a.Document.Title).ToLowerInvariant(),
+                    FileType = Path.GetExtension(a.Document.StoragePath).ToLowerInvariant(),
                     FileName = a.Document.Title,
                     UploadedByUserId = a.Document.CreatedByUserId,
                     UploadedByName = (a.Document.CreatedBy != null) ? $"{a.Document.CreatedBy.FirstName} {a.Document.CreatedBy.LastName}" : "",

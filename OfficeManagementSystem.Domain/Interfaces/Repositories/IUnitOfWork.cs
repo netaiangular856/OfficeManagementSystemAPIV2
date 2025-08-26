@@ -1,5 +1,7 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Notifications;
+using OfficeManagementSystem.Domain.Entity.Meeting;
+using OfficeManagementSystem.Domain.Entity.Visit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,18 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         IGenericRepository<Document> DocumentRepository { get; }
         INotificationRepository NotificationRepository { get; }
         IGenericRepository<UserNotification> UserNotifications { get; }
+        
+        // Meeting repositories
+        IMeetingRepository MeetingRepository { get; }
+        IGenericRepository<MeetingAttendee> MeetingAttendeeRepository { get; }
+        IGenericRepository<MeetingMinutes> MeetingMinutesRepository { get; }
+        IGenericRepository<Recommendation> RecommendationRepository { get; }
+        IGenericRepository<MeetingAttachment> MeetingAttachmentRepository { get; }
+        
+        // Visit repositories
+        IVisitRepository VisitRepository { get; }
+        IGenericRepository<VisitParticipant> VisitParticipantRepository { get; }
+        
         Task<int> SaveAsync();
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeManagementSystem.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using OfficeManagementSystem.Infrastructure.Data;
 namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250826091227_edit-Meeting-Table")]
+    partial class editMeetingTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -641,6 +644,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("PlaceId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartAt")
                         .HasColumnType("datetime2");
 
@@ -665,6 +671,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("LocationMode");
 
                     b.HasIndex("OrganizerUserId");
+
+                    b.HasIndex("PlaceId");
 
                     b.HasIndex("StartAt");
 
@@ -716,9 +724,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<string>("DisplayName")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("JobTitle")
                         .HasMaxLength(200)
@@ -779,6 +784,41 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("MeetingMinutes", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.MeetingPlace", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContactInfoJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("Type");
+
+                    b.ToTable("MeetingPlaces", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.Recommendation", b =>
@@ -1123,104 +1163,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("TaskUpdates", (string)null);
                 });
 
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Purpose")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("VisitDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("Type");
-
-                    b.HasIndex("VisitDate");
-
-                    b.ToTable("Visits", (string)null);
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.VisitParticipant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Department")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("DisplayName")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(320)
-                        .HasColumnType("nvarchar(320)");
-
-                    b.Property<string>("JobTitle")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("Kind")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Organization")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("UserId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("VisitId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("VisitId");
-
-                    b.ToTable("VisitParticipants", (string)null);
-                });
-
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>
                 {
                     b.HasBaseType("OfficeManagementSystem.Domain.Entity.Auth.AppUser");
@@ -1423,7 +1365,14 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Meeting.MeetingPlace", "Place")
+                        .WithMany()
+                        .HasForeignKey("PlaceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Organizer");
+
+                    b.Navigation("Place");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.MeetingAttachment", b =>
@@ -1578,34 +1527,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Task");
                 });
 
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
-                {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CreatedByUser");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.VisitParticipant", b =>
-                {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Visit.Visit", "Visit")
-                        .WithMany("Participants")
-                        .HasForeignKey("VisitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("Visit");
-                });
-
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Employee", "Manager")
@@ -1671,11 +1592,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Attachments");
 
                     b.Navigation("Updates");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
-                {
-                    b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>

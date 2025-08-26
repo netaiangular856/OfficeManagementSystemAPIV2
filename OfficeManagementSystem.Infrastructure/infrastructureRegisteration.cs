@@ -42,6 +42,12 @@ namespace OfficeManagementSystem.Infrastructure
             services.AddScoped<ITaskService, TaskService>();
             services.AddScoped<ITaskUpdateService, TaskUpdateService>();
             services.AddScoped<ITaskAttachmentService, TaskAttachmentService>();
+            
+            // Meeting services
+            services.AddScoped<IMeetingService, MeetingService>();
+            
+            // Visit services
+            services.AddScoped<IVisitService, VisitService>();
 
 
 

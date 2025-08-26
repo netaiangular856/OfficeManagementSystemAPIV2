@@ -1,17 +1,20 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Enums.Meeting;
+using System.ComponentModel.DataAnnotations;
 
-namespace OfficeManagementSystem.Domain.Entity.Meeting
+namespace OfficeManagementSystem.Domain.Entity.Visit
 {
-    public class MeetingAttendee
+    public class VisitParticipant
     {
         public int Id { get; set; }
-        public int MeetingId { get; set; }
-        public Meeting Meeting { get; set; } = default!;
+        public int VisitId { get; set; }
+        public Visit Visit { get; set; } = default!;
+
         public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
 
+
         // داخلي
-        public string? UserId { get; set; } 
+        public string? UserId { get; set; }
         public AppUser? User { get; set; }
 
         // خارجي
@@ -20,10 +23,5 @@ namespace OfficeManagementSystem.Domain.Entity.Meeting
         public string? JobTitle { get; set; }
         public string? Department { get; set; }
         public string? Email { get; set; }
-
-
-        public AttendeeRole Role { get; set; } = AttendeeRole.Required; // required|optional|speaker
-        public RSVP AttendanceStatus { get; set; } = RSVP.Invited;
-        public string? Notes { get; set; }
     }
 }

@@ -12,12 +12,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.UploadedByUserId)
-                .IsRequired()
-                .HasMaxLength(450);
-
-            builder.Property(x => x.UploadedAt)
-                .HasDefaultValueSql("GETUTCDATE()");
 
             // Relationships
             builder.HasOne(x => x.Meeting)
@@ -26,19 +20,14 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.Document)
-                .WithMany()
+                .WithMany(x=>x.MeetingAttachments)
                 .HasForeignKey(x => x.DocumentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.UploadedBy)
-                .WithMany()
-                .HasForeignKey(x => x.UploadedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
             builder.HasIndex(x => x.MeetingId);
             builder.HasIndex(x => x.DocumentId);
-            builder.HasIndex(x => x.UploadedByUserId);
         }
     }
 }

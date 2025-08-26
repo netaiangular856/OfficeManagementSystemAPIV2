@@ -9,6 +9,7 @@ namespace OfficeManagementSystem.Domain.Enums.Meeting
     public enum MeetingType
     {
         Internal,
-        External
+        External,
+        Other
     }
 }

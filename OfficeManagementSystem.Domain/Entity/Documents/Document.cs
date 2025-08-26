@@ -1,4 +1,5 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
 using System;
@@ -23,5 +24,6 @@ namespace OfficeManagementSystem.Domain.Entity.Documents
         public DateTime? UpdatedAt { get; set; }
 
         public ICollection<TaskAttachment> TaskAttachments { get; set; } = new List<TaskAttachment>();
+        public ICollection<MeetingAttachment> MeetingAttachments { get; set; } = new List<MeetingAttachment>();
     }
 }

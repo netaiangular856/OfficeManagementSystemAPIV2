@@ -8,6 +8,7 @@ using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Tasks;
+using OfficeManagementSystem.Domain.Entity.Visit;
 
 namespace OfficeManagementSystem.Infrastructure.Data
 {
@@ -43,9 +44,7 @@ namespace OfficeManagementSystem.Infrastructure.Data
         public virtual DbSet<Meeting> Meetings { get; set; }
         public virtual DbSet<MeetingAttendee> MeetingAttendees { get; set; }
         public virtual DbSet<MeetingAttachment> MeetingAttachments { get; set; }
-        public virtual DbSet<MeetingBooking> MeetingBookings { get; set; }
         public virtual DbSet<MeetingMinutes> MeetingMinutes { get; set; }
-        public virtual DbSet<MeetingPlace> MeetingPlaces { get; set; }
         public virtual DbSet<Recommendation> Recommendations { get; set; }
 
         // Tasks
@@ -56,6 +55,10 @@ namespace OfficeManagementSystem.Infrastructure.Data
         //Notifications
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<UserNotification> UserNotifications { get; set; }
+
+        //Visits
+        public virtual DbSet<Visit> Visits { get; set; }
+        public virtual DbSet<VisitParticipant> VisitParticipants { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

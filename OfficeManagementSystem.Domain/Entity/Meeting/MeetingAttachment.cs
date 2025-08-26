@@ -14,10 +14,5 @@ namespace OfficeManagementSystem.Domain.Entity.Meeting
 
         public int DocumentId { get; set; }   // ارتباط مع ARC.Document
         public Document Document { get; set; } = default!;
-
-        public string UploadedByUserId { get; set; } = default!;
-        public AppUser UploadedBy { get; set; } = default!;
-
-        public DateTime UploadedAt { get; set; }
     }
 }
