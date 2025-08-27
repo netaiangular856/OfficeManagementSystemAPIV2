@@ -48,6 +48,15 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Visit services
             services.AddScoped<IVisitService, VisitService>();
+            
+            // Document services
+            services.AddScoped<IDocumentService, DocumentService>();
+            
+            // Partner services
+            services.AddScoped<IPartnerService, PartnerService>();
+            
+            // Letter services
+            services.AddScoped<ILetterService, LetterService>();
 
 
 

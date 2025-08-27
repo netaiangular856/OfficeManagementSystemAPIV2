@@ -13,5 +13,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         Task<ApiResponse<bool>> MoveAsync(int id, MoveDepartmentDto moveDto);
         Task<ApiResponse<bool>> AssignManagerAsync(int id, AssignManagerDto assignDto);
         Task<ApiResponse<bool>> DeleteAsync(int id);
+        Task<ApiResponse<IEnumerable<DepartmentNameIdDto>>> GetDepartmentsNamesAsync(string? search);
     }
 }

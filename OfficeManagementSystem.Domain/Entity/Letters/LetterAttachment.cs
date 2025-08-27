@@ -12,10 +12,4 @@ public class LetterAttachment
 
     public int DocumentId { get; set; }
     public Document Document { get; set; } = default!;
-
-    public string UploadedByUserId { get; set; } = default!;
-    public AppUser UploadedBy { get; set; } = default!;
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-
-    public string? Note { get; set; }
 }

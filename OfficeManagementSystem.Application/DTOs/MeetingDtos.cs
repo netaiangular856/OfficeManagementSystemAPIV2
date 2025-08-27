@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using OfficeManagementSystem.Domain.Enums;
 
 namespace OfficeManagementSystem.Application.DTOs
 {
@@ -184,6 +185,7 @@ namespace OfficeManagementSystem.Application.DTOs
     {
         public IFormFile File { get; set; }
         public string? Description { get; set; }
+        public DocumentSource? DocumentSource { get; set; }
     }
 
     public class MeetingAttachmentDto
@@ -197,6 +199,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string UploadedByName { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime UploadedAt { get; set; }
+        public DocumentSource? DocumentSource { get; set; }
     }
 
 

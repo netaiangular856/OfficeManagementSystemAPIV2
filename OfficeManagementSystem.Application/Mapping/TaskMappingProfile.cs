@@ -13,8 +13,8 @@ namespace OfficeManagementSystem.Application.Mapping
             // Task mappings
             CreateMap<TaskItem, TaskDto>()
                 .ForMember(dest => dest.DeptName, opt => opt.MapFrom(src => src.Dept != null ? src.Dept.NameEn : null))
-                .ForMember(dest => dest.AssigneeName, opt => opt.MapFrom(src => src.Assignee != null ? src.Assignee.UserName : null))
-                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? src.CreatedBy.UserName : null))
+                .ForMember(dest => dest.AssigneeName, opt => opt.MapFrom(src => src.Assignee != null ? src.Assignee.FirstName+""+src.Assignee.LastName  : null))
+                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? src.Assignee.FirstName + "" + src.Assignee.LastName : null))
                 .ForMember(dest => dest.UpdatesCount, opt => opt.MapFrom(src => src.Updates.Count))
                 .ForMember(dest => dest.AttachmentsCount, opt => opt.MapFrom(src => src.Attachments.Count));
 
@@ -29,7 +29,7 @@ namespace OfficeManagementSystem.Application.Mapping
 
             // Task Update mappings
             CreateMap<TaskUpdate, TaskUpdateDto>()
-                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? src.CreatedBy.UserName : null));
+                .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? src.CreatedBy.FirstName+"" + src.CreatedBy.LastName : null));
 
             CreateMap<CreateTaskUpdateDto, TaskUpdate>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));

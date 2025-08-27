@@ -6,17 +6,10 @@ using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.Domain.Enums
 {
-    public enum DocumentType
+    public enum DocumentSource
     {
-        Letter,
-        Task,
-        Meeting,
-        Minute,
-        Contract,
-        Report,
-        Image,
-        Scan,
-        Other
+        Incoming,
+        Outgoing,
+        Internal
     }
-
 }

@@ -12,8 +12,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Number)
-                .HasMaxLength(100);
 
             builder.Property(x => x.Subject)
                 .IsRequired()
@@ -52,7 +50,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Indexes
-            builder.HasIndex(x => x.Number);
             builder.HasIndex(x => x.Direction);
             builder.HasIndex(x => x.Confidentiality);
             builder.HasIndex(x => x.CreatedByUserId);

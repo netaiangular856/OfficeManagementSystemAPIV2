@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OfficeManagementSystem.Application.DTOs;
+using OfficeManagementSystem.Application.DTOs.Common;
+using OfficeManagementSystem.Application.Services.implementions;
 using OfficeManagementSystem.Application.Services.Interfaces;
 
 namespace OfficeManagementSystem.API.Controllers
@@ -92,6 +94,12 @@ namespace OfficeManagementSystem.API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _departmentService.DeleteAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+        [HttpGet("names")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<DepartmentDto>>>> GetDepartmentsName([FromQuery] string? search)
+        {
+            var result = await _departmentService.GetDepartmentsNamesAsync(search);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

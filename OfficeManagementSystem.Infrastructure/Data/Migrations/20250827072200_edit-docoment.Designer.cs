@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeManagementSystem.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using OfficeManagementSystem.Infrastructure.Data;
 namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250827072200_edit-docoment")]
+    partial class editdocoment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -526,8 +529,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("LetterDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Number")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ReferenceNumbers")
                         .HasMaxLength(500)
@@ -543,7 +547,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
@@ -557,6 +561,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Direction");
+
+                    b.HasIndex("Number");
 
                     b.ToTable("Letters", (string)null);
                 });
@@ -575,11 +581,27 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<int>("LetterId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("UploadedByUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentId");
 
                     b.HasIndex("LetterId");
+
+                    b.HasIndex("UploadedByUserId");
 
                     b.ToTable("LetterAttachments", (string)null);
                 });
@@ -863,9 +885,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("ContractStartDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Country")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -888,14 +907,18 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte?>("RelationshipScore")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("Sector")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<string>("Tags")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
@@ -931,6 +954,14 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Mobile")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -942,9 +973,22 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("Position")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("PreferredChannel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("email");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email");
+
+                    b.HasIndex("IsPrimary");
 
                     b.HasIndex("PartnerId");
 
@@ -1364,9 +1408,17 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "UploadedBy")
+                        .WithMany()
+                        .HasForeignKey("UploadedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Document");
 
                     b.Navigation("Letter");
+
+                    b.Navigation("UploadedBy");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.Meeting", b =>
@@ -1456,17 +1508,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Notification");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>
-                {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedByUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.PartnerContact", b =>

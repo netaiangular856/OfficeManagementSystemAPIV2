@@ -282,6 +282,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     UploadedByName = (a.Document.CreatedBy != null) ? $"{a.Document.CreatedBy.FirstName} {a.Document.CreatedBy.LastName}" : "",
                     UploadedAt = a.Document.CreatedAt,
                     Description = a.Document.Description,
+                    DocumentSource=a.Document.DocumentSource
                 }).ToList();
                 return ApiResponse<List<MeetingAttachmentDto>>.SuccessResponse(attachmentDtos);
             }
@@ -311,6 +312,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Description = attachmentDto.Description,
                     CreatedByUserId = userId,
                     CreatedAt = DateTime.UtcNow,
+                    DocumentSource=attachmentDto.DocumentSource,
                 };
 
                 await _unitOfWork.DocumentRepository.AddAsync(document);
@@ -336,6 +338,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     UploadedByUserId = document.CreatedByUserId,
                     UploadedAt = document.CreatedAt,
                     Description = document.Description,
+                    DocumentSource=document.DocumentSource,
                 };
 
                 return ApiResponse<MeetingAttachmentDto>.SuccessResponse(dto, "تم إضافة المرفق بنجاح");

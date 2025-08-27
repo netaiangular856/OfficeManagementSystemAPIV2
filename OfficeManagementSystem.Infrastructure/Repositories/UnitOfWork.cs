@@ -12,6 +12,8 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeManagementSystem.Domain.Entity.Partners;
+using OfficeManagementSystem.Domain.Entity.Letters;
 
 namespace OfficeManagementSystem.Infrastructure.Repositories
 {
@@ -23,7 +25,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public ITaskUpdateRepository TaskUpdateRepository { get; }
         public ITaskAttachmentRepository TaskAttachmentRepository { get; }
 
-        public IGenericRepository<Document> DocumentRepository { get; }
+        public IDocumentRepository DocumentRepository { get; }
 
         public INotificationRepository NotificationRepository { get; }
 
@@ -40,6 +42,14 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public IVisitRepository VisitRepository { get; }
         public IGenericRepository<VisitParticipant> VisitParticipantRepository { get; }
 
+        //Partner
+        public IPartnerRepository PartnerRepository { get; }
+        public IGenericRepository<PartnerContact> PartnerContactRepository { get; }
+
+        //Letter
+        public IGenericRepository<LetterAttachment> LetterAttachmentRepository { get; }
+        public ILetterRepository LetterRepository { get; }
+
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -47,7 +57,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             TaskRepository = new TaskRepository(_context);
             TaskUpdateRepository = new TaskUpdateRepository(_context);
             TaskAttachmentRepository = new TaskAttachmentRepository(_context);
-            DocumentRepository = new GenericRepository<Document>(_context);
+            DocumentRepository = new DocumentRepository(_context);
             NotificationRepository = new NotificationRepository(_context);
             UserNotifications = new GenericRepository<UserNotification>(_context);
 
@@ -61,6 +71,14 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             // Visit repositories
             VisitRepository = new VisitRepository(_context);
             VisitParticipantRepository = new GenericRepository<VisitParticipant>(_context);
+
+            // Partner repositories
+            PartnerRepository = new PartnerRepository(_context);
+            PartnerContactRepository = new GenericRepository<PartnerContact>(_context);
+
+            // Letter repositories
+            LetterRepository = new LetterRepository(_context);
+            LetterAttachmentRepository = new GenericRepository<LetterAttachment>(_context);
         }
 
         public Task<int> SaveAsync()

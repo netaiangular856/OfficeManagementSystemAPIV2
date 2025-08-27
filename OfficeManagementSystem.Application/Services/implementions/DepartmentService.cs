@@ -325,5 +325,32 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<bool>.ErrorResponse($"خطأ في حذف القسم: {ex.Message}");
             }
         }
+
+        public async Task<ApiResponse<IEnumerable<DepartmentNameIdDto>>> GetDepartmentsNamesAsync(string? search)
+        {
+            try
+            {
+                var departments = await _unitOfWork.DepartmentRepository
+                    .GetAllAsync(m=>string.IsNullOrEmpty(search)||
+                   m.NameEn.ToLower().Contains(search.ToLower())||
+                   m.NameAr.ToLower().Contains(search.ToLower()));
+                if (!departments.Any())
+                {
+                    return ApiResponse<IEnumerable<DepartmentNameIdDto>>.ErrorResponse("no department to show");
+                }
+                // أو _context.Departments
+                var result = departments.Select(d => new DepartmentNameIdDto
+                {
+                    Id = d.Id,
+                    Name = d.NameEn // أو d.Name لو عندك حقل واحد
+                });
+
+                return ApiResponse<IEnumerable<DepartmentNameIdDto>>.SuccessResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<IEnumerable<DepartmentNameIdDto>>.ErrorResponse("An error occurred while retrieving departments");
+            }
+        }
     }
 }

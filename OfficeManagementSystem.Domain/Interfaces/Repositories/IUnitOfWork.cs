@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeManagementSystem.Domain.Entity.Partners;
+using OfficeManagementSystem.Domain.Entity.Letters;
 
 namespace OfficeManagementSystem.Domain.Interfaces.Repositories
 {
@@ -17,7 +19,7 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         ITaskUpdateRepository TaskUpdateRepository { get; }
         ITaskAttachmentRepository TaskAttachmentRepository { get; }
 
-        IGenericRepository<Document> DocumentRepository { get; }
+        IDocumentRepository DocumentRepository { get; }
         INotificationRepository NotificationRepository { get; }
         IGenericRepository<UserNotification> UserNotifications { get; }
         
@@ -31,6 +33,14 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         // Visit repositories
         IVisitRepository VisitRepository { get; }
         IGenericRepository<VisitParticipant> VisitParticipantRepository { get; }
+        
+        // Partner repositories
+        IPartnerRepository PartnerRepository { get; }
+        IGenericRepository<PartnerContact> PartnerContactRepository { get; }
+        
+        // Letter repositories
+        ILetterRepository LetterRepository { get; }
+        IGenericRepository<LetterAttachment> LetterAttachmentRepository { get; }
         
         Task<int> SaveAsync();
     }

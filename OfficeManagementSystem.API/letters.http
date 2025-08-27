@@ -1,0 +1,173 @@
+### Letter Management API Tests
+
+### Variables
+@baseUrl = https://localhost:7001
+@authToken = your_jwt_token_here
+
+### 1. Create Letter (Outgoing)
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 1,
+  "subject": "طلب تعاون في مشروع التقنية",
+  "body": "<p>تحية طيبة وبعد،</p><p>نود التعاون معكم في مشروع تطوير النظام التقني الجديد.</p><p>نرجو الرد في أقرب وقت ممكن.</p><p>مع تحياتنا،<br/>فريق التقنية</p>",
+  "confidentiality": 0,
+  "to": "شركة التقنية المتقدمة; tech@company.com",
+  "cc": "manager@company.com",
+  "bcc": "",
+  "letterDate": "2024-01-15T00:00:00",
+  "referenceNumbers": "2025/OUT/123"
+}
+
+### 2. Create Letter (Incoming)
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 0,
+  "subject": "رد على طلب التعاون",
+  "body": "<p>تحية طيبة وبعد،</p><p>نشكركم على طلب التعاون ونؤكد استعدادنا للعمل معكم.</p><p>سنقوم بترتيب اجتماع قريب لمناقشة التفاصيل.</p><p>مع تحياتنا،<br/>فريق شركة التقنية المتقدمة</p>",
+  "confidentiality": 0,
+  "to": "فريق التقنية; tech@ourcompany.com",
+  "cc": "",
+  "bcc": "",
+  "letterDate": "2024-01-16T00:00:00",
+  "referenceNumbers": "2025/IN/456"
+}
+
+### 3. Get All Letters
+GET {{baseUrl}}/api/letters?search=تعاون&direction=1&confidentiality=0&from=2024-01-01&to=2024-12-31&pageSize=10&pageNumber=1
+Authorization: Bearer {{authToken}}
+
+### 4. Get Letter by ID
+GET {{baseUrl}}/api/letters/1
+Authorization: Bearer {{authToken}}
+
+### 5. Update Letter
+PUT {{baseUrl}}/api/letters/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 1,
+  "subject": "طلب تعاون في مشروع التقنية - محدث",
+  "body": "<p>تحية طيبة وبعد،</p><p>نود التعاون معكم في مشروع تطوير النظام التقني الجديد - محدث.</p><p>نرجو الرد في أقرب وقت ممكن.</p><p>مع تحياتنا،<br/>فريق التقنية</p>",
+  "confidentiality": 0,
+  "to": "شركة التقنية المتقدمة; tech@company.com",
+  "cc": "manager@company.com; director@company.com",
+  "bcc": "",
+  "letterDate": "2024-01-15T00:00:00",
+  "referenceNumbers": "2025/OUT/123; 2025/OUT/124"
+}
+
+### 6. Get Letter Attachments
+GET {{baseUrl}}/api/letters/1/attachments
+Authorization: Bearer {{authToken}}
+
+### 7. Add Letter Attachment
+POST {{baseUrl}}/api/letters/1/attachments
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "documentId": 1
+}
+
+### 8. Remove Letter Attachment
+DELETE {{baseUrl}}/api/letters/1/attachments/1
+Authorization: Bearer {{authToken}}
+
+### 9. Delete Letter
+DELETE {{baseUrl}}/api/letters/1
+Authorization: Bearer {{authToken}}
+
+### 10. Get Letters by Direction (Outgoing)
+GET {{baseUrl}}/api/letters?direction=1
+Authorization: Bearer {{authToken}}
+
+### 11. Get Letters by Direction (Incoming)
+GET {{baseUrl}}/api/letters?direction=0
+Authorization: Bearer {{authToken}}
+
+### 12. Get Letters by Confidentiality
+GET {{baseUrl}}/api/letters?confidentiality=0
+Authorization: Bearer {{authToken}}
+
+### 13. Search Letters
+GET {{baseUrl}}/api/letters?search=تقنية
+Authorization: Bearer {{authToken}}
+
+### 14. Get Letters by Date Range
+GET {{baseUrl}}/api/letters?from=2024-01-01&to=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### 15. Create Restricted Letter
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 1,
+  "subject": "معلومات سرية - مقيدة",
+  "body": "<p>تحية طيبة وبعد،</p><p>هذا خطاب يحتوي على معلومات مقيدة.</p><p>يرجى التعامل معه بسرية تامة.</p>",
+  "confidentiality": 1,
+  "to": "المدير العام; director@company.com",
+  "cc": "",
+  "bcc": "",
+  "letterDate": "2024-01-20T00:00:00",
+  "referenceNumbers": "2025/OUT/789"
+}
+
+### 16. Create Secret Letter
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 0,
+  "subject": "معلومات سرية للغاية",
+  "body": "<p>تحية طيبة وبعد،</p><p>هذا خطاب يحتوي على معلومات سرية للغاية.</p><p>يجب التعامل معه بأقصى درجات السرية.</p>",
+  "confidentiality": 2,
+  "to": "رئيس مجلس الإدارة; chairman@company.com",
+  "cc": "",
+  "bcc": "",
+  "letterDate": "2024-01-25T00:00:00",
+  "referenceNumbers": "2025/IN/999"
+}
+
+### 17. Create Letter with Multiple Recipients
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 1,
+  "subject": "إشعار عام لجميع الموظفين",
+  "body": "<p>تحية طيبة وبعد،</p><p>نود إعلامكم باجتماع عام يوم الخميس القادم.</p><p>نرجو الحضور في الموعد المحدد.</p>",
+  "confidentiality": 0,
+  "to": "جميع الموظفين; employees@company.com; staff@company.com",
+  "cc": "المدراء; managers@company.com",
+  "bcc": "",
+  "letterDate": "2024-01-30T00:00:00",
+  "referenceNumbers": "2025/OUT/100"
+}
+
+### 18. Create Letter with HTML Content
+POST {{baseUrl}}/api/letters
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "direction": 1,
+  "subject": "تقرير شهري مفصل",
+  "body": "<html><body><h2>التقرير الشهري</h2><p>تحية طيبة وبعد،</p><p>مرفق التقرير الشهري لشهر يناير 2024:</p><ul><li>إنجازات المشروع</li><li>الميزانية المستهلكة</li><li>الخطط المستقبلية</li></ul><p>مع تحياتنا،<br/><strong>فريق التقنية</strong></p></body></html>",
+  "confidentiality": 0,
+  "to": "المدير المالي; finance@company.com",
+  "cc": "رئيس قسم التقنية; tech@company.com",
+  "bcc": "",
+  "letterDate": "2024-02-01T00:00:00",
+  "referenceNumbers": "2025/OUT/101"
+}

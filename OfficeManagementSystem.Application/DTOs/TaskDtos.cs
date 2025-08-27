@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using OfficeManagementSystem.Application.DTOs.Common;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using System.ComponentModel.DataAnnotations;
 using TaskStatus = OfficeManagementSystem.Domain.Enums.Tasks.TaskStatus;
@@ -118,12 +119,14 @@ namespace OfficeManagementSystem.Application.DTOs
         public string UploadedByName { get; set; } = string.Empty;
         public string? Description { get; set; }
         public DateTime UploadedAt { get; set; }
+        public DocumentSource? DocumentSource { get; set; }
     }
 
     public class UplodeTaskDto
     {
         public IFormFile File { get; set; }
         public string? Description { get; set; }
+        public DocumentSource? DocumentSource { get; set; }
     }
 
     // Bulk Operations DTOs

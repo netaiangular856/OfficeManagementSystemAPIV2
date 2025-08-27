@@ -14,5 +14,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         Task<ApiResponse<bool>> UpdateUserRoleAsync(string userId, UpdateUserRoleRequestDto updateRoleRequest);
         Task<ApiResponse<bool>> UpdateUserStatusAsync(string userId, UpdateUserStatusRequestDto updateStatusRequest);
         Task<ApiResponse<UserDto>> UpdateUserProfileAsync(string userId, UpdateUserProfileRequestDto updateProfileRequest);
+        Task<ApiResponse<IEnumerable<UserNameIdDto>>> GetUserNameIdAsync(string? search);
     }
 }

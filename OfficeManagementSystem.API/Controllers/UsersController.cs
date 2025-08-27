@@ -4,6 +4,7 @@ using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Sharing;
+using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.API.Controllers
 {
@@ -393,6 +394,13 @@ namespace OfficeManagementSystem.API.Controllers
                 _logger.LogError(ex, "Error occurred while updating user profile");
                 return StatusCode(500, "Internal server error occurred while updating user profile");
             }
+        }
+
+        [HttpGet("names")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserNameIdDto>>>> GetUserNames([FromQuery] string? search)
+        {
+            var result =await _userService.GetUserNameIdAsync(search);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }

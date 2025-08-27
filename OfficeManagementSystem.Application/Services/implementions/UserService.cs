@@ -11,6 +11,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -423,6 +424,45 @@ namespace OfficeManagementSystem.Application.Services.implementions
             {
                 _logger.LogError(ex, "Error occurred while getting roles for user: {UserId}", user.Id);
                 return new List<string>();
+            }
+        }
+
+        public async Task<ApiResponse<IEnumerable<UserNameIdDto>>> GetUserNameIdAsync(string? search)
+        {
+            try
+            {
+                var query = _userManager.Users
+                    .Include(u => u.Department)
+                    .AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    search = search.Trim().ToLower();
+                    query = query.Where(u =>
+                        (u.FirstName + " " + u.LastName).ToLower().Contains(search) ||
+                        u.UserName.ToLower().Contains(search));
+                }
+
+                var result = await query.Select(m=>new UserNameIdDto
+                    {
+                        Id = m.Id,
+                        Name=m.FirstName +" "+m.LastName,
+                        DepartmentName= m.Department != null ? m.Department.NameEn :string.Empty
+                    })
+                    .ToListAsync();
+
+                if (!result.Any())
+                {
+                    return ApiResponse<IEnumerable<UserNameIdDto>>.ErrorResponse("no user to show");
+                }
+                
+
+                return ApiResponse<IEnumerable<UserNameIdDto>>.SuccessResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting users");
+                return ApiResponse<IEnumerable<UserNameIdDto>>.ErrorResponse("An error occurred while retrieving users");
             }
         }
     }

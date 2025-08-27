@@ -31,9 +31,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.Property(x => x.Website)
                 .HasMaxLength(300);
 
-            builder.Property(x => x.Tags)
-                .HasMaxLength(1000);
-
             builder.Property(x => x.CreatedByUserId)
                 .IsRequired()
                 .HasMaxLength(450);

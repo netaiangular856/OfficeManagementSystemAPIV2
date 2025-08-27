@@ -16,6 +16,7 @@ namespace OfficeManagementSystem.Domain.Entity.Documents
         public int Id { get; set; }
         public string Title { get; set; } = default!;
         public DocumentType Type { get; set; }
+        public DocumentSource? DocumentSource { get; set; }
         public string StoragePath { get; set; } = default!;
         public string? Description { get; set; }
         public string CreatedByUserId { get; set; } = default!;

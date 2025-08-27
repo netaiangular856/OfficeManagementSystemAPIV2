@@ -42,7 +42,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var document = new Document
                 {
                     Title = Path.GetFileNameWithoutExtension(UplodeDto.File.FileName),
-                    Type = DocumentType.Task, // Õÿ enum „‰«”» ⁄‰œﬂ
+                    Type = DocumentType.Task,
+                    DocumentSource=UplodeDto.DocumentSource,// Õÿ enum „‰«”» ⁄‰œﬂ
                     StoragePath = filePath,
                     Description = UplodeDto.Description,
                     CreatedByUserId = currentUserId,
@@ -74,6 +75,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     UploadedByName = task.CreatedBy?.UserName ?? string.Empty, // √Ê Â« Â« „‰ «·‹ UserService
                     UploadedAt = document.CreatedAt,
                     Description=document.Description,
+                    DocumentSource=UplodeDto.DocumentSource
                 };
 
                 return ApiResponse<TaskAttachmentDto>.SuccessResponse(attachmentDto, "Attachment uploaded successfully");
@@ -108,6 +110,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     UploadedByName = (a.Document.CreatedBy != null) ? $"{a.Document.CreatedBy.FirstName} {a.Document.CreatedBy.LastName}" : "",
                     UploadedAt = a.Document.CreatedAt,
                     Description = a.Document.Description,
+                    DocumentSource = a.Document.DocumentSource,
                 }).ToList();
 
                 return ApiResponse<List<TaskAttachmentDto>>.SuccessResponse(attachmentDtos, "Task attachments retrieved successfully");
