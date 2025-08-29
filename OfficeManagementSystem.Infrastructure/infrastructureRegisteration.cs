@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
+using OfficeManagementSystem.Application.Services.BackgroundServices;
 
 namespace OfficeManagementSystem.Infrastructure
 {
@@ -57,6 +58,23 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Letter services
             services.AddScoped<ILetterService, LetterService>();
+            
+            // Employee KPI services
+            services.AddScoped<IEmployeeKpiService, EmployeeKpiService>();
+            
+            // Calendar services
+            services.AddScoped<ICalendarService, CalendarService>();
+            
+            // Register Dashboard Service
+            services.AddScoped<IDashboardService, DashboardService>();
+
+            // Background services
+            services.AddHostedService<MonthlyKpiCalculationService>();
+
+            //WorkFlowLogs
+            services.AddScoped<IWorkFlowLogsService, WorkFlowLogsService>();
+
+
 
 
 

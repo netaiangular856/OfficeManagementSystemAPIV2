@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeManagementSystem.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using OfficeManagementSystem.Infrastructure.Data;
 namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250829121408_Add-EmployeeKPI")]
+    partial class AddEmployeeKPI
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,8 +463,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<decimal>("AvgCompletionDays")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmployeeId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("MeetingsAttended")
@@ -493,7 +498,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("EmployeeId1");
 
                     b.ToTable("EmployeeKPIs");
                 });
@@ -1232,42 +1237,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("VisitParticipants", (string)null);
                 });
 
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.WorkflowLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EntityName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("WorkflowLogs");
-                });
-
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>
                 {
                     b.HasBaseType("OfficeManagementSystem.Domain.Entity.Auth.AppUser");
@@ -1409,9 +1378,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Employee", "Employee")
                         .WithMany("KPIs")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId1");
 
                     b.Navigation("Employee");
                 });
@@ -1665,17 +1632,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("User");
 
                     b.Navigation("Visit");
-                });
-
-            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.WorkflowLog", b =>
-                {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>

@@ -2,7 +2,9 @@ using AutoMapper;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Tasks;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 
@@ -33,6 +35,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var taskUpdate = _mapper.Map<TaskUpdate>(createUpdateDto);
                 taskUpdate.TaskItemId = taskId;
                 taskUpdate.CreatedByUserId = currentUserId;
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"New Task Update to '{task.Title}  {taskUpdate.Note}",
+                    UserId = currentUserId // √Ê ŒœÂ „‰ «·‹ Context Õ”» «·„” Œœ„ «·Õ«·Ì
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TaskUpdateRepository.AddAsync(taskUpdate);
                 await _unitOfWork.SaveAsync();

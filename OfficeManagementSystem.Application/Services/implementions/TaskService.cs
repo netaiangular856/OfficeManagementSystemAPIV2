@@ -2,9 +2,12 @@ using AutoMapper;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Tasks;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using TaskStatus = OfficeManagementSystem.Domain.Enums.Tasks.TaskStatus;
 
@@ -30,6 +33,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var task = _mapper.Map<TaskItem>(createTaskDto);
                 task.CreatedByUserId = currentUserId;
                 task.Status = TaskStatus.New;
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"New Task added '{task.Title}' and assgin to {task.AssigneeUserId}",
+                    UserId = task.CreatedByUserId // √Ê ŒœÂ „‰ «·‹ Context Õ”» «·„” Œœ„ «·Õ«·Ì
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TaskRepository.AddAsync(task);
                 await _unitOfWork.SaveAsync();
@@ -123,6 +136,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 _mapper.Map(updateTaskDto, task);
                 task.UpdatedAt = DateTime.UtcNow;
 
+                //  Workflow log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Task '{task.Title}' updated at {DateTime.UtcNow}",
+                    UserId = task.CreatedByUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
                 await _unitOfWork.TaskRepository.UpdateAsync(task);
                 await _unitOfWork.SaveAsync();
 
@@ -142,6 +166,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var task = await _unitOfWork.TaskRepository.GetByIdAsync(id);
                 if (task == null)
                     return ApiResponse<bool>.ErrorResponse("Task not found");
+
+                //  Workflow log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Task '{task.Title}' deleted at {DateTime.UtcNow}",
+                    UserId = task.CreatedByUserId // √Ê «·„” Œœ„ «·Õ«·Ì
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TaskRepository.DeleteAsync(id);
                 await _unitOfWork.SaveAsync();
@@ -179,6 +214,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     CreatedByUserId = currentUserId,
                     CreatedAt = DateTime.UtcNow
                 };
+
+                // Workflow log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Task '{task.Title}' closed with status {task.Status} at {DateTime.UtcNow}",
+                    UserId = currentUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TaskRepository.UpdateAsync(task);
                 await _unitOfWork.TaskUpdateRepository.AddAsync(taskUpdate);
@@ -229,6 +275,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     await _unitOfWork.TaskUpdateRepository.AddAsync(update);
                 }
 
+                // Workflow log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = 0, // √Ê „„ﬂ‰  Œ·ÌÂ« null / √Ê· TaskId
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"{tasks.Count} tasks closed with status {bulkCloseDto.Status} at {DateTime.UtcNow}",
+                    UserId = currentUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
                 await _unitOfWork.SaveAsync();
 
                 return ApiResponse<bool>.SuccessResponse(true, $"{tasks.Count} tasks status Changes To {bulkCloseDto.Status} successfully");
@@ -275,6 +332,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     await _unitOfWork.TaskUpdateRepository.AddAsync(update);
                 }
+
+                // Workflow log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = 0,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"{tasks.Count} tasks reassigned to user {bulkReassignDto.NewAssigneeUserId} at {DateTime.UtcNow}",
+                    UserId = currentUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.SaveAsync();
 

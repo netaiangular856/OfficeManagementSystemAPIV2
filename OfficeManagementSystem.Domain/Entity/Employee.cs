@@ -17,5 +17,6 @@ namespace OfficeManagementSystem.Domain.Entity
         public string? ManagerId { get; set; }
         public Employee? Manager { get; set; }
         public ICollection<Employee> Subordinates { get; set; } = new List<Employee>();
+        public ICollection<EmployeeKPI> KPIs { get; set; } = new List<EmployeeKPI>();
     }
 }

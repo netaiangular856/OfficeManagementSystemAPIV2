@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
@@ -49,6 +50,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     CreatedByUserId = currentUserId,
                     CreatedAt = DateTime.UtcNow,
                 };
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.AttachmentAdded,
+                    Description = $"New Attachment added to Task '{task.Title}'",
+                    UserId = currentUserId // √Ê ŒœÂ „‰ «·‹ Context Õ”» «·„” Œœ„ «·Õ«·Ì
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.DocumentRepository.AddAsync(document);
                 await _unitOfWork.SaveAsync();
@@ -137,6 +148,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // Delete file from storage
                 _attachmentFileService.DeleteAttachment(attachment.Document.StoragePath);
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Task",
+                    EntityId = task.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Delete Task Attachment task Name: '{task.Title}'",
+                    UserId = task.CreatedByUserId // √Ê ŒœÂ „‰ «·‹ Context Õ”» «·„” Œœ„ «·Õ«·Ì
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 // Delete document + attachment
                 await _unitOfWork.TaskAttachmentRepository.DeleteAsync(attachmentId);

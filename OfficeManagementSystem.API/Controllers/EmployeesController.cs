@@ -13,11 +13,13 @@ namespace OfficeManagementSystem.API.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private readonly IEmployeeKpiService _employeeKpiService;
         private readonly ILogger<EmployeesController> _logger;
 
-        public EmployeesController(IEmployeeService employeeService, ILogger<EmployeesController> logger)
+        public EmployeesController(IEmployeeService employeeService, IEmployeeKpiService employeeKpiService, ILogger<EmployeesController> logger)
         {
             _employeeService = employeeService;
+            _employeeKpiService = employeeKpiService;
             _logger = logger;
         }
 
@@ -388,5 +390,108 @@ namespace OfficeManagementSystem.API.Controllers
                 return StatusCode(500, "Internal server error occurred while updating employee profile");
             }
         }
+
+        #region Employee KPI Endpoints
+
+        /// <summary>
+        /// Get employee KPIs
+        /// </summary>
+        /// <param name="id">Employee ID</param>
+        /// <returns>Employee KPI data</returns>
+        [HttpGet("{id}/kpis")]
+        [ProducesResponseType(typeof(ApiResponse<EmployeeKpiDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetEmployeeKpis(string id)
+        {
+            try
+            {
+                var result = await _employeeKpiService.GetLatestKpiAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving KPIs for employee {EmployeeId}", id);
+                return StatusCode(500, "Internal server error occurred while retrieving employee KPIs");
+            }
+        }
+
+        /// <summary>
+        /// Get employee KPI history
+        /// </summary>
+        /// <param name="id">Employee ID</param>
+        /// <param name="count">Number of KPI records to retrieve (default: 12)</param>
+        /// <returns>Employee KPI history</returns>
+        [HttpGet("{id}/kpis/history")]
+        [ProducesResponseType(typeof(ApiResponse<List<EmployeeKpiDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetEmployeeKpiHistory(string id, [FromQuery] int count = 12)
+        {
+            try
+            {
+                var result = await _employeeKpiService.GetKpiHistoryAsync(id, count);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving KPI history for employee {EmployeeId}", id);
+                return StatusCode(500, "Internal server error occurred while retrieving employee KPI history");
+            }
+        }
+
+        /// <summary>
+        /// Get employee KPI summary with trend analysis
+        /// </summary>
+        /// <param name="id">Employee ID</param>
+        /// <returns>Employee KPI summary</returns>
+        [HttpGet("{id}/kpis/summary")]
+        [ProducesResponseType(typeof(ApiResponse<EmployeeKpiSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetEmployeeKpiSummary(string id)
+        {
+            try
+            {
+                var result = await _employeeKpiService.GetKpiSummaryAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving KPI summary for employee {EmployeeId}", id);
+                return StatusCode(500, "Internal server error occurred while retrieving employee KPI summary");
+            }
+        }
+
+        /// <summary>
+        /// Recalculate employee KPIs
+        /// </summary>
+        /// <param name="request">Recalculation request data</param>
+        /// <returns>Recalculation results</returns>
+        [HttpPost("kpis/recalculate")]
+        [ProducesResponseType(typeof(ApiResponse<RecalculateKpisResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> RecalculateKpis([FromBody] RecalculateKpisRequestDto request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _employeeKpiService.RecalculateKpisAsync(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while recalculating KPIs");
+                return StatusCode(500, "Internal server error occurred while recalculating KPIs");
+            }
+        }
+
+
+        #endregion
     }
 }

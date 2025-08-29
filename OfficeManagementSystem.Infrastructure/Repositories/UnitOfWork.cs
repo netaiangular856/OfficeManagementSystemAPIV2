@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Letters;
+using OfficeManagementSystem.Domain.Entity;
 
 namespace OfficeManagementSystem.Infrastructure.Repositories
 {
@@ -49,6 +50,8 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         //Letter
         public IGenericRepository<LetterAttachment> LetterAttachmentRepository { get; }
         public ILetterRepository LetterRepository { get; }
+        public IEmployeeKpiRepository EmployeeKpiRepository { get; }
+        public IGenericRepository<WorkflowLog> WorkFlowLogRepository { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -79,6 +82,12 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             // Letter repositories
             LetterRepository = new LetterRepository(_context);
             LetterAttachmentRepository = new GenericRepository<LetterAttachment>(_context);
+
+            // Employee KPI repository
+            EmployeeKpiRepository = new EmployeeKpiRepository(_context);
+
+            //Workflow
+            WorkFlowLogRepository = new GenericRepository<WorkflowLog>(_context);
         }
 
         public Task<int> SaveAsync()

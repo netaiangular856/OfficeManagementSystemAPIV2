@@ -60,7 +60,8 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMeetingDto updateDto)
         {
-            var result = await _meetingService.UpdateAsync(id, updateDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _meetingService.UpdateAsync(id, updateDto, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -70,7 +71,8 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateMeetingStatusDto statusDto)
         {
-            var result = await _meetingService.UpdateStatusAsync(id, statusDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _meetingService.UpdateStatusAsync(id, statusDto, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -80,7 +82,8 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _meetingService.DeleteAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _meetingService.DeleteAsync(id,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -116,7 +119,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpDelete("{meetingId}/attachments/{id}")]
         public async Task<IActionResult> RemoveAttachment(int meetingId, int id)
         {
-            var result = await _meetingService.RemoveAttachmentAsync(meetingId, id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.RemoveAttachmentAsync(meetingId, id, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -147,7 +153,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpPut("{id}/attendees/{attendeeId}")]
         public async Task<IActionResult> UpdateAttendee(int id, int attendeeId, [FromBody] UpdateMeetingAttendeeDto attendeeDto)
         {
-            var result = await _meetingService.UpdateAttendeeAsync(id, attendeeId, attendeeDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.UpdateAttendeeAsync(id, attendeeId, attendeeDto,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -157,7 +166,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpDelete("{id}/attendees/{attendeeId}")]
         public async Task<IActionResult> RemoveAttendee(int id, int attendeeId)
         {
-            var result = await _meetingService.RemoveAttendeeAsync(id, attendeeId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.RemoveAttendeeAsync(id, attendeeId,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -188,7 +200,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpPut("{id}/minutes")]
         public async Task<IActionResult> UpdateMinutes(int id, [FromBody] UpdateMeetingMinutesDto minutesDto)
         {
-            var result = await _meetingService.UpdateMinutesAsync(id, minutesDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.UpdateMinutesAsync(id, minutesDto,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -219,7 +234,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpPut("recommendations/{recId}")]
         public async Task<IActionResult> UpdateRecommendation(int recId, [FromBody] UpdateRecommendationDto recommendationDto)
         {
-            var result = await _meetingService.UpdateRecommendationAsync(recId, recommendationDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.UpdateRecommendationAsync(recId, recommendationDto,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -229,7 +247,10 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpDelete("recommendations/{recId}")]
         public async Task<IActionResult> RemoveRecommendation(int recId)
         {
-            var result = await _meetingService.RemoveRecommendationAsync(recId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            var result = await _meetingService.RemoveRecommendationAsync(recId,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

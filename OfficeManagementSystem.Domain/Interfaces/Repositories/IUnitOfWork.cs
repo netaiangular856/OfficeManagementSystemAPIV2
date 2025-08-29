@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Letters;
+using OfficeManagementSystem.Domain.Entity;
 
 namespace OfficeManagementSystem.Domain.Interfaces.Repositories
 {
@@ -42,6 +43,12 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         ILetterRepository LetterRepository { get; }
         IGenericRepository<LetterAttachment> LetterAttachmentRepository { get; }
         
+        // Employee KPI repository
+        IEmployeeKpiRepository EmployeeKpiRepository { get; }
+
+        //WorkFlowLog
+        IGenericRepository<WorkflowLog> WorkFlowLogRepository { get; }
+
         Task<int> SaveAsync();
     }
 }

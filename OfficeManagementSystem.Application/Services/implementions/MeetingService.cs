@@ -77,7 +77,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 meeting.CreatedByUserId = organizerUserId;
                 meeting.Status = MeetingStatus.Scheduled;
 
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Meeting",
+                    EntityId = meeting.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"New Meeting Create '{meeting.Title}' At {DateTime.UtcNow} Meeting Date From {meeting.StartAt} To {meeting.EndAt} , Meeting Location {meeting.LocationText ?? meeting.OnlineUrl}",
+                    UserId = meeting.CreatedByUserId,
+                };
+                
                 await _unitOfWork.MeetingRepository.AddAsync(meeting);
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
                 await _unitOfWork.SaveAsync();
 
 
@@ -173,7 +183,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<MeetingDto>> UpdateAsync(int id, UpdateMeetingDto updateDto)
+        public async Task<ApiResponse<MeetingDto>> UpdateAsync(int id, UpdateMeetingDto updateDto, string userId)
         {
             try
             {
@@ -197,7 +207,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 _mapper.Map(updateDto, meeting);
                 meeting.UpdatedAt = DateTime.UtcNow;
-
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Meeting",
+                    EntityId = meeting.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Meeting Update '{meeting.Title}' At {DateTime.UtcNow} Meeting Date From {meeting.StartAt} To {meeting.EndAt} , Meeting Location {meeting.LocationText ?? meeting.OnlineUrl}",
+                    UserId = userId,
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
                 await _unitOfWork.MeetingRepository.UpdateAsync(meeting);
                 await _unitOfWork.SaveAsync();
 
@@ -212,7 +230,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<bool>> UpdateStatusAsync(int id, UpdateMeetingStatusDto statusDto)
+        public async Task<ApiResponse<bool>> UpdateStatusAsync(int id, UpdateMeetingStatusDto statusDto,string userId)
         {
             try
             {
@@ -221,9 +239,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("الاجتماع غير موجود");
                 }
-
+                var oldStatus = meeting.Status.ToString();
                 meeting.Status = statusDto.Status;
                 meeting.UpdatedAt = DateTime.UtcNow;
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Meeting",
+                    EntityId = meeting.Id,
+                    ActionType = WorkflowActionType.StatusChanged,
+                    Description = $"Meeting '{meeting.Title}' status changed from {oldStatus} to {meeting.Status.ToString()}",
+                    UserId = userId,
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingRepository.UpdateAsync(meeting);
                 await _unitOfWork.SaveAsync();
@@ -236,7 +264,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteAsync(int id)
+        public async Task<ApiResponse<bool>> DeleteAsync(int id, string userId)
         {
             try
             {
@@ -245,6 +273,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("الاجتماع غير موجود");
                 }
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Meeting",
+                    EntityId = meeting.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Meeting '{meeting.Title}' Deleted",
+                    UserId = userId,
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingRepository.DeleteAsync(id);
                 await _unitOfWork.SaveAsync();
@@ -314,6 +351,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     CreatedAt = DateTime.UtcNow,
                     DocumentSource=attachmentDto.DocumentSource,
                 };
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Meeting",
+                    EntityId = meeting.Id,
+                    ActionType = WorkflowActionType.AttachmentAdded,
+                    Description = $"New Attachment For  Meeting '{meeting.Title}' ",
+                    UserId = userId,
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.DocumentRepository.AddAsync(document);
                 await _unitOfWork.SaveAsync();
@@ -323,6 +369,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     MeetingId = meetingId,
                     DocumentId = document.Id
                 };
+
 
                 await _unitOfWork.MeetingAttachmentRepository.AddAsync(attachment);
                 await _unitOfWork.SaveAsync();
@@ -349,7 +396,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<bool>> RemoveAttachmentAsync(int meetingId, int attachmentId)
+        public async Task<ApiResponse<bool>> RemoveAttachmentAsync(int meetingId, int attachmentId, string userId)
         {
             try
             {
@@ -358,7 +405,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("المرفق غير موجود");
                 }
-
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Attachment",
+                    EntityId = attachment.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Attachment added to Meeting '{attachment.MeetingId}'",
+                    UserId = userId // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
                 await _unitOfWork.MeetingAttachmentRepository.DeleteAsync(attachmentId);
                 await _unitOfWork.SaveAsync();
 
@@ -412,6 +467,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 var attendee = _mapper.Map<MeetingAttendee>(attendeeDto);
                 attendee.MeetingId = meetingId;
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingAttendee",
+                    EntityId = attendee.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"Attendee '{attendeeDto.DisplayName ?? attendeeDto.UserId}' added to Meeting '{meeting.Title}'",
+                    UserId = meeting.CreatedByUserId // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingAttendeeRepository.AddAsync(attendee);
                 await _unitOfWork.SaveAsync();
@@ -429,7 +493,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<MeetingAttendeeDto>> UpdateAttendeeAsync(int meetingId, int attendeeId, UpdateMeetingAttendeeDto attendeeDto)
+        public async Task<ApiResponse<MeetingAttendeeDto>> UpdateAttendeeAsync(int meetingId, int attendeeId, UpdateMeetingAttendeeDto attendeeDto,string UserId)
         {
             try
             {
@@ -440,6 +504,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 _mapper.Map(attendeeDto, attendee);
+
+                // 📝 Log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingAttendee",
+                    EntityId = attendee.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Attendee '{attendeeDto.DisplayName ?? attendee.UserId}' updated in Meeting '{attendee.MeetingId}'",
+                    UserId = UserId  // لو عندك UserId للـ actor
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingAttendeeRepository.UpdateAsync(attendee);
                 await _unitOfWork.SaveAsync();
@@ -455,7 +530,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<bool>> RemoveAttendeeAsync(int meetingId, int attendeeId)
+        public async Task<ApiResponse<bool>> RemoveAttendeeAsync(int meetingId, int attendeeId,string userID)
         {
             try
             {
@@ -464,6 +539,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("الحضور غير موجود");
                 }
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingAttendee",
+                    EntityId = attendeeId,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Attendee '{attendee.UserId}' removed from Meeting '{meetingId}'",
+                    UserId = userID // أو الـ UserId بتاع اللي عمل الحذف
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingAttendeeRepository.DeleteAsync(attendeeId);
                 await _unitOfWork.SaveAsync();
@@ -522,6 +607,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var minutes = _mapper.Map<MeetingMinutes>(minutesDto);
                 minutes.MeetingId = meetingId;
 
+                // 📝 Log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingMinutes",
+                    EntityId = minutes.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"Minutes created for Meeting '{meeting.Title}' at {DateTime.UtcNow}",
+                    UserId = meeting.CreatedByUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
                 await _unitOfWork.MeetingMinutesRepository.AddAsync(minutes);
                 await _unitOfWork.SaveAsync();
 
@@ -536,7 +632,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<MeetingMinutesDto>> UpdateMinutesAsync(int meetingId, UpdateMeetingMinutesDto minutesDto)
+        public async Task<ApiResponse<MeetingMinutesDto>> UpdateMinutesAsync(int meetingId, UpdateMeetingMinutesDto minutesDto,string userId)
         {
             try
             {
@@ -549,6 +645,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 _mapper.Map(minutesDto, existingMinutes);
+                // 📝 Log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingMinutes",
+                    EntityId = existingMinutes.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Minutes updated for Meeting '{meetingId}' at {DateTime.UtcNow}",
+                    UserId = userId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.MeetingMinutesRepository.UpdateAsync(existingMinutes);
                 await _unitOfWork.SaveAsync();
@@ -597,6 +703,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var recommendation = _mapper.Map<Recommendation>(recommendationDto);
                 recommendation.MeetingId = meetingId;
 
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Recommendation",
+                    EntityId = recommendation.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"Recommendation  added to Meeting '{meeting.Title}' at {DateTime.UtcNow}",
+                    UserId = meeting.CreatedByUserId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
                 await _unitOfWork.RecommendationRepository.AddAsync(recommendation);
                 await _unitOfWork.SaveAsync();
 
@@ -611,7 +727,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<RecommendationDto>> UpdateRecommendationAsync(int recommendationId, UpdateRecommendationDto recommendationDto)
+        public async Task<ApiResponse<RecommendationDto>> UpdateRecommendationAsync(int recommendationId, UpdateRecommendationDto recommendationDto,string userId)
         {
             try
             {
@@ -622,6 +738,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 _mapper.Map(recommendationDto, recommendation);
+                // 📝 Log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Recommendation",
+                    EntityId = recommendation.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Recommendation updated at {DateTime.UtcNow}",
+                    UserId = userId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.RecommendationRepository.UpdateAsync(recommendation);
                 await _unitOfWork.SaveAsync();
@@ -637,7 +763,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<bool>> RemoveRecommendationAsync(int recommendationId)
+        public async Task<ApiResponse<bool>> RemoveRecommendationAsync(int recommendationId, string userId)
         {
             try
             {
@@ -646,6 +772,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("التوصية غير موجودة");
                 }
+
+                // 📝 Log
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Recommendation",
+                    EntityId = recommendation.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Recommendation removed from Meeting '{recommendation.MeetingId}' at {DateTime.UtcNow}",
+                    UserId = userId // أو المستخدم الحالي اللي عمل الحذف
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.RecommendationRepository.DeleteAsync(recommendationId);
                 await _unitOfWork.SaveAsync();

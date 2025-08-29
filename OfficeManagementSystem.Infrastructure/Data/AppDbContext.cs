@@ -28,6 +28,9 @@ namespace OfficeManagementSystem.Infrastructure.Data
         public virtual DbSet<Employee> Employees { get; set; }
 
         public virtual DbSet<EmployeeNote> EmployeeNotes { get; set; }
+        public virtual DbSet<EmployeeKPI> EmployeeKPIs { get; set; }
+        public virtual DbSet<WorkflowLog> WorkflowLogs { get; set; }
+
 
         // Documents
         public virtual DbSet<Document> Documents { get; set; }

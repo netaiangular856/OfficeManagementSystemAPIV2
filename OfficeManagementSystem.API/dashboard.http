@@ -1,0 +1,66 @@
+@BaseUrl = http://localhost:5000
+@Token = your_jwt_token_here
+
+### الحصول على ملخص عام للنظام
+GET {{BaseUrl}}/api/v1/dashboard/overview
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص عام للنظام مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/overview?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص المهام
+GET {{BaseUrl}}/api/v1/dashboard/tasks/overview
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص المهام مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/tasks/overview?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على اتجاه المهام
+GET {{BaseUrl}}/api/v1/dashboard/tasks/trend
+Authorization: Bearer {{Token}}
+
+### الحصول على اتجاه المهام مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/tasks/trend?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص الاجتماعات
+GET {{BaseUrl}}/api/v1/dashboard/meetings/overview
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص الاجتماعات مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/meetings/overview?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص المراسلات
+GET {{BaseUrl}}/api/v1/dashboard/letters/overview
+Authorization: Bearer {{Token}}
+
+### الحصول على ملخص المراسلات مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/letters/overview?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على المراسلات الشهرية
+GET {{BaseUrl}}/api/v1/dashboard/letters/monthly
+Authorization: Bearer {{Token}}
+
+### الحصول على المراسلات الشهرية مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/letters/monthly?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على اتجاه KPI الموظفين
+GET {{BaseUrl}}/api/v1/dashboard/employees/kpi-trend
+Authorization: Bearer {{Token}}
+
+### الحصول على اتجاه KPI الموظفين مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/employees/kpi-trend?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
+
+### الحصول على قائمة المتصدرين
+GET {{BaseUrl}}/api/v1/dashboard/employees/leaderboard
+Authorization: Bearer {{Token}}
+
+### الحصول على قائمة المتصدرين مع فلتر التاريخ
+GET {{BaseUrl}}/api/v1/dashboard/employees/leaderboard?fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{Token}}
