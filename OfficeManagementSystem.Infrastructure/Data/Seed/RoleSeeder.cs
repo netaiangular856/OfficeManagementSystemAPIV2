@@ -32,6 +32,27 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
                     await roleManager.CreateAsync(role);
                 }
             }
+
+            // Assign all permissions to Admin role
+            var context = serviceProvider.GetRequiredService<AppDbContext>();
+            var adminRole = await roleManager.FindByNameAsync("Admin");
+            if (adminRole != null)
+            {
+                var allPermissions = context.Permissions.Select(p => p.Id).ToList();
+                var existingPermissions = context.RolePermissions.Where(rp => rp.RoleId == adminRole.Id).Select(rp => rp.PermissionId).ToList();
+                var newPermissions = allPermissions.Except(existingPermissions).ToList();
+                if (newPermissions.Any())
+                {
+                    var rolePermissions = newPermissions.Select(pid => new RolePermission
+                    {
+                        RoleId = adminRole.Id,
+                        PermissionId = pid,
+                        AssignedAt = DateTime.Now
+                    }).ToList();
+                    context.RolePermissions.AddRange(rolePermissions);
+                    await context.SaveChangesAsync();
+                }
+            }
         }
     }
 

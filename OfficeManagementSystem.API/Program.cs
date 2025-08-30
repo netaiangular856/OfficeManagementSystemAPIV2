@@ -75,6 +75,7 @@ namespace OfficeManagementSystem.API
                     await context.Database.MigrateAsync();
                     await RoleSeeder.SeedRoles(services);
                     await SeedEmail.SeedAsync(services);
+                    await PermissionSeeder.SeedAsync(context);
                 }
                 catch (Exception ex)
                 {

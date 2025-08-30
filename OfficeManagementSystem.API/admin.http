@@ -12,6 +12,18 @@ Content-Type: application/json
 GET {{BaseUrl}}/api/v1/admin/test-db
 Content-Type: application/json
 
+### Seed permissions for all controllers
+POST {{BaseUrl}}/api/v1/admin/seed-permissions
+Content-Type: application/json
+
+### Seed roles
+POST {{BaseUrl}}/api/v1/admin/seed-roles
+Content-Type: application/json
+
+### Seed both permissions and roles
+POST {{BaseUrl}}/api/v1/admin/seed-all
+Content-Type: application/json
+
 ### ========================================
 ### PERMISSIONS ENDPOINTS
 ### ========================================
