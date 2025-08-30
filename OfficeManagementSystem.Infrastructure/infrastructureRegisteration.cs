@@ -73,6 +73,10 @@ namespace OfficeManagementSystem.Infrastructure
 
             //WorkFlowLogs
             services.AddScoped<IWorkFlowLogsService, WorkFlowLogsService>();
+            
+            // Permission and Role services
+            services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IRoleService, RoleService>();
 
 
 
@@ -80,6 +84,10 @@ namespace OfficeManagementSystem.Infrastructure
 
             //IUnitOfWork
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            
+            // Repositories
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
             services.AddScoped<ISendNotificationService, SendNotificationService>();
             services.AddScoped<INotificationService, NotificationService>();
 

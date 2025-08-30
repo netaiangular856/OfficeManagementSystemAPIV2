@@ -11,6 +11,8 @@ namespace OfficeManagementSystem.Domain.Entity.Auth
     public class AppRole:IdentityRole
     {
         [MaxLength(200)] public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
         public ICollection<RolePermission> Permissions { get; set; } = new List<RolePermission>();
     }
 }

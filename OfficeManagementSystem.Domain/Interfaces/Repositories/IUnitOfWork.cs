@@ -48,6 +48,12 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
 
         //WorkFlowLog
         IGenericRepository<WorkflowLog> WorkFlowLogRepository { get; }
+        
+        // Permission repository
+        IPermissionRepository PermissionRepository { get; }
+        
+        // Role Permission repository
+        IRolePermissionRepository RolePermissionRepository { get; }
 
         Task<int> SaveAsync();
     }

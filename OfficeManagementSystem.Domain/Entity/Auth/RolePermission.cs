@@ -14,6 +14,8 @@ namespace OfficeManagementSystem.Domain.Entity.Auth
         public string RoleId { get; set; } = default!;
         public AppRole Role { get; set; } = default!;
 
+        public DateTime AssignedAt { get; set; } = DateTime.Now;
+
         public int PermissionId { get; set; }
         public Permission Permission { get; set; } = default!;
     }

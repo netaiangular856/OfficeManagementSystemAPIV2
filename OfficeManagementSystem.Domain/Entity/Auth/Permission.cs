@@ -6,17 +6,20 @@ namespace OfficeManagementSystem.Domain.Entity.Auth
     {
         public int Id { get; set; }
 
-        [MaxLength(80)]
-        public string Key { get; set; } = default!;  // مثال: "tasks.read", "letters.approve"
+        [MaxLength(100)]
+        public string Name { get; set; } = default!;
 
         [MaxLength(150)]
-        public string? Name { get; set; }            // اسم عربي/معرّف للعرض
+        public string? DisplayName { get; set; }        
 
         [MaxLength(300)]
         public string? Description { get; set; }
 
-        [MaxLength(40)]
-        public string? Category { get; set; }        // tasks / meetings / letters / ...
+        [MaxLength(100)]
+        public string? Controller { get; set; }        // tasks / meetings / letters / ...
+
+        [StringLength(50)]
+        public string? Action { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.Now;

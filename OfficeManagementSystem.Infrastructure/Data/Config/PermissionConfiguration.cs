@@ -12,25 +12,25 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Key)
-                .IsRequired()
-                .HasMaxLength(80);
-
             builder.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(x => x.DisplayName)
                 .HasMaxLength(150);
 
             builder.Property(x => x.Description)
                 .HasMaxLength(300);
 
-            builder.Property(x => x.Category)
-                .HasMaxLength(40);
+            builder.Property(x => x.Controller)
+                .HasMaxLength(100);
 
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
             // Indexes
-            builder.HasIndex(x => x.Key).IsUnique();
-            builder.HasIndex(x => x.Category);
+            builder.HasIndex(x => x.Name).IsUnique();
+            builder.HasIndex(x => x.Controller);
             builder.HasIndex(x => x.IsActive);
         }
     }

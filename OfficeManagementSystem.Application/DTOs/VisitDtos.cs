@@ -75,6 +75,7 @@ namespace OfficeManagementSystem.Application.DTOs
     // Visit Participant DTOs
     public class CreateVisitParticipantDto
     {
+        [EnumDataType(typeof(AttendeeKind), ErrorMessage = "ﬁÌ„… Kind €Ì— ’ÕÌÕ…")]
         public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
         public string? UserId { get; set; } // For internal participants
         public string? DisplayName { get; set; } // For external participants

@@ -1,0 +1,121 @@
+@BaseUrl = http://localhost:5000
+
+### ========================================
+### TEST ENDPOINTS
+### ========================================
+
+### Test if controller is working
+GET {{BaseUrl}}/api/v1/admin/test
+Content-Type: application/json
+
+### Test database connection
+GET {{BaseUrl}}/api/v1/admin/test-db
+Content-Type: application/json
+
+### ========================================
+### PERMISSIONS ENDPOINTS
+### ========================================
+
+### Get all permissions (simple)
+GET {{BaseUrl}}/api/v1/admin/permissions/all
+Content-Type: application/json
+
+### Get all permissions with pagination
+GET {{BaseUrl}}/api/v1/admin/permissions?page=1&pageSize=10
+Content-Type: application/json
+
+### Get permissions with search
+GET {{BaseUrl}}/api/v1/admin/permissions?search=user&page=1&pageSize=10
+Content-Type: application/json
+
+### Get permissions by controller
+GET {{BaseUrl}}/api/v1/admin/permissions?controller=tasks&page=1&pageSize=10
+Content-Type: application/json
+
+### Get active permissions only
+GET {{BaseUrl}}/api/v1/admin/permissions?isActive=true&page=1&pageSize=10
+Content-Type: application/json
+
+### Create new permission
+POST {{BaseUrl}}/api/v1/admin/permissions
+Content-Type: application/json
+
+{
+    "name": "users.create",
+    "displayName": "Create Users",
+    "description": "Permission to create new users",
+    "controller": "users",
+    "action": "create",
+    "isActive": true
+}
+
+### Update permission
+PUT {{BaseUrl}}/api/v1/admin/permissions/1
+Content-Type: application/json
+
+{
+    "name": "users.create",
+    "displayName": "Create Users Updated",
+    "description": "Updated permission to create new users",
+    "controller": "users",
+    "action": "create",
+    "isActive": true
+}
+
+### Delete permission
+DELETE {{BaseUrl}}/api/v1/admin/permissions/1
+Content-Type: application/json
+
+### ========================================
+### ROLES ENDPOINTS
+### ========================================
+
+### Get all roles
+GET {{BaseUrl}}/api/v1/admin/roles?page=1&pageSize=10
+Content-Type: application/json
+
+### Get specific role
+GET {{BaseUrl}}/api/v1/admin/roles/role-id-here
+Content-Type: application/json
+
+### Create new role
+POST {{BaseUrl}}/api/v1/admin/roles
+Content-Type: application/json
+
+{
+    "name": "Manager",
+    "description": "Manager role with elevated permissions"
+}
+
+### Update role
+PUT {{BaseUrl}}/api/v1/admin/roles/role-id-here
+Content-Type: application/json
+
+{
+    "name": "Senior Manager",
+    "description": "Updated manager role with elevated permissions"
+}
+
+### Delete role
+DELETE {{BaseUrl}}/api/v1/admin/roles/role-id-here
+Content-Type: application/json
+
+### ========================================
+### ROLE PERMISSIONS ENDPOINTS
+### ========================================
+
+### Get permissions for a role
+GET {{BaseUrl}}/api/v1/admin/roles/role-id-here/permissions
+Content-Type: application/json
+
+### Assign permissions to role
+POST {{BaseUrl}}/api/v1/admin/roles/role-id-here/permissions
+Content-Type: application/json
+
+{
+    "permissionIds": ["1", "2", "3"]
+}
+
+### Remove permission from role
+DELETE {{BaseUrl}}/api/v1/admin/roles/role-id-here/permissions/1
+Content-Type: application/json

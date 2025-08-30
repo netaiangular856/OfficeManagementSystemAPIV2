@@ -52,6 +52,12 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public ILetterRepository LetterRepository { get; }
         public IEmployeeKpiRepository EmployeeKpiRepository { get; }
         public IGenericRepository<WorkflowLog> WorkFlowLogRepository { get; }
+        
+        // Permission repository
+        public IPermissionRepository PermissionRepository { get; }
+        
+        // Role Permission repository
+        public IRolePermissionRepository RolePermissionRepository { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -88,6 +94,12 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
             //Workflow
             WorkFlowLogRepository = new GenericRepository<WorkflowLog>(_context);
+            
+            // Permission repository
+            PermissionRepository = new PermissionRepository(_context);
+            
+            // Role Permission repository
+            RolePermissionRepository = new RolePermissionRepository(_context);
         }
 
         public Task<int> SaveAsync()
