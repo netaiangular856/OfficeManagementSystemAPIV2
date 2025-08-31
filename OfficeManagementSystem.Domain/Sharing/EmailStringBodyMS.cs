@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.Domain.Sharing
 {
-    public static class EmailStringBodyRF
+    public static class EmailStringBodyMS
     {
-        public static string Send(string email, string token, string component, string message)
+        public static string Send(string message)
         {
-            string encodeToken = Uri.EscapeDataString(token);
             return $@"
 <!DOCTYPE html>
 <html lang=""ar"" dir=""rtl"">
@@ -284,32 +283,7 @@ namespace OfficeManagementSystem.Domain.Sharing
                 {message}
             </div>
             
-            <div class=""token-section"">
-                <div class=""token-label"">رمز التأكيد الخاص بك:</div>
-                <div class=""token-code"">{token}</div>
-                <a class=""cta-button"" href=""http://localhost:4200/auth/{component}?email={email}&code={encodeToken}"" target=""_blank"">
-                    تأكيد الحساب
-                </a>
-            </div>
             
-            <div class=""instructions"">
-                <div class=""instructions-title"">
-                    📋 تعليمات الاستخدام
-                </div>
-                <div class=""instructions-text"">
-                    • انقر على زر ""تأكيد الحساب"" أعلاه لإكمال العملية<br>
-                    • أو استخدم رمز التأكيد المرفق في الصفحة المخصصة<br>
-                    • يُرجى إكمال العملية خلال 24 ساعة من استلام هذا الإيميل
-                </div>
-            </div>
-            
-            <div class=""warning-notice"">
-                <div class=""warning-title"">⚠️ تنبيه أمني</div>
-                <div class=""warning-text"">
-                    إذا لم تكن قد طلبت تأكيد هذا الحساب، يُرجى تجاهل هذا الإيميل تماماً وعدم الضغط على أي رابط. 
-                    للإبلاغ عن أي استخدام مشبوه، يُرجى التواصل مع الدعم الفني فوراً.
-                </div>
-            </div>
             
             <div class=""contact-info"">
                 <div class=""contact-title"">هل تحتاج مساعدة؟</div>
@@ -321,7 +295,7 @@ namespace OfficeManagementSystem.Domain.Sharing
         
         <div class=""footer"">
             <div class=""footer-text"">
-                <strong>هذا إيميل تلقائي من النظام</strong><br>
+                <strong>هذا إيميل تلقائي من النظام </strong><br>
                 يُرجى عدم الرد على هذا الإيميل مباشرة
             </div>
             

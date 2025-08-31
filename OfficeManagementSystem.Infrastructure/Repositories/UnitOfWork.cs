@@ -43,6 +43,9 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public IVisitRepository VisitRepository { get; }
         public IGenericRepository<VisitParticipant> VisitParticipantRepository { get; }
 
+        // Travel repositories
+        public ITravelRepository TravelRepository { get; }
+
         //Partner
         public IPartnerRepository PartnerRepository { get; }
         public IGenericRepository<PartnerContact> PartnerContactRepository { get; }
@@ -80,6 +83,9 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             // Visit repositories
             VisitRepository = new VisitRepository(_context);
             VisitParticipantRepository = new GenericRepository<VisitParticipant>(_context);
+
+            // Travel repositories
+            TravelRepository = new TravelRepository(_context);
 
             // Partner repositories
             PartnerRepository = new PartnerRepository(_context);

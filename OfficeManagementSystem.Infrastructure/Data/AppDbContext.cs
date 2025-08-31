@@ -63,6 +63,9 @@ namespace OfficeManagementSystem.Infrastructure.Data
         public virtual DbSet<Visit> Visits { get; set; }
         public virtual DbSet<VisitParticipant> VisitParticipants { get; set; }
 
+        //Travels
+        public virtual DbSet<Travel> Travels { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

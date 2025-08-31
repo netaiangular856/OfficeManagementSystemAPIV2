@@ -14,6 +14,7 @@ using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Meeting;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using OfficeManagementSystem.Domain.Sharing;
 using System.Linq.Expressions;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -819,8 +820,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (attendeeUserIds.Any())
                 {
                     var title = $"دعوة لحضور اجتماع: {meeting.Title}";
-                    var message = $"تمت دعوتك لحضور اجتماع '{meeting.Title}' في {meeting.StartAt:dd/MM/yyyy HH:mm}";
-                    
+                    var message =
+                        $"تمت دعوتك لحضور اجتماع بعنوان: \"{meeting.Title}\".\n\n" +
+                        $"🗓 التاريخ: {meeting.StartAt:dddd, dd/MM/yyyy}\n" +
+                        $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
+                        "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
+
                     await _notificationService.SendNotificationAsync(title, message, attendeeUserIds, "Meeting");
                 }
 
@@ -828,18 +833,22 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (externalEmails.Any())
                 {
                     var title = $"دعوة لحضور اجتماع: {meeting.Title}";
-                    var message = $"تمت دعوتك لحضور اجتماع '{meeting.Title}' في {meeting.StartAt:dd/MM/yyyy HH:mm}";
+                    var message =
+                        $"تمت دعوتك لحضور اجتماع بعنوان: \"{meeting.Title}\".\n\n" +
+                        $"🗓 التاريخ: {meeting.StartAt:dddd, dd/MM/yyyy}\n" +
+                        $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
+                        "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
 
                     // For external attendees, we'll need to implement email sending
                     // This would require extending the notification service or creating a separate email service
 
-                    foreach(var externalEmail in externalEmails)
+                    foreach (var externalEmail in externalEmails)
                     {
                         var emaildto = new EmailDTO(
                         externalEmail,
                         _configuration["EmailSetting:From"],
                         title,
-                        message
+                        EmailStringBodyMS.Send(message)
                         );
 
                         await _emailService.SendEmail(emaildto);
@@ -863,7 +872,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (meetingAttendee.UserId!=null&& meetingAttendee.Kind== AttendeeKind.Internal)
                 {
                     var title = $"دعوة لحضور اجتماع: {meeting.Title}";
-                    var message = $"تمت دعوتك لحضور اجتماع '{meeting.Title}' في {meeting.StartAt:dd/MM/yyyy HH:mm}";
+                    var message =
+                        $"تمت دعوتك لحضور اجتماع بعنوان: \"{meeting.Title}\".\n\n" +
+                        $"🗓 التاريخ: {meeting.StartAt:dddd, dd/MM/yyyy}\n" +
+                        $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
+                        "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
 
                     await _notificationService.SendNotificationAsync(title, message, new List<string> { meetingAttendee.UserId }, "Meeting");
                 }
@@ -872,15 +885,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (!string.IsNullOrEmpty(meetingAttendee.Email)&&meetingAttendee.Kind == AttendeeKind.External)
                 {
                     var title = $"دعوة لحضور اجتماع: {meeting.Title}";
-                    var message = $"تمت دعوتك لحضور اجتماع '{meeting.Title}' في {meeting.StartAt:dd/MM/yyyy HH:mm}";
+                    var message =
+                        $"تمت دعوتك لحضور اجتماع بعنوان: \"{meeting.Title}\".\n\n" +
+                        $"🗓 التاريخ: {meeting.StartAt:dddd, dd/MM/yyyy}\n" +
+                        $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
+                        "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
 
                     // For external attendees, we'll need to implement email sending
                     // This would require extending the notification service or creating a separate email service
-                        var emaildto = new EmailDTO(
+                    var emaildto = new EmailDTO(
                         meetingAttendee.Email,
                         _configuration["EmailSetting:From"],
                         title,
-                        message
+                        EmailStringBodyMS.Send(message)
                         );
 
                         await _emailService.SendEmail(emaildto);

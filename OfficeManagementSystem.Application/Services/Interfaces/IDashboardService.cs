@@ -49,5 +49,15 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         /// الحصول على قائمة المتصدرين
         /// </summary>
         Task<EmployeeLeaderboardDto> GetEmployeeLeaderboardAsync(DashboardDateFilterDto filter);
+
+        /// <summary>
+        /// الحصول على ملخص الزيارات
+        /// </summary>
+        Task<VisitsOverviewDto> GetVisitsOverviewAsync(DashboardDateFilterDto filter);
+
+        /// <summary>
+        /// الحصول على ملخص السفريات
+        /// </summary>
+        Task<TravelsOverviewDto> GetTravelsOverviewAsync(DashboardDateFilterDto filter);
     }
 }

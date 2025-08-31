@@ -2,6 +2,7 @@
 using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Visit;
+using OfficeManagementSystem.Domain.Entity.Visit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,9 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         // Visit repositories
         IVisitRepository VisitRepository { get; }
         IGenericRepository<VisitParticipant> VisitParticipantRepository { get; }
+        
+        // Travel repositories
+        ITravelRepository TravelRepository { get; }
         
         // Partner repositories
         IPartnerRepository PartnerRepository { get; }

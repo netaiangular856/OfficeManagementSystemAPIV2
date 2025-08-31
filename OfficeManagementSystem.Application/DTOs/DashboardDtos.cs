@@ -216,4 +216,86 @@ namespace OfficeManagementSystem.Application.DTOs
         public double TaskCompletionRate { get; set; }
         public int Rank { get; set; }
     }
+
+    /// <summary>
+    /// ملخص الزيارات
+    /// </summary>
+    public class VisitsOverviewDto
+    {
+        public int TotalVisits { get; set; }
+        public int CompletedVisits { get; set; }
+        public int UpcomingVisits { get; set; }
+        public int OverdueVisits { get; set; }
+        public double CompletionRate { get; set; }
+        public List<VisitTypeDistributionDto> TypeDistribution { get; set; } = new();
+        public List<VisitMonthlyDataDto> MonthlyData { get; set; } = new();
+    }
+
+    /// <summary>
+    /// توزيع نوع الزيارات
+    /// </summary>
+    public class VisitTypeDistributionDto
+    {
+        public string Type { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public double Percentage { get; set; }
+    }
+
+    /// <summary>
+    /// بيانات الزيارات الشهرية
+    /// </summary>
+    public class VisitMonthlyDataDto
+    {
+        public string Month { get; set; } = string.Empty;
+        public int TotalVisits { get; set; }
+        public int CompletedVisits { get; set; }
+        public int UpcomingVisits { get; set; }
+    }
+
+    /// <summary>
+    /// ملخص السفريات
+    /// </summary>
+    public class TravelsOverviewDto
+    {
+        public int TotalTravels { get; set; }
+        public int CompletedTravels { get; set; }
+        public int UpcomingTravels { get; set; }
+        public int OngoingTravels { get; set; }
+        public double CompletionRate { get; set; }
+        public List<TravelDestinationDistributionDto> DestinationDistribution { get; set; } = new();
+        public List<TravelTransportDistributionDto> TransportDistribution { get; set; } = new();
+        public List<TravelMonthlyDataDto> MonthlyData { get; set; } = new();
+    }
+
+    /// <summary>
+    /// توزيع وجهات السفر
+    /// </summary>
+    public class TravelDestinationDistributionDto
+    {
+        public string Destination { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public double Percentage { get; set; }
+    }
+
+    /// <summary>
+    /// توزيع وسائل النقل
+    /// </summary>
+    public class TravelTransportDistributionDto
+    {
+        public string TransportMode { get; set; } = string.Empty;
+        public int Count { get; set; }
+        public double Percentage { get; set; }
+    }
+
+    /// <summary>
+    /// بيانات السفريات الشهرية
+    /// </summary>
+    public class TravelMonthlyDataDto
+    {
+        public string Month { get; set; } = string.Empty;
+        public int TotalTravels { get; set; }
+        public int CompletedTravels { get; set; }
+        public int UpcomingTravels { get; set; }
+        public int OngoingTravels { get; set; }
+    }
 }

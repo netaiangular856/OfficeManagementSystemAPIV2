@@ -388,5 +388,141 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 throw;
             }
         }
+
+        /// <summary>
+        /// الحصول على ملخص الزيارات
+        /// </summary>
+        public async Task<VisitsOverviewDto> GetVisitsOverviewAsync(DashboardDateFilterDto filter)
+        {
+            try
+            {
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
+                var toDate = filter.ToDate ?? DateTime.Now;
+
+                var visits = await _unitOfWork.VisitRepository.GetAllAsync(
+                    v => v.CreatedAt >= fromDate && v.CreatedAt <= toDate);
+
+                var totalVisits = visits.Count();
+                var completedVisits = visits.Count(v => v.VisitDate < DateTime.Now);
+                var upcomingVisits = visits.Count(v => v.VisitDate >= DateTime.Now);
+                var overdueVisits = visits.Count(v => v.VisitDate < DateTime.Now && v.VisitDate < fromDate);
+
+                // توزيع النوع
+                var typeDistribution = visits
+                    .GroupBy(v => v.Type)
+                    .Select(g => new VisitTypeDistributionDto
+                    {
+                        Type = g.Key.ToString(),
+                        Count = g.Count(),
+                        Percentage = totalVisits > 0 ? (double)g.Count() / totalVisits * 100 : 0
+                    })
+                    .ToList();
+
+                // البيانات الشهرية
+                var monthlyData = visits
+                    .GroupBy(v => new { v.CreatedAt.Year, v.CreatedAt.Month })
+                    .OrderBy(g => g.Key.Year)
+                    .ThenBy(g => g.Key.Month)
+                    .Select(g => new VisitMonthlyDataDto
+                    {
+                        Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                        TotalVisits = g.Count(),
+                        CompletedVisits = g.Count(v => v.VisitDate < DateTime.Now),
+                        UpcomingVisits = g.Count(v => v.VisitDate >= DateTime.Now)
+                    })
+                    .ToList();
+
+                return new VisitsOverviewDto
+                {
+                    TotalVisits = totalVisits,
+                    CompletedVisits = completedVisits,
+                    UpcomingVisits = upcomingVisits,
+                    OverdueVisits = overdueVisits,
+                    CompletionRate = totalVisits > 0 ? (double)completedVisits / totalVisits * 100 : 0,
+                    TypeDistribution = typeDistribution,
+                    MonthlyData = monthlyData
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"VisitsOverview Error: {ex}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// الحصول على ملخص السفريات
+        /// </summary>
+        public async Task<TravelsOverviewDto> GetTravelsOverviewAsync(DashboardDateFilterDto filter)
+        {
+            try
+            {
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
+                var toDate = filter.ToDate ?? DateTime.Now;
+
+                var travels = await _unitOfWork.TravelRepository.GetAllAsync(
+                    t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+
+                var totalTravels = travels.Count();
+                var completedTravels = travels.Count(t => t.EndDate < DateTime.Now);
+                var upcomingTravels = travels.Count(t => t.StartDate > DateTime.Now);
+                var ongoingTravels = travels.Count(t => t.StartDate <= DateTime.Now && t.EndDate >= DateTime.Now);
+
+                // توزيع الوجهات
+                var destinationDistribution = travels
+                    .GroupBy(t => t.Destination)
+                    .Select(g => new TravelDestinationDistributionDto
+                    {
+                        Destination = g.Key,
+                        Count = g.Count(),
+                        Percentage = totalTravels > 0 ? (double)g.Count() / totalTravels * 100 : 0
+                    })
+                    .ToList();
+
+                // توزيع وسائل النقل
+                var transportDistribution = travels
+                    .Where(t => !string.IsNullOrEmpty(t.TransportMode))
+                    .GroupBy(t => t.TransportMode)
+                    .Select(g => new TravelTransportDistributionDto
+                    {
+                        TransportMode = g.Key ?? "غير محدد",
+                        Count = g.Count(),
+                        Percentage = totalTravels > 0 ? (double)g.Count() / totalTravels * 100 : 0
+                    })
+                    .ToList();
+
+                // البيانات الشهرية
+                var monthlyData = travels
+                    .GroupBy(t => new { t.CreatedAt.Year, t.CreatedAt.Month })
+                    .OrderBy(g => g.Key.Year)
+                    .ThenBy(g => g.Key.Month)
+                    .Select(g => new TravelMonthlyDataDto
+                    {
+                        Month = $"{g.Key.Year}-{g.Key.Month:D2}",
+                        TotalTravels = g.Count(),
+                        CompletedTravels = g.Count(t => t.EndDate < DateTime.Now),
+                        UpcomingTravels = g.Count(t => t.StartDate > DateTime.Now),
+                        OngoingTravels = g.Count(t => t.StartDate <= DateTime.Now && t.EndDate >= DateTime.Now)
+                    })
+                    .ToList();
+
+                return new TravelsOverviewDto
+                {
+                    TotalTravels = totalTravels,
+                    CompletedTravels = completedTravels,
+                    UpcomingTravels = upcomingTravels,
+                    OngoingTravels = ongoingTravels,
+                    CompletionRate = totalTravels > 0 ? (double)completedTravels / totalTravels * 100 : 0,
+                    DestinationDistribution = destinationDistribution,
+                    TransportDistribution = transportDistribution,
+                    MonthlyData = monthlyData
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TravelsOverview Error: {ex}");
+                throw;
+            }
+        }
     }
 }

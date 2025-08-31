@@ -3,11 +3,13 @@ using LinqKit;
 using MailKit.Search;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using System.Linq.Expressions;
 
@@ -18,12 +20,23 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ISendNotificationService _notificationService;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public DepartmentService(IUnitOfWork unitOfWork, IMapper mapper,UserManager<AppUser> userManager)
+        public DepartmentService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,UserManager<AppUser> userManager,
+            ISendNotificationService notificationService,
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _notificationService = notificationService;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<ApiResponse<DepartmentDto>> CreateAsync(CreateDepartmentDto createDto)
@@ -284,6 +297,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 await _unitOfWork.DepartmentRepository.UpdateAsync(department);
                 await _unitOfWork.SaveAsync();
+
+                var title = $"You Have Assgin to Manager of department {department.NameEn}";
+                var message =
+                            $"Dear {manager.FirstName + ' '+manager.LastName ?? "User"},\n\n" +
+                            $"You have been assigned as the Manager of the {department.NameEn} Department on {DateTime.Now:dddd, dd MMMM yyyy}.\n\n" +
+                            "Please review your new responsibilities in the system.\n\n" +
+                            "Best regards,\n" +
+                            "Administration Team";
+
+                await _notificationService.SendNotificationAsync(title, message, new List<string> { assignDto.ManagerUserId }, "Department");
 
                 return ApiResponse<bool>.SuccessResponse(true, "تم تعيين المدير بنجاح");
             }

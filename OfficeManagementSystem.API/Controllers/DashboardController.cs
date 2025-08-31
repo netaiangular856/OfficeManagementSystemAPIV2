@@ -250,5 +250,61 @@ namespace OfficeManagementSystem.API.Controllers
                 return StatusCode(500, new { message = "حدث خطأ أثناء جلب قائمة المتصدرين", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// الحصول على ملخص الزيارات
+        /// </summary>
+        /// <param name="fromDate">تاريخ البداية</param>
+        /// <param name="toDate">تاريخ النهاية</param>
+        /// <returns>ملخص الزيارات</returns>
+        [HttpGet("visits/overview")]
+        public async Task<ActionResult<VisitsOverviewDto>> GetVisitsOverview(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var filter = new DashboardDateFilterDto
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate
+                };
+
+                var result = await _dashboardService.GetVisitsOverviewAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "حدث خطأ أثناء جلب ملخص الزيارات", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// الحصول على ملخص السفريات
+        /// </summary>
+        /// <param name="fromDate">تاريخ البداية</param>
+        /// <param name="toDate">تاريخ النهاية</param>
+        /// <returns>ملخص السفريات</returns>
+        [HttpGet("travels/overview")]
+        public async Task<ActionResult<TravelsOverviewDto>> GetTravelsOverview(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var filter = new DashboardDateFilterDto
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate
+                };
+
+                var result = await _dashboardService.GetTravelsOverviewAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "حدث خطأ أثناء جلب ملخص السفريات", error = ex.Message });
+            }
+        }
     }
 }

@@ -1,0 +1,55 @@
+### Travel API Tests
+
+### Create Travel
+POST {{baseUrl}}/api/Travel
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "رحلة عمل إلى دبي",
+  "destination": "دبي، الإمارات العربية المتحدة",
+  "purpose": "مؤتمر تقني واجتماعات عمل",
+  "startDate": "2024-03-15T00:00:00Z",
+  "endDate": "2024-03-20T00:00:00Z",
+  "transportMode": "طائرة",
+  "accommodation": "فندق برج العرب"
+}
+
+### Get All Travels
+GET {{baseUrl}}/api/Travel?pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Get All Travels with Search
+GET {{baseUrl}}/api/Travel?pageNumber=1&pageSize=10&search=دبي
+Authorization: Bearer {{token}}
+
+### Get All Travels by Date Range
+GET {{baseUrl}}/api/Travel?pageNumber=1&pageSize=10&from=2024-01-01T00:00:00Z&to=2024-12-31T00:00:00Z
+Authorization: Bearer {{token}}
+
+### Get All Travels by Destination
+GET {{baseUrl}}/api/Travel?pageNumber=1&pageSize=10&destination=دبي
+Authorization: Bearer {{token}}
+
+### Get Travel by ID
+GET {{baseUrl}}/api/Travel/1
+Authorization: Bearer {{token}}
+
+### Update Travel
+PUT {{baseUrl}}/api/Travel/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "رحلة عمل محدثة إلى دبي",
+  "destination": "دبي، الإمارات العربية المتحدة",
+  "purpose": "مؤتمر تقني واجتماعات عمل محدثة",
+  "startDate": "2024-03-16T00:00:00Z",
+  "endDate": "2024-03-21T00:00:00Z",
+  "transportMode": "طائرة",
+  "accommodation": "فندق برج الخليفة"
+}
+
+### Delete Travel
+DELETE {{baseUrl}}/api/Travel/1
+Authorization: Bearer {{token}}

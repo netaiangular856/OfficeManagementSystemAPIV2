@@ -6,6 +6,7 @@ using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using OfficeManagementSystem.Domain.Sharing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     user.Email,
                     _configuration["EmailSetting:From"],
                     title,
-                    htmlContent??message
+                    htmlContent?? EmailStringBodyMS.Send(message)
                 );
 
                 emailTasks.Add(_emailService.SendEmail(emaildto));
