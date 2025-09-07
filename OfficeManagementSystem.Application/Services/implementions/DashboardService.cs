@@ -114,7 +114,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var toDate = filter.ToDate ?? DateTime.Now;
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+                    t => t.DueDate >= fromDate && t.DueDate <= toDate);
 
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
@@ -170,13 +170,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var toDate = filter.ToDate ?? DateTime.Now;
 
             var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+                t => t.DueDate >= fromDate && t.DueDate <= toDate);
 
             var trendData = new List<TaskTrendDataDto>();
 
             // تجميع البيانات حسب التاريخ
             var dailyGroups = tasks
-                .GroupBy(t => t.CreatedAt.Date)
+                .GroupBy(t => t.DueDate.Date)
                 .OrderBy(g => g.Key);
 
             foreach (var group in dailyGroups)
@@ -210,7 +210,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             var totalMeetings = meetings.Count();
             var completedMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Done);
-            var upcomingMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Scheduled);
+            var upcomingMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Scheduled || m.Status == Domain.Enums.Meeting.MeetingStatus.InProgress);
             var cancelledMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Cancelled);
 
             // توزيع الحالة
@@ -348,13 +348,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
                 var toDate = filter.ToDate ?? DateTime.Now;
 
-                var employees = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
+                // جلب كل الـ KPIs مع تفاصيل الموظفين
+                var allKpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
                     includeProperties: "Employee,Employee.Department");
+
+                // تجميع KPIs حسب الموظف وأخذ آخر واحد لكل موظف
+                var latestKpis = allKpis
+                    .GroupBy(e => e.EmployeeId)
+                    .Select(g => g.OrderByDescending(e => e.PeriodEnd).First())
+                    .ToList();
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
                     t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
 
-                var leaderboard = employees
+                var leaderboard = latestKpis
                     .Select(e => new EmployeeLeaderboardItemDto
                     {
                         EmployeeId = e.EmployeeId,
@@ -396,16 +403,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = filter.ToDate ?? DateTime.Now;
+
+
 
                 var visits = await _unitOfWork.VisitRepository.GetAllAsync(
-                    v => v.CreatedAt >= fromDate && v.CreatedAt <= toDate);
+                    v =>(filter.FromDate == null || v.VisitDate >= filter.FromDate) &&(filter.ToDate==null || v.VisitDate <= filter.ToDate));
 
                 var totalVisits = visits.Count();
-                var completedVisits = visits.Count(v => v.VisitDate < DateTime.Now);
+                var completedVisits = visits.Count(v =>  v.IsCompleted==true);
                 var upcomingVisits = visits.Count(v => v.VisitDate >= DateTime.Now);
-                var overdueVisits = visits.Count(v => v.VisitDate < DateTime.Now && v.VisitDate < fromDate);
+                var overdueVisits = visits.Count(v => v.VisitDate < DateTime.Now && v.IsCompleted==false);
 
                 // توزيع النوع
                 var typeDistribution = visits
@@ -420,14 +427,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // البيانات الشهرية
                 var monthlyData = visits
-                    .GroupBy(v => new { v.CreatedAt.Year, v.CreatedAt.Month })
+                    .GroupBy(v => new { v.VisitDate.Year, v.VisitDate.Month })
                     .OrderBy(g => g.Key.Year)
                     .ThenBy(g => g.Key.Month)
                     .Select(g => new VisitMonthlyDataDto
                     {
                         Month = $"{g.Key.Year}-{g.Key.Month:D2}",
                         TotalVisits = g.Count(),
-                        CompletedVisits = g.Count(v => v.VisitDate < DateTime.Now),
+                        CompletedVisits = g.Count(v =>  v.IsCompleted==true),
                         UpcomingVisits = g.Count(v => v.VisitDate >= DateTime.Now)
                     })
                     .ToList();

@@ -13,7 +13,9 @@ namespace OfficeManagementSystem.Application.Mapping
     {
         public WorkFlowProfile()
         {
-            CreateMap<WorkflowLog, WorkflowLogDto>().ReverseMap();
+            CreateMap<WorkflowLog, WorkflowLogDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FirstName+ src.User.LastName))
+                .ReverseMap();
         }
     }
 }

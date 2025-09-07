@@ -23,7 +23,8 @@ namespace OfficeManagementSystem.Domain.Entity.Documents
         public AppUser CreatedBy { get; set; } = default!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
-
+        public long? FileSize { get; set; }
+        
         public ICollection<TaskAttachment> TaskAttachments { get; set; } = new List<TaskAttachment>();
         public ICollection<MeetingAttachment> MeetingAttachments { get; set; } = new List<MeetingAttachment>();
     }

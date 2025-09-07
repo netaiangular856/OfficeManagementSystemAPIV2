@@ -137,7 +137,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filter = filter == null ? toFilter : filter.And(toFilter);
                 }
 
-                var meetings = await _unitOfWork.MeetingRepository.GetAllWithDetailsAsync(
+                var meetings = await _unitOfWork.MeetingRepository.GetAllAsync(
                     filter,
                     q => q.OrderByDescending(m => m.StartAt));
 
@@ -559,6 +559,49 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 return ApiResponse<bool>.ErrorResponse($"خطأ في حذف الحضور: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<MeetingAttendeeDto>> UpdateAttendeeStatusAsync(int meetingId, int attendeeId, UpdateAttendeeStatusDto statusDto, string userId)
+        {
+            try
+            {
+                var attendee = await _unitOfWork.MeetingAttendeeRepository.GetByIdAsync(attendeeId);
+                if (attendee == null || attendee.MeetingId != meetingId)
+                {
+                    return ApiResponse<MeetingAttendeeDto>.ErrorResponse("الحضور غير موجود");
+                }
+
+                var oldStatus = attendee.AttendanceStatus.ToString();
+                attendee.AttendanceStatus = statusDto.AttendanceStatus;
+                
+                if (!string.IsNullOrEmpty(statusDto.Notes))
+                {
+                    attendee.Notes = statusDto.Notes;
+                }
+
+                // Log the status change
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "MeetingAttendee",
+                    EntityId = attendeeId,
+                    ActionType = WorkflowActionType.StatusChanged,
+                    Description = $"Attendee '{attendee.UserId ?? attendee.DisplayName}' status changed from {oldStatus} to {attendee.AttendanceStatus.ToString()} in Meeting '{meetingId}'",
+                    UserId = userId
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
+                await _unitOfWork.MeetingAttendeeRepository.UpdateAsync(attendee);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.MeetingAttendeeRepository.GetByIdAsync(attendeeId);
+                var dto = _mapper.Map<MeetingAttendeeDto>(result);
+
+                return ApiResponse<MeetingAttendeeDto>.SuccessResponse(dto, "تم تحديث حالة الحضور بنجاح");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<MeetingAttendeeDto>.ErrorResponse($"خطأ في تحديث حالة الحضور: {ex.Message}");
             }
         }
 

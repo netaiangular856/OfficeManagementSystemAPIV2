@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Notifications;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using OfficeManagementSystem.Domain.Sharing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +21,23 @@ namespace OfficeManagementSystem.Application.Services.implementions
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly UserManager<AppUser> _userManager;
 
-        public NotificationService(IUnitOfWork unitOfWork,IMapper mapper)
+        public NotificationService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IEmailService emailService,
+            IConfiguration configuration,
+            UserManager<AppUser> userManager
+            )
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _emailService = emailService;
+            _configuration = configuration;
+            _userManager = userManager;
         }
 
         public async Task<ApiResponse<NotificationDto>> AddNotification(CreateNotificationDto notificationDto)
@@ -38,8 +54,21 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     CreatedAt = DateTime.UtcNow,
 
                 };
+            var emailTasks = new List<Task>();
             foreach (var userid in notificationDto.UserIds)
             {
+                var user = await _userManager.Users.FirstOrDefaultAsync(m => m.Id == userid);
+                if (string.IsNullOrEmpty(user.Email)) continue;
+
+                var emaildto = new EmailDTO(
+                    user.Email,
+                    _configuration["EmailSetting:From"],
+                    notificationDto.Title,
+                     EmailStringBodyMS.Send(notificationDto.Message)
+                );
+
+                emailTasks.Add(_emailService.SendEmail(emaildto));
+
                 var usernotification = new UserNotification
                 {
                     UserId = userid,
@@ -48,8 +77,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 };
                 notification.UserNotifications.Add(usernotification);
             }
+
             await _unitOfWork.NotificationRepository.AddAsync(notification);
             await _unitOfWork.SaveAsync();
+            // Send all emails in parallel
+            await Task.WhenAll(emailTasks);
 
             var result= _mapper.Map<NotificationDto>(notification);
             return ApiResponse<NotificationDto>.SuccessResponse(result);

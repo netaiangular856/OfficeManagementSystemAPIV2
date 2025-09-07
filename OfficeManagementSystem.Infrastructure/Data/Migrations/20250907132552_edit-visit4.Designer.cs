@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OfficeManagementSystem.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using OfficeManagementSystem.Infrastructure.Data;
 namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250907132552_edit-visit4")]
+    partial class editvisit4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,9 +437,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.Property<int?>("DocumentSource")
                         .HasColumnType("int");
-
-                    b.Property<long?>("FileSize")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("StoragePath")
                         .IsRequired()

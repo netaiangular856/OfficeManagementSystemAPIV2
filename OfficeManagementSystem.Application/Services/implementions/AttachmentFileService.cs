@@ -33,7 +33,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+            var uniqueFileName = $"{file.FileName}";
             var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
             var relativePath = Path.Combine("Files", folderName, uniqueFileName).Replace("\\", "/");
 

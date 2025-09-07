@@ -29,7 +29,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var query = await _unitOfWork.WorkFlowLogRepository.GetAllAsync(
                 filter: BuildFilter(request),
                 orderBy: m => m.OrderByDescending(x => x.CreatedAt),
-                disableTracking: true
+                disableTracking: true,
+                includeProperties: "User"
+
             );
 
 

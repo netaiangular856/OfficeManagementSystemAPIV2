@@ -23,6 +23,7 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         Task<ApiResponse<MeetingAttendeeDto>> AddAttendeeAsync(int meetingId, CreateMeetingAttendeeDto attendeeDto);
         Task<ApiResponse<MeetingAttendeeDto>> UpdateAttendeeAsync(int meetingId, int attendeeId, UpdateMeetingAttendeeDto attendeeDto, string userID);
         Task<ApiResponse<bool>> RemoveAttendeeAsync(int meetingId, int attendeeId, string userID);
+        Task<ApiResponse<MeetingAttendeeDto>> UpdateAttendeeStatusAsync(int meetingId, int attendeeId, UpdateAttendeeStatusDto statusDto, string userId);
 
         // Meeting Minutes
         Task<ApiResponse<MeetingMinutesDto>> GetMinutesAsync(int meetingId);

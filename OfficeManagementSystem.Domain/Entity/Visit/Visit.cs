@@ -21,6 +21,7 @@ namespace OfficeManagementSystem.Domain.Entity.Visit
         public AppUser? CreatedByUser { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        public bool IsCompleted { get; set; } = false;
 
         public ICollection<VisitParticipant> Participants { get; set; } = new List<VisitParticipant>();
     }

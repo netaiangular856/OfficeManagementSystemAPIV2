@@ -21,7 +21,7 @@ namespace OfficeManagementSystem.Application.Mapping
             CreateMap<Department, DepartmentDto>()
                 .ForMember(dest => dest.ManagerName, opt => opt.MapFrom(src => 
                     src.ManagerUser != null ? $"{src.ManagerUser.FirstName} {src.ManagerUser.LastName}" : null))
-                .ForMember(dest => dest.EmployeesCount, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.EmployeesCount, opt => opt.MapFrom(src =>
                     src.Employees != null ? src.Employees.Count : 0))
                 .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.Children));
 

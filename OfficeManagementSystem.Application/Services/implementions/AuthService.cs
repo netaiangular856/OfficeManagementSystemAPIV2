@@ -13,6 +13,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using OfficeManagementSystem.Domain.Interfaces.Repositories;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -23,18 +24,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailService emailService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AuthService(
             UserManager<AppUser> userManager,
             RoleManager<AppRole> roleManager,
             SignInManager<AppUser> signInManager,
-            IConfiguration configuration, IEmailService emailService)
+            IConfiguration configuration, IEmailService emailService,IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _configuration = configuration;
             this.emailService = emailService;
+            _unitOfWork = unitOfWork;
         }
 
 
@@ -190,6 +193,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private async Task<string> GenerateJwtTokenAsync(AppUser user)
         {
             var userRoles = await _userManager.GetRolesAsync(user);
+            
+            
+            
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
@@ -204,7 +210,21 @@ namespace OfficeManagementSystem.Application.Services.implementions
             foreach (var role in userRoles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+
+
+                // جيب الـ RoleId من الاسم
+                var roleEntity = await _roleManager.FindByNameAsync(role);
+                if (roleEntity != null)
+                {
+                    var permissions = await _unitOfWork.PermissionRepository.GetByRoleIdAsync(roleEntity.Id);
+                    foreach (var permission in permissions)
+                    {
+                        claims.Add(new Claim("permission", permission.Name));
+                    }
+                }
+
             }
+            
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Token:Secret"]!));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

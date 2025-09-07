@@ -19,14 +19,14 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
             CreateMap<Meeting, MeetingDto>()
-                .ForMember(dest => dest.OrganizerName, opt => opt.MapFrom(src => src.Organizer.UserName));
+                .ForMember(dest => dest.OrganizerName, opt => opt.MapFrom(src => src.Organizer.FirstName+src.Organizer.LastName));
                 
 
             // Meeting Attendee mappings
             CreateMap<CreateMeetingAttendeeDto, MeetingAttendee>();
             CreateMap<UpdateMeetingAttendeeDto, MeetingAttendee>();
             CreateMap<MeetingAttendee, MeetingAttendeeDto>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null));
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.FirstName + src.User.LastName : null));
 
             // Meeting Minutes mappings
             CreateMap<CreateMeetingMinutesDto, MeetingMinutes>();
@@ -40,7 +40,15 @@ namespace OfficeManagementSystem.Application.Mapping
 
             // Meeting Attachment mappings
             CreateMap<CreateMeetingAttachmentDto, MeetingAttachment>();
-            CreateMap<MeetingAttachment, MeetingAttachmentDto>();
+            CreateMap<MeetingAttachment, MeetingAttachmentDto>()
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.Document.StoragePath))
+                .ForMember(dest => dest.FileType, opt => opt.MapFrom(src => src.Document.Type.ToString())) // αζ DocumentType Enum
+                .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => src.Document.Title))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Document.Description))
+                .ForMember(dest => dest.UploadedByUserId, opt => opt.MapFrom(src => src.Document.CreatedByUserId))
+                .ForMember(dest => dest.UploadedByName, opt => opt.MapFrom(src => src.Document.CreatedBy.UserName))
+                .ForMember(dest => dest.UploadedAt, opt => opt.MapFrom(src => src.Document.CreatedAt))
+                .ForMember(dest => dest.DocumentSource, opt => opt.MapFrom(src => src.Document.DocumentSource));
 
 
         }

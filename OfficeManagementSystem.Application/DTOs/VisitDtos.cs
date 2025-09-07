@@ -45,6 +45,8 @@ namespace OfficeManagementSystem.Application.DTOs
 
         [Required]
         public DateTime VisitDate { get; set; }
+
+        public bool IsCompleted { get; set; } = false;
     }
 
     public class VisitDto
@@ -59,6 +61,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? CreatedByName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsCompleted { get; set; } = false;
         public List<VisitParticipantDto> Participants { get; set; } = new();
     }
 

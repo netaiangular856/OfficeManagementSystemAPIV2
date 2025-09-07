@@ -56,14 +56,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<DocumentDto>.ErrorResponse("يوجد مستند بنفس العنوان");
                 }
-
+                var fileSize = createDto.File.Length;
                 // Save file
                 var filePath = await _attachmentFileService.SaveAttachmentAsync(createDto.File, "Documents");
+
 
                 // Create document
                 var document = _mapper.Map<Document>(createDto);
                 document.CreatedByUserId = userId;
                 document.StoragePath = filePath;
+                document.FileSize= fileSize;
 
                 await _unitOfWork.DocumentRepository.AddAsync(document);
                 await _unitOfWork.SaveAsync();

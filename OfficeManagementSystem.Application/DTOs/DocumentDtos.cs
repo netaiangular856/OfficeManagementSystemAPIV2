@@ -49,7 +49,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime? UpdatedAt { get; set; }
         public string FileName { get; set; } = string.Empty;
         public string FileExtension { get; set; } = string.Empty;
-        public long FileSize { get; set; }
+        public long? FileSize { get; set; }
     }
 
     public class DocumentQueryDto

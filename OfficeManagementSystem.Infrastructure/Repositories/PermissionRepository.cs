@@ -32,5 +32,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .Where(p => p.Roles.Any(rp => rp.RoleId == roleId))
                 .ToListAsync();
         }
+
+        
     }
 }

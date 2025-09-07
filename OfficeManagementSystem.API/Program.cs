@@ -45,7 +45,8 @@ namespace OfficeManagementSystem.API
                     Version = "v1"
                 });
             });
-
+            // Add Permission Policies ﬁ»· „«  ⁄„· Build
+            builder.Services.AddPermissionPolicies(builder.Configuration);
             var app = builder.Build();
 
             // ======= Swagger UI =======
@@ -72,10 +73,13 @@ namespace OfficeManagementSystem.API
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
+                    
                     await context.Database.MigrateAsync();
-                    await RoleSeeder.SeedRoles(services);
-                    await SeedEmail.SeedAsync(services);
                     await PermissionSeeder.SeedAsync(context);
+                    await RoleSeeder.SeedRoles(services);
+                    
+                    await SeedEmail.SeedAsync(services);
+                    await DepartmentTreeSeeder.SeedAsync(context);
                 }
                 catch (Exception ex)
                 {

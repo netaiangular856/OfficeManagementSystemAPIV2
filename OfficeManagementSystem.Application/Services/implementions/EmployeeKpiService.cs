@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
@@ -23,15 +24,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<EmployeeKpiService> _logger;
 
         public EmployeeKpiService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            ILogger<EmployeeKpiService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<EmployeeKpiDto>> GetLatestKpiAsync(string employeeId)
@@ -306,6 +310,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var periodStartDate = periodStart.ToDateTime(TimeOnly.MinValue);
             var periodEndDate = periodEnd.ToDateTime(TimeOnly.MaxValue);
 
+            _logger.LogInformation($"=== KPI Calculation for Employee {employeeId} ({periodStart} - {periodEnd}) ===");
+
             // Calculate Task-related KPIs
             await CalculateTaskKpisAsync(kpi, employeeId, periodStartDate, periodEndDate);
 
@@ -317,26 +323,66 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             // Calculate overall score
             kpi.Score = CalculateOverallScore(kpi);
+            
+            _logger.LogInformation($"=== Final KPI Results ===");
+            _logger.LogInformation($"Tasks Assigned: {kpi.TasksAssigned}, Completed: {kpi.TasksCompleted}, Late: {kpi.TasksLate}");
+            _logger.LogInformation($"Meetings Attended: {kpi.MeetingsAttended}, Missed: {kpi.MeetingsMissed}");
+            _logger.LogInformation($"Response Speed: {kpi.ResponseSpeedAvgHours} hours");
+            _logger.LogInformation($"Overall Score: {kpi.Score}");
+            _logger.LogInformation($"===============================================");
         }
 
         private async Task CalculateTaskKpisAsync(EmployeeKPI kpi, string employeeId, DateTime periodStart, DateTime periodEnd)
         {
-            // Get all tasks assigned to this employee in the period
-            var tasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                t.AssigneeUserId == employeeId && 
-                t.CreatedAt >= periodStart && 
-                t.CreatedAt <= periodEnd);
+            _logger.LogInformation($"  Starting task calculation for employee {employeeId}");
+            _logger.LogInformation($"  Period: {periodStart:yyyy-MM-dd HH:mm:ss} to {periodEnd:yyyy-MM-dd HH:mm:ss}");
+            
+            // Get all tasks assigned to this employee
+            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
+                t.AssigneeUserId == employeeId);
 
-            kpi.TasksAssigned = tasks.Count();
-            kpi.TasksCompleted = tasks.Count(t => t.Status == TaskStatus.Done);
-            kpi.TasksLate = tasks.Count(t => t.Status != TaskStatus.Done && t.DueDate < DateTime.UtcNow);
+            _logger.LogInformation($"  Found {allTasks.Count()} total tasks for employee {employeeId}");
 
-            // Calculate average completion days for completed tasks
-            var completedTasks = tasks.Where(t => t.Status == TaskStatus.Done).ToList();
-            if (completedTasks.Any())
+            // Log all tasks for debugging
+            foreach (var task in allTasks)
             {
-                var totalDays = completedTasks.Sum(t => (t.UpdatedAt - t.CreatedAt).TotalDays);
-                kpi.AvgCompletionDays = (decimal)(totalDays / completedTasks.Count);
+                _logger.LogInformation($"    All Task {task.Id}: Status={task.Status}, Created={task.CreatedAt:yyyy-MM-dd HH:mm:ss}, Updated={task.UpdatedAt:yyyy-MM-dd HH:mm:ss}, Due={task.DueDate:yyyy-MM-dd HH:mm:ss}");
+            }
+
+            // Simplified logic: Tasks that were created during the period OR completed during the period
+            var tasksInPeriod = allTasks.Where(t => 
+                // Task was created during the period
+                (t.CreatedAt >= periodStart && t.CreatedAt <= periodEnd) ||
+                // OR task was completed during the period (regardless of when it was created)
+                (t.Status == TaskStatus.Done && t.UpdatedAt >= periodStart && t.UpdatedAt <= periodEnd));
+
+            _logger.LogInformation($"  Tasks active in period {periodStart:yyyy-MM-dd} to {periodEnd:yyyy-MM-dd}: {tasksInPeriod.Count()}");
+
+            // Log each task for debugging
+            foreach (var task in tasksInPeriod)
+            {
+                _logger.LogInformation($"    Task {task.Id}: Status={task.Status}, Created={task.CreatedAt:yyyy-MM-dd}, Updated={task.UpdatedAt:yyyy-MM-dd}, Due={task.DueDate:yyyy-MM-dd}");
+            }
+
+            kpi.TasksAssigned = tasksInPeriod.Count();
+            kpi.TasksCompleted = tasksInPeriod.Count(t => t.Status == TaskStatus.Done && t.UpdatedAt >= periodStart && t.UpdatedAt <= periodEnd);
+            kpi.TasksLate = tasksInPeriod.Count(t => t.Status != TaskStatus.Done && t.DueDate < periodEnd);
+
+            _logger.LogInformation($"  Tasks Assigned: {kpi.TasksAssigned}");
+            _logger.LogInformation($"  Tasks Completed: {kpi.TasksCompleted}");
+            _logger.LogInformation($"  Tasks Late: {kpi.TasksLate}");
+
+            // Calculate average completion days for completed tasks in the period
+            var completedTasksInPeriod = tasksInPeriod.Where(t => 
+                t.Status == TaskStatus.Done && 
+                t.UpdatedAt >= periodStart && 
+                t.UpdatedAt <= periodEnd).ToList();
+                
+            if (completedTasksInPeriod.Any())
+            {
+                var totalDays = completedTasksInPeriod.Sum(t => (t.UpdatedAt - t.CreatedAt).TotalDays);
+                kpi.AvgCompletionDays = (decimal)(totalDays / completedTasksInPeriod.Count);
+                _logger.LogInformation($"  Average Completion Days: {kpi.AvgCompletionDays}");
             }
         }
 
@@ -348,24 +394,64 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 ma.Meeting.CreatedAt >= periodStart && 
                 ma.Meeting.CreatedAt <= periodEnd);
 
+            _logger.LogInformation($"  Found {meetingAttendees.Count()} meeting attendees for employee {employeeId} in period {periodStart:yyyy-MM-dd} to {periodEnd:yyyy-MM-dd}");
+
             var totalMeetings = meetingAttendees.Count();
             kpi.MeetingsAttended = meetingAttendees.Count(ma => ma.AttendanceStatus == Domain.Enums.Meeting.RSVP.Accepted);
             kpi.MeetingsMissed = totalMeetings - kpi.MeetingsAttended;
+
+            _logger.LogInformation($"  Meetings Attended: {kpi.MeetingsAttended}");
+            _logger.LogInformation($"  Meetings Missed: {kpi.MeetingsMissed}");
         }
 
         private async Task CalculateResponseSpeedKpiAsync(EmployeeKPI kpi, string employeeId, DateTime periodStart, DateTime periodEnd)
         {
-            // Get task updates by this employee in the period
-            var taskUpdates = await _unitOfWork.TaskUpdateRepository.GetAllAsync(tu => 
-                tu.CreatedByUserId == employeeId && 
-                tu.CreatedAt >= periodStart && 
-                tu.CreatedAt <= periodEnd);
+            // Get all tasks assigned to this employee
+            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
+                t.AssigneeUserId == employeeId);
 
-            if (taskUpdates.Any())
+            // Filter tasks that were active during the period
+            var tasksInPeriod = allTasks.Where(t => 
+                (t.CreatedAt >= periodStart && t.CreatedAt <= periodEnd) ||
+                (t.Status == TaskStatus.Done && t.UpdatedAt >= periodStart && t.UpdatedAt <= periodEnd));
+
+            _logger.LogInformation($"  Calculating response speed for {tasksInPeriod.Count()} tasks");
+
+            if (tasksInPeriod.Any())
             {
-                // Calculate average response time in hours
-                var totalHours = taskUpdates.Sum(tu => (tu.CreatedAt - tu.CreatedAt).TotalHours);
-                kpi.ResponseSpeedAvgHours = (decimal)(totalHours / taskUpdates.Count());
+                // Calculate average response time based on time from task creation to first update
+                var responseTimes = new List<double>();
+                
+                foreach (var task in tasksInPeriod)
+                {
+                    // Get first update for this task by the assignee
+                    var taskUpdates = await _unitOfWork.TaskUpdateRepository.GetAllAsync(tu => 
+                        tu.TaskItemId == task.Id && 
+                        tu.CreatedByUserId == employeeId);
+                    
+                    var firstUpdate = taskUpdates.OrderBy(tu => tu.CreatedAt).FirstOrDefault();
+
+                    if (firstUpdate != null)
+                    {
+                        var responseTime = (firstUpdate.CreatedAt - task.CreatedAt).TotalHours;
+                        responseTimes.Add(responseTime);
+                        _logger.LogInformation($"    Task {task.Id}: Response time = {responseTime:F2} hours");
+                    }
+                }
+
+                if (responseTimes.Any())
+                {
+                    kpi.ResponseSpeedAvgHours = (decimal)responseTimes.Average();
+                    _logger.LogInformation($"  Average Response Speed: {kpi.ResponseSpeedAvgHours:F2} hours");
+                }
+                else
+                {
+                    _logger.LogInformation($"  No task updates found for response speed calculation");
+                }
+            }
+            else
+            {
+                _logger.LogInformation($"  No tasks found for response speed calculation");
             }
         }
 

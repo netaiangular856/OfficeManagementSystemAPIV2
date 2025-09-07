@@ -24,7 +24,7 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy != null ? $"{src.CreatedBy.FirstName} {src.CreatedBy.LastName}" : ""))
                 .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => System.IO.Path.GetFileNameWithoutExtension(src.StoragePath)))
                 .ForMember(dest => dest.FileExtension, opt => opt.MapFrom(src => System.IO.Path.GetExtension(src.StoragePath)))
-                .ForMember(dest => dest.FileSize, opt => opt.MapFrom(src => GetFileSize(src.StoragePath)));
+               ;
         }
 
         private long GetFileSize(string filePath)

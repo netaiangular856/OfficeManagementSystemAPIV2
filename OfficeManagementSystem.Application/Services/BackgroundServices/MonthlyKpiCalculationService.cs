@@ -14,7 +14,7 @@ namespace OfficeManagementSystem.Application.Services.BackgroundServices
         private readonly ILogger<MonthlyKpiCalculationService> _logger;
         private readonly TimeSpan _checkInterval = TimeSpan.FromHours(1); // Check every hour
         private readonly int _targetDayOfMonth = 1; // Calculate KPIs on the 1st of each month
-        private readonly TimeSpan _targetTime = new TimeSpan(2, 0, 0); // At 2:00 AM
+        private readonly TimeSpan _targetTime = new TimeSpan(14, 0, 0); // At 2:00 AM
 
         public MonthlyKpiCalculationService(
             IServiceProvider serviceProvider,

@@ -22,5 +22,6 @@ namespace OfficeManagementSystem.Domain.Entity.Auth
         public DateTime? UpdatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public bool IsActive { get; set; }
+        //public string? JobTitle { get;set; }
     }
 }

@@ -116,7 +116,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 //    q => q.OrderBy(d => d.Order));
 
                 var departments = await _unitOfWork.DepartmentRepository
-                    .GetAllAsync(filter,orderBy:m => m.OrderByDescending(m => m.Order));
+                    .GetAllAsync(filter,orderBy:m => m.OrderByDescending(m => m.Order),includeProperties: "ManagerUser,Employees");
 
                 var totalCount = departments.Count();
                 var items = departments
@@ -365,7 +365,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var result = departments.Select(d => new DepartmentNameIdDto
                 {
                     Id = d.Id,
-                    Name = d.NameEn // أو d.Name لو عندك حقل واحد
+                    NameAr = d.NameAr, // أو d.Name لو عندك حقل واحد
+                    NameEn = d.NameEn // أو d.Name لو عندك حقل واحد
                 });
 
                 return ApiResponse<IEnumerable<DepartmentNameIdDto>>.SuccessResponse(result);

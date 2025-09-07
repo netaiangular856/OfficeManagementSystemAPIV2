@@ -117,6 +117,13 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Notes { get; set; }
     }
 
+    public class UpdateAttendeeStatusDto
+    {
+        [Required]
+        public RSVP AttendanceStatus { get; set; }
+        public string? Notes { get; set; }
+    }
+
     public class MeetingAttendeeDto
     {
         public int Id { get; set; }

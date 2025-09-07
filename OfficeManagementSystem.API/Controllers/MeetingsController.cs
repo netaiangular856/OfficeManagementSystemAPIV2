@@ -173,6 +173,20 @@ namespace OfficeManagementSystem.API.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// تحديث حالة حضور الاجتماع (RSVP)
+        /// </summary>
+        [HttpPatch("{id}/attendees/{attendeeId}/status")]
+        public async Task<IActionResult> UpdateAttendeeStatus(int id, int attendeeId, [FromBody] UpdateAttendeeStatusDto statusDto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return BadRequest();
+            
+            var result = await _meetingService.UpdateAttendeeStatusAsync(id, attendeeId, statusDto, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         // Meeting Minutes
         /// <summary>
         /// جلب محاضر الاجتماع

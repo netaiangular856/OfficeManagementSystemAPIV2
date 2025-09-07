@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
@@ -12,6 +13,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "admin.index")]
     public class AdminController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
