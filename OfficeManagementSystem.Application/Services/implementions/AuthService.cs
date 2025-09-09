@@ -79,19 +79,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Roles = userRoles.ToList(),
                     LastLoginAt= user.LastLoginAt,
                 };
-                var emaildto = new EmailDTO(
-                    user.Email,
-                  _configuration["EmailSetting:From"],
-                "Login Notification",
-                    EmailStringBodyMS.Send(
-                        $"Dear {user.FirstName +' '+user.LastName ?? user.Email},\n\n" +
-                        $"You have successfully logged into your account on {DateTime.Now:dddd, dd MMMM yyyy hh:mm tt}.\n\n" +
-                        "If this wasn’t you, please secure your account immediately.\n\n" +
-                        "Best regards,\n" +
-                        "Your Support Team"
-                    )
-                    );
-                await emailService.SendEmail(emaildto);
+                //var emaildto = new EmailDTO(
+                //    user.Email,
+                //  _configuration["EmailSetting:From"],
+                //"Login Notification",
+                //    EmailStringBodyMS.Send(
+                //        $"Dear {user.FirstName +' '+user.LastName ?? user.Email},\n\n" +
+                //        $"You have successfully logged into your account on {DateTime.Now:dddd, dd MMMM yyyy hh:mm tt}.\n\n" +
+                //        "If this wasn’t you, please secure your account immediately.\n\n" +
+                //        "Best regards,\n" +
+                //        "Your Support Team"
+                //    )
+                //    );
+                //await emailService.SendEmail(emaildto);
 
                 return ApiResponse<LoginResponseDto>.SuccessResponse(response, "Login successful");
             }
@@ -121,19 +121,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 // Update security stamp to invalidate existing tokens
                 await _userManager.UpdateSecurityStampAsync(user);
 
-                var emaildto = new EmailDTO(
-                user.Email,
-                _configuration["EmailSetting:From"],
-                "Password Change Notification",
-                EmailStringBodyMS.Send(
-                    $"Dear {user.FirstName+' '+user.LastName ?? user.Email},\n\n" +
-                    $"Your account password was successfully changed on {DateTime.Now:dddd, dd MMMM yyyy hh:mm tt}.\n\n" +
-                    "If you did not request this change, please reset your password immediately or contact our support team.\n\n" +
-                    "Best regards,\n" +
-                    "Your Support Team"
-                )
-            );
-                await emailService.SendEmail(emaildto);
+            //    var emaildto = new EmailDTO(
+            //    user.Email,
+            //    _configuration["EmailSetting:From"],
+            //    "Password Change Notification",
+            //    EmailStringBodyMS.Send(
+            //        $"Dear {user.FirstName+' '+user.LastName ?? user.Email},\n\n" +
+            //        $"Your account password was successfully changed on {DateTime.Now:dddd, dd MMMM yyyy hh:mm tt}.\n\n" +
+            //        "If you did not request this change, please reset your password immediately or contact our support team.\n\n" +
+            //        "Best regards,\n" +
+            //        "Your Support Team"
+            //    )
+            //);
+            //    await emailService.SendEmail(emaildto);
 
                 return ApiResponse<bool>.SuccessResponse(true, "Password changed successfully");
             }

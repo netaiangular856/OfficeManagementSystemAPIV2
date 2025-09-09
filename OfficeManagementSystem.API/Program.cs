@@ -49,23 +49,34 @@ namespace OfficeManagementSystem.API
             builder.Services.AddPermissionPolicies(builder.Configuration);
             var app = builder.Build();
 
-            // ======= Swagger UI =======
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Office Management API V1");
+                    options.RoutePrefix = "swagger"; 
+                });
+            }
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Office Management API V1");
-                options.RoutePrefix = string.Empty; // Swagger on root URL
+                options.RoutePrefix = "swagger"; 
             });
 
             // ======= Middleware =======
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseCors("AllowSpecificOrigins");
             app.UseAuthentication();
             app.UseAuthorization();
 
+
             // ======= Map Controllers =======
             app.MapControllers();
+            app.MapFallbackToFile("/index.html");
 
             using (var scope = app.Services.CreateScope())
             {
@@ -73,17 +84,18 @@ namespace OfficeManagementSystem.API
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
-                    
+
                     await context.Database.MigrateAsync();
                     await PermissionSeeder.SeedAsync(context);
                     await RoleSeeder.SeedRoles(services);
-                    
+
                     await SeedEmail.SeedAsync(services);
                     await DepartmentTreeSeeder.SeedAsync(context);
                 }
                 catch (Exception ex)
                 {
                     // Log the exception if needed
+                    Console.WriteLine("Error during seeding: " + ex.Message);
                 }
             }
             app.Run();

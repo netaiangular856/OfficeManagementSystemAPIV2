@@ -20,38 +20,38 @@ namespace OfficeManagementSystem.Application.Services.implementions
         }
         public async Task SendEmail(EmailDTO email)
         {
-            MimeMessage message = new();
+            //MimeMessage message = new();
 
-            message.From.Add(new MailboxAddress("Office Management System", _configuration["EmailSetting:From"]));
-            message.Subject = email.Subject;
-            message.To.Add(new MailboxAddress(email.To, email.To));
-            message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-            {
-                Text = email.Content
-            };
-            using (var smtp = new MailKit.Net.Smtp.SmtpClient())
-            {
-                try
-                {
-                    await smtp.ConnectAsync(_configuration["EmailSetting:Smtp"],
-                        int.Parse(_configuration["EmailSetting:Port"]), true);
+            //message.From.Add(new MailboxAddress("Office Management System", _configuration["EmailSetting:From"]));
+            //message.Subject = email.Subject;
+            //message.To.Add(new MailboxAddress(email.To, email.To));
+            //message.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            //{
+            //    Text = email.Content
+            //};
+            //using (var smtp = new MailKit.Net.Smtp.SmtpClient())
+            //{
+            //    try
+            //    {
+            //        await smtp.ConnectAsync(_configuration["EmailSetting:Smtp"],
+            //            int.Parse(_configuration["EmailSetting:Port"]), true);
 
-                    await smtp.AuthenticateAsync(_configuration["EmailSetting:UserName"],
-                       _configuration["EmailSetting:Password"]);
+            //        await smtp.AuthenticateAsync(_configuration["EmailSetting:UserName"],
+            //           _configuration["EmailSetting:Password"]);
 
-                    await smtp.SendAsync(message);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("EMAIL ERROR: " + ex.Message);
-                    throw new Exception("Failed to send email", ex);
-                }
-                finally
-                {
-                    smtp.Disconnect(true);
-                    smtp.Dispose();
-                }
-            }
+            //        await smtp.SendAsync(message);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine("EMAIL ERROR: " + ex.Message);
+            //        throw new Exception("Failed to send email", ex);
+            //    }
+            //    finally
+            //    {
+            //        smtp.Disconnect(true);
+            //        smtp.Dispose();
+            //    }
+            //}
         }
     }
 }

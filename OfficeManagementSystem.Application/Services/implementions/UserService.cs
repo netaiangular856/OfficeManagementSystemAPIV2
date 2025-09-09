@@ -162,33 +162,33 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .FirstOrDefaultAsync(u => u.Id == user.Id);
 
 
-                var emailBody = $@"
-                <html>
-                  <body style='font-family: Arial, sans-serif;'>
-                    <h2>Welcome to Our System</h2>
-                    <p>Dear {user.FirstName} {user.LastName},</p>
-                    <p>Your account has been created successfully. Below are your login credentials:</p>
+                //var emailBody = $@"
+                //<html>
+                //  <body style='font-family: Arial, sans-serif;'>
+                //    <h2>Welcome to Our System</h2>
+                //    <p>Dear {user.FirstName} {user.LastName},</p>
+                //    <p>Your account has been created successfully. Below are your login credentials:</p>
 
-                    <p><b>Email:</b> {user.Email}</p>
-                    <p><b>Password:</b> {createUserRequest.Password}</p>
+                //    <p><b>Email:</b> {user.Email}</p>
+                //    <p><b>Password:</b> {createUserRequest.Password}</p>
 
-                    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
+                //    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
 
-                    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
+                //    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
 
-                    <br/>
-                    <p>Best Regards,<br/>System Admin</p>
-                  </body>
-                </html>";
+                //    <br/>
+                //    <p>Best Regards,<br/>System Admin</p>
+                //  </body>
+                //</html>";
 
-                var emaildto = new EmailDTO(
-                user.Email,
-                _configuration["EmailSetting:From"],
-                "Your Account Details",
-                emailBody
-                );
+                //var emaildto = new EmailDTO(
+                //user.Email,
+                //_configuration["EmailSetting:From"],
+                //"Your Account Details",
+                //emailBody
+                //);
 
-                await emailService.SendEmail(emaildto);
+                //await emailService.SendEmail(emaildto);
 
                 var userDto = _mapper.Map<UserDto>(createdUser);
                 userDto.Roles = await GetUserRolesAsync(createdUser);

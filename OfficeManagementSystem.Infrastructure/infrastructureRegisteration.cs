@@ -118,6 +118,16 @@ namespace OfficeManagementSystem.Infrastructure
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
+
+            // Configure Identity Options
+            services.Configure<IdentityOptions>(options =>
+            {
+                // إعدادات الـ Lockout
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1); // المدة
+                options.Lockout.MaxFailedAccessAttempts = 10; // المحاولات
+                options.Lockout.AllowedForNewUsers = true;    // مفعّل لليوزرز الجدد
+            });
+
             services.AddAuthentication(op =>
             {
                 op.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

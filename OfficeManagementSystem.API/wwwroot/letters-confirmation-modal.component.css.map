@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;2a9855366ab905f792e9e05977c24df3ba6913752a3f8464fbefe86e20dfe8f1;D:/web/EXSUS/\u062B\u0624\u062E\u0629/Project/echo-office/src/app/components/letters/letters-confirmation-modal/letters-confirmation-modal.component.ts"],
+  "sourcesContent": ["\n    .modal.show {\n      display: block !important;\n    }\n    .modal-backdrop.show {\n      opacity: 0.5;\n    }\n  "],
+  "mappings": ";AACI,CAAC,KAAK,CAAC;AACL,WAAS;AACX;AACA,CAAC,cAAc,CAHR;AAIL,WAAS;AACX;",
+  "names": []
+}

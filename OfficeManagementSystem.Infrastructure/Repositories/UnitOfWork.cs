@@ -32,6 +32,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
         public IGenericRepository<UserNotification> UserNotifications { get; }
 
+
         // Meeting repositories
         public IMeetingRepository MeetingRepository { get; }
         public IGenericRepository<MeetingAttendee> MeetingAttendeeRepository { get; }

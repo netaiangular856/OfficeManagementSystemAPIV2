@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Letters;
@@ -25,11 +26,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager;
 
-        public DashboardService(IUnitOfWork unitOfWork, IMapper mapper)
+        public DashboardService(IUnitOfWork unitOfWork, IMapper mapper,UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -39,12 +42,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = filter.ToDate ?? DateTime.Now;
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+                
 
                 // المهام
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+                    v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
 
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
@@ -53,7 +56,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // الاجتماعات
                 var meetings = await _unitOfWork.MeetingRepository.GetAllAsync(
-                    m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate);
+                    v => ((filter.FromDate == null && v.StartAt >= fromDate) || v.StartAt >= filter.FromDate) && (filter.ToDate == null || v.StartAt <= filter.ToDate));
 
                 var totalMeetings = meetings.Count();
                 var completedMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Done);
@@ -62,17 +65,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // المراسلات
                 var letters = await _unitOfWork.LetterRepository.GetAllAsync(
-                    l => l.CreatedAt >= fromDate && l.CreatedAt <= toDate);
+                    v => ((filter.FromDate == null && v.LetterDate >= fromDate) || v.LetterDate >= filter.FromDate) && (filter.ToDate == null || v.LetterDate <= filter.ToDate));
 
                 var totalLetters = letters.Count();
                 var incomingLetters = letters.Count(l => l.Direction == Domain.Enums.Letters.LetterDirection.In);
                 var outgoingLetters = letters.Count(l => l.Direction == Domain.Enums.Letters.LetterDirection.Out);
 
                 // الموظفين
-                var employees = await _unitOfWork.EmployeeKpiRepository.GetAllAsync();
+                var employeesKpi = await _unitOfWork.EmployeeKpiRepository.GetAllAsync();
+                var employees = _userManager.Users.OfType<Employee>();
+
                 var totalEmployees = employees.Count();
-                var activeEmployees = employees.Count(e => e.Employee?.IsActive == true);
-                var averageKpiScore = employees.Any() ? employees.Average(e => e.Score) : 0;
+                var activeEmployees = employees.Count(e => e.IsActive == true);
+                var averageKpiScore = employeesKpi.Any() ? employeesKpi.Average(e => e.Score) : 0;
 
                 return new SystemOverviewDto
                 {
@@ -110,11 +115,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = filter.ToDate ?? DateTime.Now;
+                var fromDate =  DateTime.Now.AddMonths(-3);
+                
+               
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    t => t.DueDate >= fromDate && t.DueDate <= toDate);
+                    v => ((filter.FromDate == null&& v.DueDate>= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
 
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
@@ -166,11 +172,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         /// </summary>
         public async Task<TasksTrendDto> GetTasksTrendAsync(DashboardDateFilterDto filter)
         {
-            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-            var toDate = filter.ToDate ?? DateTime.Now;
+            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+            
 
             var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                t => t.DueDate >= fromDate && t.DueDate <= toDate);
+                v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
 
             var trendData = new List<TaskTrendDataDto>();
 
@@ -202,11 +208,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         /// </summary>
         public async Task<MeetingsOverviewDto> GetMeetingsOverviewAsync(DashboardDateFilterDto filter)
         {
-            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-            var toDate = filter.ToDate ?? DateTime.Now;
+            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+            
 
             var meetings = await _unitOfWork.MeetingRepository.GetAllAsync(
-                m => m.CreatedAt >= fromDate && m.CreatedAt <= toDate);
+                v => ((filter.FromDate == null && v.StartAt >= fromDate) || v.StartAt >= filter.FromDate) && (filter.ToDate == null || v.StartAt <= filter.ToDate));
 
             var totalMeetings = meetings.Count();
             var completedMeetings = meetings.Count(m => m.Status == Domain.Enums.Meeting.MeetingStatus.Done);
@@ -252,11 +258,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         /// </summary>
         public async Task<LettersOverviewDto> GetLettersOverviewAsync(DashboardDateFilterDto filter)
         {
-            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-            var toDate = filter.ToDate ?? DateTime.Now;
+            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+            
 
             var letters = await _unitOfWork.LetterRepository.GetAllAsync(
-                l => l.CreatedAt >= fromDate && l.CreatedAt <= toDate);
+                v => ((filter.FromDate == null && v.LetterDate >= fromDate) || v.LetterDate >= filter.FromDate) && (filter.ToDate == null || v.LetterDate <= filter.ToDate));
 
             var totalLetters = letters.Count();
             var incomingLetters = letters.Count(l => l.Direction == Domain.Enums.Letters.LetterDirection.In);
@@ -289,11 +295,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         /// </summary>
         public async Task<LettersMonthlyDto> GetLettersMonthlyAsync(DashboardDateFilterDto filter)
         {
-            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-6);
-            var toDate = filter.ToDate ?? DateTime.Now;
+            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+            
 
             var letters = await _unitOfWork.LetterRepository.GetAllAsync(
-                l => l.CreatedAt >= fromDate && l.CreatedAt <= toDate);
+                v => ((filter.FromDate == null && v.LetterDate >= fromDate) || v.LetterDate >= filter.FromDate) && (filter.ToDate == null || v.LetterDate <= filter.ToDate));
 
             var monthlyData = letters
                 .GroupBy(l => new { l.CreatedAt.Year, l.CreatedAt.Month })
@@ -316,7 +322,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         /// </summary>
         public async Task<EmployeeKpiTrendDto> GetEmployeeKpiTrendAsync(DashboardDateFilterDto filter)
         {
-            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
+            var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
             var toDate = filter.ToDate ?? DateTime.Now;
 
             var kpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync();
@@ -345,8 +351,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = filter.ToDate ?? DateTime.Now;
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+                
 
                 // جلب كل الـ KPIs مع تفاصيل الموظفين
                 var allKpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
@@ -359,7 +365,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .ToList();
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+                    v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
 
                 var leaderboard = latestKpis
                     .Select(e => new EmployeeLeaderboardItemDto
@@ -464,11 +470,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = filter.ToDate ?? DateTime.Now;
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+                
 
                 var travels = await _unitOfWork.TravelRepository.GetAllAsync(
-                    t => t.CreatedAt >= fromDate && t.CreatedAt <= toDate);
+                    v => ((filter.FromDate == null && v.StartDate >= fromDate) || v.StartDate >= filter.FromDate) && (filter.ToDate == null || v.StartDate <= filter.ToDate));
 
                 var totalTravels = travels.Count();
                 var completedTravels = travels.Count(t => t.EndDate < DateTime.Now);
