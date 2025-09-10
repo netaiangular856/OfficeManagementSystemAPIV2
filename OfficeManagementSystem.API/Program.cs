@@ -45,8 +45,8 @@ namespace OfficeManagementSystem.API
                     Version = "v1"
                 });
             });
-            // Add Permission Policies ﬁ»· „«  ⁄„· Build
-            builder.Services.AddPermissionPolicies(builder.Configuration);
+            // Add Permission Policies Build
+            //builder.Services.AddPermissionPolicies(builder.Configuration);
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

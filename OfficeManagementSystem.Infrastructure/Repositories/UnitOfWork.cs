@@ -62,6 +62,9 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         
         // Role Permission repository
         public IRolePermissionRepository RolePermissionRepository { get; }
+        
+        // Reminder repository
+        public IReminderRepository ReminderRepository { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -107,6 +110,9 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             
             // Role Permission repository
             RolePermissionRepository = new RolePermissionRepository(_context);
+            
+            // Reminder repository
+            ReminderRepository = new ReminderRepository(_context);
         }
 
         public Task<int> SaveAsync()

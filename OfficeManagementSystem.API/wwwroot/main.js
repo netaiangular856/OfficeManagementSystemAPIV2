@@ -3,7 +3,7 @@ import {
   RouterModule,
   RouterOutlet,
   platformBrowser
-} from "./chunk-IHVPCVXT.js";
+} from "./chunk-EQNMQ4JF.js";
 import {
   Component,
   HTTP_INTERCEPTORS,
@@ -21,7 +21,7 @@ import {
   ɵɵdefineNgModule,
   ɵɵdirectiveInject,
   ɵɵelement
-} from "./chunk-MGTM5SLA.js";
+} from "./chunk-NBW6TLAW.js";
 import "./chunk-EVSPGG2W.js";
 
 // src/app/app.component.ts
@@ -60,15 +60,15 @@ var AppComponent = class _AppComponent {
 var routes = [
   {
     path: "",
-    loadChildren: () => import("./chunk-LZOBJAN7.js").then((m) => m.LayoutModule)
+    loadChildren: () => import("./chunk-ZS4BUL6P.js").then((m) => m.LayoutModule)
   },
   {
     path: "auth",
-    loadChildren: () => import("./chunk-WDNAFZPS.js").then((m) => m.AuthModule)
+    loadChildren: () => import("./chunk-NI4N7UQX.js").then((m) => m.AuthModule)
   },
   {
     path: "**",
-    loadChildren: () => import("./chunk-XYTZKVYU.js").then((m) => m.NotFoundModule)
+    loadChildren: () => import("./chunk-2ZDBO4QJ.js").then((m) => m.NotFoundModule)
   }
 ];
 var AppRoutingModule = class _AppRoutingModule {

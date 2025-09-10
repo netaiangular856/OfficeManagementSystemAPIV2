@@ -9,7 +9,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "employee.index")]
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;

@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "letter.index")]
     public class LettersController : ControllerBase
     {
         private readonly ILetterService _letterService;

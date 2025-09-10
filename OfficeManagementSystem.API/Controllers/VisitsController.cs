@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "visits.index")]
     public class VisitsController : ControllerBase
     {
         private readonly IVisitService _visitService;

@@ -58,6 +58,9 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         
         // Role Permission repository
         IRolePermissionRepository RolePermissionRepository { get; }
+        
+        // Reminder repository
+        IReminderRepository ReminderRepository { get; }
 
         Task<int> SaveAsync();
     }

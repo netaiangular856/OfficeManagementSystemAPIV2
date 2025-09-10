@@ -9,6 +9,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "workFlow.index")]
     public class WorkFlowController : ControllerBase
     {
         private readonly IWorkFlowLogsService _service;

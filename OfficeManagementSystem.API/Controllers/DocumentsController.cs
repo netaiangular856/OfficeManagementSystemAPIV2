@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "documents.index")]
     public class DocumentsController : ControllerBase
     {
         private readonly IDocumentService _documentService;

@@ -22,6 +22,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using OfficeManagementSystem.Application.Services.BackgroundServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OfficeManagementSystem.Infrastructure
 {
@@ -73,6 +74,7 @@ namespace OfficeManagementSystem.Infrastructure
 
             // Background services
             services.AddHostedService<MonthlyKpiCalculationService>();
+            services.AddHostedService<ReminderBackgroundService>();
 
             //WorkFlowLogs
             services.AddScoped<IWorkFlowLogsService, WorkFlowLogsService>();
@@ -80,6 +82,9 @@ namespace OfficeManagementSystem.Infrastructure
             // Permission and Role services
             services.AddScoped<IPermissionService, PermissionService>();
             services.AddScoped<IRoleService, RoleService>();
+            
+            // Reminder services
+            services.AddScoped<IReminderService, ReminderService>();
 
 
 
@@ -101,7 +106,9 @@ namespace OfficeManagementSystem.Infrastructure
             services.AddSingleton<IFileProvider>(
                 new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")));
 
-            
+            services.AddSingleton<IAuthorizationPolicyProvider, DynamicAuthorizationPolicyProvider>();
+
+
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

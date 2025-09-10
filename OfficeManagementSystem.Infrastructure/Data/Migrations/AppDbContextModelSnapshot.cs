@@ -1016,6 +1016,61 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("PartnerContacts", (string)null);
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("EventTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsSent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("ReminderTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsSent");
+
+                    b.HasIndex("ReminderTime");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reminders", (string)null);
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAttachment", b =>
                 {
                     b.Property<int>("Id")
@@ -1646,6 +1701,17 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Partner");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Reminder", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAttachment", b =>

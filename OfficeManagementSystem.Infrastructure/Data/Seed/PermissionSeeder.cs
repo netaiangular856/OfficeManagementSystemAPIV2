@@ -14,10 +14,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
 
         public static async Task SeedAsync(AppDbContext _context)
         {
-            //if (await _context.Permissions.AnyAsync())
-            //{
-            //    return; // Permissions already seeded
-            //}
+            if (await _context.Permissions.AnyAsync())
+            {
+                return; // Permissions already seeded
+            }
             //await _context.Database.ExecuteSqlRawAsync("DELETE FROM Permissions");
 
             var permissions = new List<Permission>
@@ -112,7 +112,12 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
 #endregion   
                 // Tasks Controller Permissions
                 #region
-                new Permission { Name = "index", DisplayName = "Tasks page", Description = "View all tasks", Controller = "tasks", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Permission { Name = "task.index", DisplayName = "Tasks page", Description = "View all tasks", Controller = "tasks", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
+               
+#endregion
+                // Tasks Controller Permissions
+                #region
+                new Permission { Name = "travel.index", DisplayName = "Travels page", Description = "View all travels", Controller = "travels", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
                
 #endregion
             };

@@ -10,7 +10,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "task.index")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;

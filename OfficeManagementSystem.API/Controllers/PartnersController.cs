@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "partners.index")]
     public class PartnersController : ControllerBase
     {
         private readonly IPartnerService _partnerService;

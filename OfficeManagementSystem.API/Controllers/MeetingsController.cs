@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "meeting.index")]
     public class MeetingsController : ControllerBase
     {
         private readonly IMeetingService _meetingService;

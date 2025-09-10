@@ -13,7 +13,7 @@ namespace OfficeManagementSystem.API.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "dashboard.index")]
     public class DashboardController : ControllerBase
     {
         private readonly IDashboardService _dashboardService;

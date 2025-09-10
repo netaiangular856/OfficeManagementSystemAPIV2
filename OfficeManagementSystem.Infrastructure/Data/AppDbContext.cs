@@ -66,6 +66,9 @@ namespace OfficeManagementSystem.Infrastructure.Data
         //Travels
         public virtual DbSet<Travel> Travels { get; set; }
 
+        //Reminders
+        public virtual DbSet<Reminder> Reminders { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

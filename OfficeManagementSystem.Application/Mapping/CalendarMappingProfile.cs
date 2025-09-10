@@ -2,6 +2,7 @@ using AutoMapper;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Tasks;
+using OfficeManagementSystem.Domain.Entity.Visit;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using TaskStatus = OfficeManagementSystem.Domain.Enums.Tasks.TaskStatus;
 
@@ -45,6 +46,43 @@ namespace OfficeManagementSystem.Application.Mapping
                     src.Dept.NameEn))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => (int)src.Priority))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => GetTaskColor(src.Priority, src.Status)))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+
+            // Mapping for Visit to CalendarEventDto
+            CreateMap<Visit, CalendarEventDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Purpose))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.VisitDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.VisitDate.AddHours(2))) // افتراض ساعتين للزيارة
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => EventType.Visit))
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.IsCompleted ? EventStatus.Completed : EventStatus.Scheduled))
+                .ForMember(dest => dest.OrganizerName, opt => opt.MapFrom(src => 
+                    src.CreatedByUser != null ? $"{src.CreatedByUser.FirstName} {src.CreatedByUser.LastName}" : ""))
+                .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => 
+                    src.CreatedByUser != null && src.CreatedByUser.Department != null ? src.CreatedByUser.Department.NameEn : ""))
+                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 2))
+                .ForMember(dest => dest.Color, opt => opt.MapFrom(src => "#9C27B0")) // Purple for visits
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+
+            // Mapping for Travel to CalendarEventDto
+            CreateMap<Travel, CalendarEventDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Purpose))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate))
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(src => EventType.Travel))
+                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.Destination))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => 
+                    src.EndDate < DateTime.UtcNow ? EventStatus.Completed : EventStatus.Scheduled))
+                .ForMember(dest => dest.OrganizerName, opt => opt.MapFrom(src => 
+                    src.CreatedByUser != null ? $"{src.CreatedByUser.FirstName} {src.CreatedByUser.LastName}" : ""))
+                .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => 
+                    src.CreatedByUser != null && src.CreatedByUser.Department != null ? src.CreatedByUser.Department.NameEn : ""))
+                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 3))
+                .ForMember(dest => dest.Color, opt => opt.MapFrom(src => "#FF9800")) // Orange for travel
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
         }
 

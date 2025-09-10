@@ -30,7 +30,9 @@ namespace OfficeManagementSystem.Application.DTOs
     public enum EventType
     {
         Meeting,
-        Task
+        Task,
+        Visit,
+        Travel
     }
 
     /// <summary>

@@ -10,7 +10,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "user.index")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
