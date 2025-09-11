@@ -392,6 +392,7 @@
     "add_new_role": "Add New Role",
     "search_roles": "Search roles...",
     "search": "Search",
+    "save":"Save",
     "clear_search": "Clear search",
     "roles_list": "Roles List",
     "roles": "roles",
@@ -568,6 +569,7 @@
     "workflow": "Workflow",
     "departments": "Departments",
     "calendar": "Calendar",
+    "my_calendar": "My Calendar",
     "settings": "Settings",
     "send_notification": "Send Notification",
     "logout": "Logout",
@@ -605,7 +607,10 @@
     "retry": "Retry",
     "event_types": {
       "meeting": "Meeting",
-      "task": "Task"
+      "task": "Task",
+      "visit": "Visit",
+      "travel": "Travel",
+      "unknown":"Unknown"
     },
     "event_statuses": {
       "scheduled": "Scheduled",
@@ -614,6 +619,36 @@
       "cancelled": "Cancelled",
       "overdue": "Overdue"
     }
+  },
+  "reminders": {
+    "title": "Reminder Management",
+    "add_reminder": "Add Reminder",
+    "edit_reminder": "Edit Reminder",
+    "all_reminders": "All My Reminders",
+    "reminder_title": "Reminder Title",
+    "reminder_description": "Description",
+    "event_time": "Event Time",
+    "reminder_time": "Reminder Time",
+    "title_placeholder": "Enter reminder title",
+    "description_placeholder": "Enter reminder description",
+    "create_success": "Reminder created successfully",
+    "update_success": "Reminder updated successfully",
+    "delete_success": "Reminder deleted successfully",
+    "create_error": "Failed to create reminder",
+    "update_error": "Failed to update reminder",
+    "delete_error": "Failed to delete reminder",
+    "load_error": "Failed to load reminders",
+    "validation_error": "Reminder time must be before event time",
+    "confirm_delete": "Are you sure you want to delete this reminder?",
+    "no_reminders": "No reminders found",
+    "no_reminders_description": "Start by creating your first reminder to stay organized.",
+    "add_first_reminder": "Add First Reminder",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "submit":"Submit",
+    "cancel":"Cancel",
+    "update":"Update"
   },
   "employees": {
     "title": "Employees",
@@ -1486,5 +1521,12 @@
     "back_to_earth": "Back to Earth",
     "go_back": "Go Back",
     "error_number": "404"
+  },
+  "unauthorized": {
+    "title": "Access Denied",
+    "description": "You do not have permission to access this page. Please contact your administrator if you believe this is an error.",
+    "back_to_dashboard": "Back to Dashboard",
+    "go_back": "Go Back",
+    "error_number": "403"
   }
 }

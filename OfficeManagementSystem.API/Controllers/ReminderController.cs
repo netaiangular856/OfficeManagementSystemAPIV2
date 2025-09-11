@@ -140,7 +140,7 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpGet("my-reminders")]
         public async Task<ActionResult<ApiResponse<List<ReminderDto>>>> GetMyReminders()
         {
-            var userId = "65b6b144-5725-4d7b-a74d-8bb348cf1689"; // مؤقت للاختبار
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // مؤقت للاختبار
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest(ApiResponse<List<ReminderDto>>.ErrorResponse("معرف المستخدم غير موجود"));

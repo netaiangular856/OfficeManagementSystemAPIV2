@@ -392,6 +392,7 @@
     "add_new_role": "إضافة دور جديد",
     "search_roles": "البحث في الأدوار...",
     "search": "بحث",
+    "save":"حفظ",
     "clear_search": "مسح البحث",
     "roles_list": "قائمة الأدوار",
     "roles": "أدوار",
@@ -568,6 +569,7 @@
     "documents": "الارشيف",
     "workflow": "سير العمل",
     "calendar": "التقويم",
+    "my_calendar": "تقويمي",
     "settings": "الاعدادات",
     "send_notification": "إرسال الإشعارات",
     "logout": "تسجيل الخروج",
@@ -605,7 +607,10 @@
     "retry": "إعادة المحاولة",
     "event_types": {
       "meeting": "اجتماع",
-      "task": "مهمة"
+      "task": "مهمة",
+      "visit": "زيارة",
+      "travel": "سفر",
+      "unknown":"غير معروف"
     },
     "event_statuses": {
       "scheduled": "مجدول",
@@ -615,6 +620,37 @@
       "overdue": "متأخر"
     }
   },
+    "reminders": {
+      "title": "إدارة التذكيرات",
+      "add_reminder": "إضافة تذكير",
+      "edit_reminder": "تعديل التذكير",
+      "all_reminders": "جميع تذكيراتي",
+      "reminder_title": "عنوان التذكير",
+      "reminder_description": "الوصف",
+      "event_time": "وقت الحدث",
+      "reminder_time": "وقت التذكير",
+      "title_placeholder": "أدخل عنوان التذكير",
+      "description_placeholder": "أدخل وصف التذكير",
+      "create_success": "تم إنشاء التذكير بنجاح",
+      "update_success": "تم تحديث التذكير بنجاح",
+      "delete_success": "تم حذف التذكير بنجاح",
+      "create_error": "فشل في إنشاء التذكير",
+      "update_error": "فشل في تحديث التذكير",
+      "delete_error": "فشل في حذف التذكير",
+      "load_error": "فشل في تحميل التذكيرات",
+      "validation_error": "وقت التذكير يجب أن يكون قبل وقت الحدث",
+      "confirm_delete": "هل أنت متأكد من حذف هذا التذكير؟",
+      "no_reminders": "لا توجد تذكيرات",
+      "no_reminders_description": "ابدأ بإنشاء تذكيرك الأول لتبقى منظمًا.",
+      "add_first_reminder": "إضافة أول تذكير",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "submit":"حفظ",
+      "cancel":"إلغاء",
+      "update":"تحديث"
+
+    },
   "employees": {
     "title": "الموظفين",
     "add_employee": "إضافة موظف",
@@ -1482,5 +1518,12 @@
     "back_to_earth": "العودة إلى الأرض",
     "go_back": "العودة للخلف",
     "error_number": "404"
+  },
+  "unauthorized": {
+    "title": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
+    "description": "ليس لديك صلاحية للوصول إلى هذه الصفحة. يرجى الاتصال بالمدير إذا كنت تعتقد أن هذا خطأ.",
+    "back_to_dashboard": "العودة إلى لوحة التحكم",
+    "go_back": "العودة للخلف",
+    "error_number": "403"
   }
 }
