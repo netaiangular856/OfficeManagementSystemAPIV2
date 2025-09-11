@@ -13,7 +13,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "admin.index")]
+    
     public class AdminController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
@@ -31,6 +31,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Get all permissions with pagination and filtering
         /// </summary>
         [HttpGet("permissions")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> GetPermissions([FromQuery] PermissionQueryDto queryDto)
         {
             try
@@ -48,6 +49,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Get all permissions without pagination (for testing)
         /// </summary>
         [HttpGet("permissions/all")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> GetAllPermissions()
         {
             try
@@ -66,6 +68,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Create a new permission
         /// </summary>
         [HttpPost("permissions")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> CreatePermission([FromBody] CreatePermissionDto createDto)
         {
             try
@@ -83,6 +86,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Update an existing permission
         /// </summary>
         [HttpPut("permissions/{permissionId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> UpdatePermission(int permissionId, [FromBody] UpdatePermissionDto updateDto)
         {
             var result = await _permissionService.UpdateAsync(permissionId, updateDto);
@@ -93,6 +97,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Delete a permission
         /// </summary>
         [HttpDelete("permissions/{permissionId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> DeletePermission(int permissionId)
         {
             var result = await _permissionService.DeleteAsync(permissionId);
@@ -107,6 +112,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Get all roles with pagination
         /// </summary>
         [HttpGet("roles")]
+        
         public async Task<IActionResult> GetRoles([FromQuery] RoleQueryDto queryDto)
         {
             var result = await _roleService.GetAllAsync(queryDto);
@@ -117,6 +123,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Get a specific role by ID
         /// </summary>
         [HttpGet("roles/{roleId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> GetRole(string roleId)
         {
             var result = await _roleService.GetByIdAsync(roleId);
@@ -127,6 +134,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Create a new role
         /// </summary>
         [HttpPost("roles")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> CreateRole([FromBody] CreateRoleDto createDto)
         {
             var result = await _roleService.CreateAsync(createDto);
@@ -137,6 +145,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Update an existing role
         /// </summary>
         [HttpPut("roles/{roleId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> UpdateRole(string roleId, [FromBody] UpdateRoleDto updateDto)
         {
             var result = await _roleService.UpdateAsync(roleId, updateDto);
@@ -147,6 +156,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Delete a role
         /// </summary>
         [HttpDelete("roles/{roleId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> DeleteRole(string roleId)
         {
             var result = await _roleService.DeleteAsync(roleId);
@@ -161,6 +171,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Get permissions for a specific role
         /// </summary>
         [HttpGet("roles/{roleId}/permissions")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> GetRolePermissions(string roleId)
         {
             var result = await _roleService.GetRolePermissionsAsync(roleId);
@@ -171,6 +182,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Assign permissions to a role
         /// </summary>
         [HttpPost("roles/{roleId}/permissions")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> AssignPermissionsToRole(string roleId, [FromBody] AssignPermissionsDto assignDto)
         {
             var result = await _roleService.AssignPermissionsToRoleAsync(roleId, assignDto);
@@ -181,6 +193,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// Remove a specific permission from a role
         /// </summary>
         [HttpDelete("roles/{roleId}/permissions/{permissionId}")]
+        [Authorize(Policy = "admin.index")]
         public async Task<IActionResult> RemovePermissionFromRole(string roleId, int permissionId)
         {
             var result = await _roleService.RemovePermissionFromRoleAsync(roleId, permissionId);

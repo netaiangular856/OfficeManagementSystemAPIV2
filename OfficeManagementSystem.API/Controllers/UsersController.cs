@@ -10,7 +10,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "user.index")]
+    
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -33,6 +33,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<UserDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> GetUsers(
             [FromQuery] string? search,
             [FromQuery] int page = 1,
@@ -72,6 +73,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> GetCurrentUserProfile()
         {
             try
@@ -114,6 +116,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> GetUserById(string userId)
         {
             try
@@ -150,6 +153,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto createUserRequest)
         {
             try
@@ -189,6 +193,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequestDto updateUserRequest)
         {
             try
@@ -231,6 +236,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             try
@@ -270,6 +276,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateUserRoleRequestDto updateRoleRequest)
         {
             try
@@ -314,6 +321,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> UpdateUserStatus(string userId, [FromBody] UpdateUserStatusRequestDto updateStatusRequest)
         {
             try
@@ -357,6 +365,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "user.index")]
         public async Task<IActionResult> UpdateCurrentUserProfile([FromForm] UpdateUserProfileRequestDto updateProfileRequest)
         {
             try
