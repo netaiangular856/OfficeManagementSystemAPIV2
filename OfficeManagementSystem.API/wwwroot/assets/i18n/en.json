@@ -177,6 +177,8 @@
     "employees_description": "Total staff count with average performance score",
     "completion_rate_description": "Overall task completion percentage",
     "completion_rate_description_visits": "Overall visits completion percentage",
+    "status_review":"Review",
+    "status_returned":"Returned",
     "status": {
       "new": "New",
       "in_progress": "In Progress",
@@ -559,17 +561,20 @@
     "users": "Users",
     "roles": "Roles",
     "tasks": "Tasks",
+    "myTasks": "My Tasks",
     "employees": "Employees",
     "partners": "Partners",
     "visits": "Visits",
     "travel": "Travel",
     "meetings": "Meetings",
     "letters": "Letters",
+    "all_letters": "All Letters",
+    "letters_approval": "Letters Approval",
     "documents": "Archives",
     "workflow": "Workflow",
     "departments": "Departments",
     "calendar": "Calendar",
-    "my_calendar": "My Calendar",
+    "my_calendar": "Business Schedule",
     "settings": "Settings",
     "send_notification": "Send Notification",
     "logout": "Logout",
@@ -742,6 +747,7 @@
   },
   "common": {
     "loading": "Loading...",
+    "processing":"Processing",
     "to": "to",
     "filters": "Filters",
     "updating": "Updating...",
@@ -1040,22 +1046,61 @@
     "confidentialities": {
       "0": "Public",
       "1": "Restricted",
-      "2": "Secret"
+      "2": "Secret",
+      "undefined":"Undefined"
     },
     "statuses": {
       "0": "Draft",
-      "1": "Approved",
-      "2": "Sent",
-      "3": "Archived"
+      "1": "Pending Approval",
+      "2": "Approved",
+      "3": "Rejected",
+      "4": "Sent"
     },
     "letter_details": "Letter Details",
     "attachment_details": "Attachment Details",
     "subject_placeholder": "Enter letter subject",
     "body_placeholder": "Enter letter body",
-    "to_placeholder": "Enter recipient",
+    "to_placeholder": "Enter recipient email address",
     "cc_placeholder": "Enter CC recipients",
     "bcc_placeholder": "Enter BCC recipients",
     "reference_numbers_placeholder": "Enter reference numbers",
+    "submit_for_approval": "Submit for Review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "send_email": "Send Email",
+    "email_sent": "Email Sent",
+    "download_pdf": "Download PDF",
+    "letters_pending_approval": "Letters Pending Approval",
+    "approval_workflow": "Approval Workflow",
+    "approve_letter": "Approve Letter",
+    "reject_letter": "Reject Letter",
+    "approval_notes": "Approval Notes",
+    "approval_notes_placeholder": "Enter approval notes (optional)",
+    "approval_notes_help": "Add any additional notes or comments for this approval",
+    "rejection_notes": "Rejection Notes",
+    "draw_signature": "Draw Signature",
+    "clear_signature": "Clear",
+    "upload_signature": "Upload Signature",
+    "signature_pad": "Signature Pad",
+    "signature_required": "Please draw or upload a signature",
+    "invalid_image_format": "Please select a valid image file",
+    "approve_success": "Letter approved successfully",
+    "reject_success": "Letter rejected successfully",
+    "submit_approval_success": "Letter submitted for approval successfully",
+    "send_email_success": "Email sent successfully",
+    "download_pdf_success": "PDF downloaded successfully",
+    "no_pending_letters": "No letters pending approval",
+    "approved_by": "Approved by",
+    "signature": "Signature",
+    "pdf_download": "PDF Download",
+    "approval_status": "Approval Status",
+    "pending_approval": "Pending Approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "resend_email": "Resend Email",
+    "approval_workflow_description": "Manage letter approval workflow and signatures",
+    "no_pdf_available": "No PDF available for this letter",
+    "confirm_send_email": "Are you sure you want to send this letter via email?",
     "attachment_description_placeholder": "Enter attachment description",
     "subject_required": "Subject is required",
     "body_required": "Body is required",
@@ -1249,7 +1294,9 @@
       "inProgress": "In Progress",
       "done": "Done",
       "stopped": "Stopped",
-      "late": "Late"
+      "late": "Late",
+      "returned": "Returned",
+      "review": "Review"
     },
     "priority": {
       "high": "High",
@@ -1274,7 +1321,9 @@
       "noSubtasks": "No subtasks",
       "updatesTimeline": "Updates Timeline",
       "noUpdates": "No updates yet",
-      "noAssignee": "No assignee"
+      "noAssignee": "No assignee",
+      "feedback": "Feedback",
+      "noFeedback": "No feedback provided yet"
     },
     "actions": {
       "view": "View",
@@ -1289,7 +1338,8 @@
       "reassign": "Reassign",
       "bulkStatus": "Bulk Status Update",
       "bulkReassign": "Bulk Reassign",
-      "selectStatus": "Select Status"
+      "selectStatus": "Select Status",
+      "submitFeedback": "Submit Feedback"
     },
     "dialogs": {
       "statusUpdate": "Update Task Status",
@@ -1343,7 +1393,27 @@
     },
     "addAttachment": "Add Attachment",
     "dragDropFiles": "Drag file or browse your device",
-    "browseFiles": "Browse Files"
+    "browseFiles": "Browse Files",
+    "myTasks": {
+      "title": "My Tasks",
+      "subtitle": "Manage your assigned tasks and provide feedback",
+      "form": {
+        "feedbackText": "Feedback",
+        "feedbackPlaceholder": "Enter your feedback about this task...",
+        "feedbackRequired": "Feedback is required",
+        "feedbackMinLength": "Feedback must be at least 10 characters"
+      },
+      "actions": {
+        "submitFeedback": "Submit Feedback"
+      },
+      "dialogs": {
+        "submitFeedback": "Submit Task Feedback",
+        "feedbackSuccess": "Feedback submitted successfully",
+        "feedbackError": "Failed to submit feedback",
+        "bulkReassignSuccess": "Tasks reassigned successfully",
+        "bulkReassignError": "Failed to reassign tasks"
+      }
+    }
   },
   "meetings": {
     "title": "Meetings Management",
@@ -1354,6 +1424,7 @@
     "all_statuses": "All Statuses",
     "from_date": "From Date",
     "to_date": "To Date",
+    "ATTENDEE":"Attendee",
     "clear_filters": "Clear Filters",
     "edit": "Edit",
     "delete": "Delete",
@@ -1443,6 +1514,9 @@
     "no_recommendations": "No recommendations yet",
     "delete_recommendation": "Delete Recommendation",
     "delete_recommendation_confirm": "Are you sure you want to delete this recommendation? This action cannot be undone.",
+    "assign_to_user": "Assign to User",
+    "select_user": "Select User",
+    "assigned_to": "Assigned to",
     "add_minutes": "Add Minutes",
     "edit_minutes": "Edit Minutes",
     "summary_ai": "AI Summary",

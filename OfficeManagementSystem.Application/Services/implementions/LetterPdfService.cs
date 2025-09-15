@@ -6,6 +6,7 @@ using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Enums.Letters;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -17,16 +18,25 @@ namespace OfficeManagementSystem.Application.Services.implementions
             {
                 QuestPDF.Settings.License = LicenseType.Community;
 
+                // تسجيل الخطوط العربية للنتيجة الأرقى
+                // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Regular.ttf");
+                // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Bold.ttf");
+
+                bool IsArabicStart(string s) => !string.IsNullOrWhiteSpace(s) && Regex.IsMatch(s, @"^\s*\p{IsArabic}");
+                string FontFor(bool ar, bool bold = false) =>
+                    ar ? (bold ? "Amiri Bold" : "Amiri") : (bold ? "Arial Bold" : "Arial");
+
+                bool subjectAr = IsArabicStart(letter?.Subject ?? "");
+                bool bodyAr = IsArabicStart(letter?.Body ?? "");
+
                 var fileName = $"Letter_{letter.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 var directory = Path.Combine("wwwroot", "pdfs");
-                
-                // Create directory if it doesn't exist
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-                
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
                 var filePath = Path.Combine(directory, fileName);
+
+                const string Gold = "#D4AF37";
+                const string TextDark = "#2C3E50";
+                const string TextBody = "#34495E";
 
                 var document = Document.Create(container =>
                 {
@@ -35,125 +45,115 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         page.Size(PageSizes.A4);
                         //page.Margin(2.5f, Unit.Centimetre);
                         page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(13));
+                        page.DefaultTextStyle(x => x.FontSize(13).FontFamily("Arial"));
 
-                        // Professional Header
+                        // ===== Header: خلفية ذهبية مع نص في المنتصف =====
                         page.Header()
-                            .Height(120, Unit.Point)
-                            .Background(Colors.White)
-                            .BorderBottom(2, Unit.Point)
-                            .BorderColor("#D4AF37") // Gold border
-                            .Padding(20, Unit.Point)
-                            .Column(col =>
+                            .Background(Gold)
+                            .PaddingTop(10)
+                            .AlignCenter()
+                            .PaddingVertical(10, Unit.Point)
+                            .Text(t =>
                             {
-                                col.Item().AlignCenter()
-                                    .Text("نظام إدارة المكاتب")
-                                    .FontSize(24)
-                                    .FontColor("#D4AF37") // Professional gold
-                                    .Bold()
-                                    .FontFamily("Arial");
+                                t.Span(letter.Subject??"")
+                                 .FontSize(22).Bold().FontColor("#2C3E50")
+                                 .FontFamily(FontFor(true, bold: true));
+                                t.Line("");
                                 
-                                col.Item().PaddingTop(10).AlignCenter()
-                                    .Text("Office Management System")
-                                    .FontSize(10)
-                                    .FontColor("#666666")
-                                    .SemiBold();
                             });
 
+                        // ===== المحتوى الرئيسي =====
                         page.Content()
                             .PaddingVertical(40, Unit.Point)
                             .Column(x =>
                             {
-                                // Subject - Clean and Professional
-                                x.Item().PaddingBottom(35, Unit.Point)
-                                    .Text(letter.Subject)
-                                    .FontSize(20)
-                                    .Bold()
-                                    .FontColor("#2C3E50") // Professional dark blue
-                                    .AlignCenter()
-                                    .FontFamily("Arial");
+                               
 
-                                // Decorative line under subject
-                                x.Item().PaddingBottom(30, Unit.Point)
-                                    .BorderBottom(1, Unit.Point)
-                                    .BorderColor("#D4AF37")
-                                    .PaddingHorizontal(50, Unit.Point);
-
-                                // Body content with professional formatting
-                                x.Item().PaddingBottom(50, Unit.Point)
-                                    .PaddingHorizontal(20, Unit.Point)
-                                    .Text(letter.Body)
-                                    .FontSize(14)
-                                    .FontColor("#34495E") // Professional text color
-                                    .LineHeight(1.9f)
-                                    .AlignRight()
-                                    .FontFamily("Arial");
-
-                                // Professional Signature Section
-                                if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
+                                // النص الرئيسي - محاذاة حسب اللغة
+                                x.Item().PaddingBottom(20).Element(body =>
                                 {
-                                    x.Item().AlignRight()
-                                        .PaddingVertical(20, Unit.Point)
-                                        .PaddingRight(10, Unit.Point)
-                                        .Column(sigCol =>
-                                        {
-                                            // Signature border and background
-                                            sigCol.Item()
-                                                .Background("#ffffff")
-                                                
-                                                .Padding(20, Unit.Point)
-                                                .Column(signatureContent =>
-                                                {
-                                                    // Check if signature image exists and display it
-                                                    var signaturePath = Path.IsPathRooted(letter.SignatureImagePath) 
-                                                        ? letter.SignatureImagePath 
-                                                        : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\'));
-                                                    
-                                                    if (File.Exists(signaturePath))
-                                                    {
-                                                        signatureContent.Item().AlignCenter()
-                                                            .Height(30, Unit.Point)
-                                                            .Width(120, Unit.Point)
-                                                            
-                                                            .Image(signaturePath)
-                                                            .FitArea();
-                                                    }
-                                                    else
-                                                    {
-                                                        signatureContent.Item().AlignCenter()
-                                                            .Text("التوقيع")
-                                                            .FontSize(14)
-                                                            .FontColor("#BDC3C7")
-                                                            .Bold();
-                                                    }
+                                    if (bodyAr)
+                                    {
+                                        body.AlignRight()
+                                            .PaddingHorizontal(15, Unit.Point)
+                                            .Text(t =>
+                                            {
+                                                t.DefaultTextStyle(s => s.LineHeight(2.0f));
+                                                t.Span(letter.Body ?? "")
+                                                 .FontSize(15).FontColor(TextBody)
+                                                 .FontFamily(FontFor(bodyAr));
+                                            });
+                                    }
+                                    else
+                                    {
+                                        body.AlignLeft()
+                                            .PaddingHorizontal(15, Unit.Point)
+                                            .Text(t =>
+                                            {
+                                                t.DefaultTextStyle(s => s.LineHeight(2.0f));
+                                                t.Span(letter.Body ?? "")
+                                                 .FontSize(15).FontColor(TextBody)
+                                                 .FontFamily(FontFor(bodyAr));
+                                            });
+                                    }
+                                });
 
-                                                   
+                            });
 
-                                                });
-                                        });
+                        // ===== Footer: خلفية ذهبية مع ترقيم في المنتصف =====
+                        page.Footer()
+                            .Background(Colors.White)
+                            .PaddingVertical(10)
+                            .PaddingHorizontal(30)
+                            .Element(footer =>
+                            {
+                                if (letter.Status == LetterStatus.Approved)
+                                {
+                                    footer.AlignRight().Width(250)
+                                       .Column(sigCol =>
+                                       {
+                                           sigCol.Spacing(8);
+
+                                           // بلوك التوقيع المحسن
+                                           sigCol.Item()
+                                               .Background("#FFFFFF")
+                                               //.Border(1.5f).BorderColor("#D4AF37")
+                                               .Padding(10)
+                                               .Column(signatureContent =>
+                                               {
+                                                   var signaturePath = !string.IsNullOrEmpty(letter.SignatureImagePath)
+                                                    ? (Path.IsPathRooted(letter.SignatureImagePath)
+                                                        ? letter.SignatureImagePath
+                                                        : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\')))
+                                                    : null;
+
+                                                   if (!string.IsNullOrEmpty(signaturePath) && File.Exists(signaturePath))
+                                                   {
+                                                       signatureContent.Item().AlignRight()
+                                                           .Height(40, Unit.Point)
+                                                           .Width(150, Unit.Point)
+                                                           .Image(signaturePath)
+                                                           .FitArea();
+                                                   }
+                                                   else
+                                                   {
+                                                       signatureContent.Item().AlignCenter()
+                                                           .Text("التوقيع")
+                                                           .FontSize(14).Bold()
+                                                           .FontColor("#D4AF37")
+                                                           .FontFamily(FontFor(true, bold: true));
+                                                   }
+                                               });
+                                           
+                                       });
                                 }
                             });
 
-                        // Professional Footer
-                        page.Footer()
-                            .Height(35, Unit.Point)
-                            .Background("#D4AF37")
-                            .BorderTop(1, Unit.Point)
-                            .BorderColor("#D4AF37")
-                            .AlignCenter()
-                            .PaddingVertical(10, Unit.Point)
-                            .Text(x =>
-                            {
-                                x.Span("صفحة ").FontSize(9).FontColor("#ffffff");
-                                x.CurrentPageNumber().FontSize(9).FontColor("#ffffff");
-                                x.Span(" من ").FontSize(9).FontColor("#ffffff");
-                                x.TotalPages().FontSize(9).FontColor("#ffffff");
-                            });
+                       
                     });
                 });
 
                 document.GeneratePdf(filePath);
-                Console.WriteLine($"تم إنشاء PDF بنجاح: {filePath}");
                 return filePath;
             }
             catch (Exception ex)

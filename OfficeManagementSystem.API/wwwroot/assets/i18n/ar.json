@@ -178,6 +178,8 @@
     "status_late": "متأخر",
     "status_stopped": "متوقف",
     "status_cancelled": "ملغي",
+      "status_review":"قيد المراجعة",
+      "status_returned":"مرتجع",
     "status": {
       "new": "جديد",
       "in_progress": "قيد التقدم",
@@ -559,17 +561,20 @@
     "users": "المستخدمين",
     "roles": "الادوار والصلاحيات",
     "tasks": "المهام",
+    "myTasks": "مهامي",
     "employees": "الموظفين",
     "departments": "الاقسام",
     "partners": "الشركاء",
     "visits": "الزيارات",
     "travel": "السفر",
-    "meetings": "الاجتماعات",
-    "letters": "الرسائل",
-    "documents": "الارشيف",
+      "meetings": "الاجتماعات",
+      "letters": "الرسائل",
+      "all_letters": "جميع الرسائل",
+      "letters_approval": "موافقة الرسائل",
+      "documents": "الارشيف",
     "workflow": "سير العمل",
     "calendar": "التقويم",
-    "my_calendar": "تقويمي",
+    "my_calendar": "جدول الاعمال",
     "settings": "الاعدادات",
     "send_notification": "إرسال الإشعارات",
     "logout": "تسجيل الخروج",
@@ -743,6 +748,7 @@
   },
   "common": {
     "loading": "جاري التحميل...",
+    "processing":"جاري العمل",
     "results": "النتائج",
     "to": "إلى",
     "filters": "الفلترة",
@@ -1032,22 +1038,60 @@
       "1": "مقيد",
       "2": "سري"
     },
-    "statuses": {
-      "0": "مسودة",
-      "1": "معتمد",
-      "2": "مرسل",
-      "3": "مؤرشف"
-    },
+      "statuses": {
+        "0": "مسودة",
+        "1": "في انتظار الاعتماد",
+        "2": "معتمد",
+        "3": "مرفوض",
+        "4": "تم الإرسال"
+      },
     "letter_details": "تفاصيل الرسالة",
     "attachment_details": "تفاصيل المرفق",
     "subject_placeholder": "أدخل موضوع الرسالة",
     "body_placeholder": "أدخل محتوى الرسالة",
-    "to_placeholder": "أدخل المستلم",
-    "cc_placeholder": "أدخل المستلمين في النسخة",
-    "bcc_placeholder": "أدخل المستلمين في النسخة المخفية",
-    "reference_numbers_placeholder": "أدخل أرقام المرجع",
-    "attachment_description_placeholder": "أدخل وصف المرفق",
-    "subject_required": "الموضوع مطلوب",
+      "to_placeholder": "أدخل عنوان البريد الإلكتروني للمستلم",
+      "cc_placeholder": "أدخل المستلمين في النسخة",
+      "bcc_placeholder": "أدخل المستلمين في النسخة المخفية",
+      "reference_numbers_placeholder": "أدخل أرقام المرجع",
+      "submit_for_approval": "إرسال للمراجعة",
+      "approve": "اعتماد",
+      "reject": "رفض",
+      "send_email": "إرسال بريد إلكتروني",
+      "email_sent": "تم إرسال البريد الإلكتروني",
+      "download_pdf": "تحميل PDF",
+      "letters_pending_approval": "رسائل بانتظار المراجعة",
+      "approval_workflow": "سير عمل الموافقة",
+      "approve_letter": "اعتماد الرسالة",
+      "reject_letter": "رفض الرسالة",
+    "approval_notes": "ملاحظات الموافقة",
+    "approval_notes_placeholder": "أدخل ملاحظات الموافقة (اختياري)",
+    "approval_notes_help": "أضف أي ملاحظات أو تعليقات إضافية لهذه الموافقة",
+    "rejection_notes": "ملاحظات الرفض",
+      "draw_signature": "رسم التوقيع",
+      "clear_signature": "مسح",
+      "upload_signature": "رفع التوقيع",
+      "signature_pad": "لوحة التوقيع",
+      "signature_required": "يرجى رسم أو رفع توقيع",
+      "invalid_image_format": "يرجى اختيار ملف صورة صالح",
+      "approve_success": "تم اعتماد الرسالة بنجاح",
+      "reject_success": "تم رفض الرسالة بنجاح",
+      "submit_approval_success": "تم إرسال الرسالة للمراجعة بنجاح",
+      "send_email_success": "تم إرسال البريد الإلكتروني بنجاح",
+      "download_pdf_success": "تم تحميل PDF بنجاح",
+      "no_pending_letters": "لا توجد رسائل بانتظار المراجعة",
+      "approved_by": "معتمد من قبل",
+      "signature": "التوقيع",
+      "pdf_download": "تحميل PDF",
+      "approval_status": "حالة الموافقة",
+      "pending_approval": "بانتظار الموافقة",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "resend_email": "إعادة إرسال البريد الإلكتروني",
+      "approval_workflow_description": "إدارة سير عمل موافقة الرسائل والتوقيعات",
+      "no_pdf_available": "لا يوجد PDF متاح لهذه الرسالة",
+      "confirm_send_email": "هل أنت متأكد من إرسال هذه الرسالة عبر البريد الإلكتروني؟",
+      "attachment_description_placeholder": "أدخل وصف المرفق",
+      "subject_required": "الموضوع مطلوب",
     "body_required": "المحتوى مطلوب",
     "direction_required": "الاتجاه مطلوب",
     "confidentiality_required": "السرية مطلوبة",
@@ -1249,7 +1293,9 @@
       "inProgress": "قيد التقدم",
       "done": "اكتملت",
       "stopped": "متوقفة",
-      "late": "متأخرة"
+      "late": "متأخرة",
+      "returned": "مرتجعة",
+      "review": "قيد المراجعة"
     },
     "priority": {
       "high": "عالية",
@@ -1274,7 +1320,9 @@
       "noSubtasks": "لا يوجد مهام فرعية",
       "updatesTimeline": "جدول التحديثات",
       "noUpdates": "لا توجد تحديثات بعد",
-      "noAssignee": "لا يوجد مسؤول"
+      "noAssignee": "لا يوجد مسؤول",
+      "feedback": "الملاحظات",
+      "noFeedback": "لا يوجد ملاحظات"
     },
     "actions": {
       "view": "عرض",
@@ -1289,7 +1337,8 @@
       "reassign": "إعادة تعيين",
       "bulkStatus": "تحديث الحالة المجمعة",
       "bulkReassign": "إعادة التعيين المجمعة",
-      "selectStatus": "اختر الحالة"
+      "selectStatus": "اختر الحالة",
+      "submitFeedback": "إرسال الملاحظات"
     },
     "dialogs": {
       "statusUpdate": "تحديث حالة المهمة",
@@ -1340,8 +1389,33 @@
       "notePlaceholder": "أدخل ملاحظة لهذا الإجراء",
       "currentStatus": "الحالة الحالية",
       "completedTasksWarning": "بعض المهام المحددة مكتملة أو متوقفة وسيتم تخطيها أثناء التحديث"
+    },
+    "myTasks": {
+      "title": "مهامي",
+      "subtitle": "إدارة المهام المخصصة لك وتقديم الملاحظات",
+      "form": {
+        "feedbackText": "الملاحظات",
+        "feedbackPlaceholder": "أدخل ملاحظاتك حول هذه المهمة...",
+        "feedbackRequired": "الملاحظات مطلوبة",
+        "feedbackMinLength": "يجب أن تكون الملاحظات 10 أحرف على الأقل"
+      },
+      "actions": {
+        "submitFeedback": "إرسال الملاحظات"
+      },
+      "task": {
+        "feedback": "الملاحظات",
+        "noFeedback": "لم يتم تقديم ملاحظات بعد"
+      },
+      "dialogs": {
+        "submitFeedback": "إرسال ملاحظات المهمة",
+        "feedbackSuccess": "تم إرسال الملاحظات بنجاح",
+        "feedbackError": "فشل في إرسال الملاحظات",
+        "bulkReassignSuccess": "تم إعادة تعيين المهام بنجاح",
+        "bulkReassignError": "فشل في إعادة تعيين المهام"
+      }
     }
   },
+
   "meetings": {
     "title": "إدارة الاجتماعات",
     "add_meeting": "إضافة اجتماع",
@@ -1354,6 +1428,7 @@
     "clear_filters": "مسح الفلاتر",
     "edit": "تعديل",
     "delete": "حذف",
+    "ATTENDEE":"الحضور",
     "view_cards": "عرض البطاقات",
     "view_table": "عرض الجدول",
     "title_label": "العنوان",
@@ -1440,6 +1515,9 @@
     "no_recommendations": "لا توجد توصيات بعد",
     "delete_recommendation": "حذف التوصية",
     "delete_recommendation_confirm": "هل أنت متأكد من حذف هذه التوصية؟ لا يمكن التراجع عن هذا الإجراء.",
+    "assign_to_user": "تعيين للمستخدم",
+    "select_user": "اختر المستخدم",
+    "assigned_to": "مُعيّن لـ",
     "add_minutes": "إضافة محضر",
     "edit_minutes": "تعديل المحضر",
     "summary_ai": "ملخص الذكاء الاصطناعي",

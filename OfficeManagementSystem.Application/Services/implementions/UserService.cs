@@ -447,7 +447,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     {
                         Id = m.Id,
                         Name=m.FirstName +" "+m.LastName,
-                        DepartmentName= m.Department != null ? m.Department.NameEn :string.Empty
+                        DepartmentName= m.Department != null ? m.Department.NameAr :string.Empty
                     })
                     .ToListAsync();
 

@@ -3,7 +3,7 @@ using OfficeManagementSystem.Domain.Entity.Letters;
 
 namespace OfficeManagementSystem.Application.Services.Interfaces
 {
-    public interface ILetterEmailService : IEmailService
+    public interface ILetterEmailService 
     {
         Task<bool> SendLetterEmailAsync(SendLetterEmailDto emailDto, string pdfPath, Letter letter);
     }

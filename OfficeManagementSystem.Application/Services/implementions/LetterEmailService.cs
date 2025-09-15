@@ -96,7 +96,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var multipart = new Multipart("mixed");
 
                 // Add email body
-                var emailBody = GenerateDefaultEmailBody(letter);
+                var emailBody = !string.IsNullOrEmpty(emailDto.EmailBody)? GenerateDefaultEmailBody(emailDto.EmailBody): GenerateDefaultEmailBody(letter.Body);
+                
+                    
 
                 var bodyPart = new TextPart(MimeKit.Text.TextFormat.Html)
                 {
@@ -104,7 +106,6 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 };
                 multipart.Add(bodyPart);
 
-                Console.WriteLine($"Email Body Length: {emailBody.Length}");
 
                 // Add PDF attachment
                 if (File.Exists(pdfPath))
@@ -114,13 +115,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         Content = new MimeContent(File.OpenRead(pdfPath)),
                         ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
-                        FileName = $"Letter_{letter.Id}.pdf"
+                        FileName = $"Letter_{letter.Subject}.pdf"
                     };
                     multipart.Add(pdfAttachment);
-                }
-                else
-                {
-                    Console.WriteLine($"ملف PDF غير موجود: {pdfPath}");
                 }
 
                 // Add letter attachments
@@ -183,7 +180,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                                     FileName = letterAttachment.Document.Title + extension
                                 };
                                 multipart.Add(attachment);
-                                Console.WriteLine($"تم إضافة المرفق: {letterAttachment.Document.Title}");
+                                
                             }
                             else
                             {
@@ -231,35 +228,39 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        private string GenerateDefaultEmailBody(Letter letter)
+        private string GenerateDefaultEmailBody(string message)
         {
             return $@"
-                <html>
-                <body dir='rtl' style='font-family: Arial, sans-serif;'>
-                    <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px;'>
-                        <h2 style='color: #d4af37; text-align: center;'>خطاب رسمي</h2>
-                        
-                       
-                        
-                        <div style='margin: 20px 0; padding: 15px; background-color: white; border-radius: 5px;'>
-                            <h3 style='color: #d4af37;'>محتوى الرسالة:</h3>
-                            <p style='line-height: 1.6;'>{letter.Body}</p>
-                        </div>
-                        
-                        <div style='margin-top: 30px; text-align: center; color: #666;'>
-                            <p>تم إرسال هذا الخطاب من نظام إدارة المكاتب</p>
-                            <p>يرجى الاطلاع على المرفق للتفاصيل الكاملة</p>
-                        </div>
-                    </div>
-                </body>
-                </html>";
+    <html dir='auto'>
+    <body style='margin:0; padding:0; background-color:#f4f4f4; font-family: Arial, sans-serif;'>
+        <div style='max-width:650px; margin:40px auto; background:white; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); overflow:hidden;'>
+
+            <!-- Header -->
+            <div style='background:linear-gradient(90deg, #d4af37, #b8952f); padding:20px; text-align:center;'>
+                <h1 style='color:#fff; margin:0; font-size:22px; letter-spacing:1px;'>خطاب رسمي</h1>
+            </div>
+
+            <!-- Body -->
+            <div style='padding:30px; color:#333; line-height:1.8; font-size:15px;' dir='auto'>
+                <p>{message}</p>
+            </div>
+
+            <!-- Footer -->
+            <div style='background-color:#f8f9fa; padding:20px; text-align:center; font-size:13px; color:#666; border-top:1px solid #eee;' dir='auto'>
+                <p style='margin:5px 0;'>تم إرسال هذا الخطاب من <b>نظام إدارة المكاتب</b></p>
+                <p style='margin:5px 0;'>يرجى الاطلاع على المرفق للتفاصيل الكاملة</p>
+            </div>
+        </div>
+    </body>
+    </html>";
         }
 
-        public async Task SendEmail(EmailDTO email)
-        {
-            // يمكن استخدام نفس منطق الإرسال أو استدعاء EmailService الموجود
-            // للآن سنتركه فارغاً كما هو في EmailService
-        }
+
+        //public async Task SendEmail(EmailDTO email)
+        //{
+        //    // يمكن استخدام نفس منطق الإرسال أو استدعاء EmailService الموجود
+        //    // للآن سنتركه فارغاً كما هو في EmailService
+        //}
 
         private bool IsValidEmail(string email)
         {
