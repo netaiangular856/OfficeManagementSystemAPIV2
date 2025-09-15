@@ -12,6 +12,8 @@ namespace OfficeManagementSystem.Domain.Enums.Tasks
         In_Progress,
         Done,
         Stopped,
-        Late
+        Late,
+        returned,
+        Review
     }
 }

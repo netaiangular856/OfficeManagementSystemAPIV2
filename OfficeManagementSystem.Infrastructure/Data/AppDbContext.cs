@@ -54,6 +54,7 @@ namespace OfficeManagementSystem.Infrastructure.Data
         public virtual DbSet<TaskItem> Tasks { get; set; }
         public virtual DbSet<TaskAttachment> TaskAttachments { get; set; }
         public virtual DbSet<TaskUpdate> TaskUpdates { get; set; }
+        public virtual DbSet<TaskFeedback> TaskFeedbacks { get; set; }
 
         //Notifications
         public virtual DbSet<Notification> Notifications { get; set; }

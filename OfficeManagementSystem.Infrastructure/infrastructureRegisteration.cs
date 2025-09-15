@@ -38,6 +38,7 @@ namespace OfficeManagementSystem.Infrastructure
             //services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<OfficeManagementSystem.Application.Services.Interfaces.IEmailService, OfficeManagementSystem.Application.Services.implementions.EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IDepartmentService, DepartmentService>();
@@ -62,6 +63,8 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Letter services
             services.AddScoped<ILetterService, LetterService>();
+            services.AddScoped<ILetterPdfService, LetterPdfService>();
+            services.AddScoped<ILetterEmailService, LetterEmailService>();
             
             // Employee KPI services
             services.AddScoped<IEmployeeKpiService, EmployeeKpiService>();

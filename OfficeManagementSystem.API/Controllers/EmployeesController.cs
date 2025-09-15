@@ -4,12 +4,13 @@ using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Sharing;
+using System.Security.Claims;
 
 namespace OfficeManagementSystem.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = "employee.index")]
+    
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
@@ -34,6 +35,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<PaginatedResult<EmployeeDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> GetEmployees(
             [FromQuery]Params? parameters)
 
@@ -109,6 +111,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(EmployeeDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> GetEmployeeById(string id)
         {
             try
@@ -145,6 +148,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(EmployeeDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto createEmployeeRequest)
         {
             try
@@ -184,6 +188,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> UpdateEmployee(string id, [FromBody] UpdateEmployeeRequestDto updateEmployeeRequest)
         {
             try
@@ -226,6 +231,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> DeleteEmployee(string id)
         {
             try
@@ -265,6 +271,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> UpdateEmployeeRole(string id, [FromBody] UpdateEmployeeRoleRequestDto updateRoleRequest)
         {
             try
@@ -309,6 +316,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> UpdateEmployeeStatus(string id, [FromBody] UpdateEmployeeStatusRequestDto updateStatusRequest)
         {
             try
@@ -352,6 +360,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+
         public async Task<IActionResult> UpdateCurrentEmployeeProfile([FromForm] UpdateEmployeeProfileRequestDto updateProfileRequest)
         {
             try
@@ -472,6 +481,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<RecalculateKpisResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> RecalculateKpis([FromBody] RecalculateKpisRequestDto request)
         {
             try
@@ -482,6 +492,32 @@ namespace OfficeManagementSystem.API.Controllers
                 }
 
                 var result = await _employeeKpiService.RecalculateKpisAsync(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while recalculating KPIs");
+                return StatusCode(500, "Internal server error occurred while recalculating KPIs");
+            }
+        }
+
+
+        [HttpGet("names")]
+        public async Task<IActionResult> Subordinates()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId==null)
+                {
+                    return BadRequest();
+                }
+
+                var result = await _employeeService.GetSubordinatesAsync(userId);
+                if (!result.Success)
+                {
+                    return NotFound(result);
+                }
                 return Ok(result);
             }
             catch (Exception ex)

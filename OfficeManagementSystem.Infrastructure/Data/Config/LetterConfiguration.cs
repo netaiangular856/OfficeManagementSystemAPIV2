@@ -51,7 +51,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             // Indexes
             builder.HasIndex(x => x.Direction);
-            builder.HasIndex(x => x.Confidentiality);
             builder.HasIndex(x => x.CreatedByUserId);
             builder.HasIndex(x => x.CreatedAt);
         }

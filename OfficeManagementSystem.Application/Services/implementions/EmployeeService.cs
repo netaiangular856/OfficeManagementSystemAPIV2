@@ -493,5 +493,25 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return 0;
             }
         }
+
+        public async Task<ApiResponse<IEnumerable<EmployeeNamesDto>>> GetSubordinatesAsync(string managerId)
+        {
+            var Subordinates = await _userManager.Users.OfType<Employee>()
+                    .Where(e => e.ManagerId == managerId)
+                    .Select(m=>new EmployeeNamesDto
+                    {
+                        FullName=m.FirstName+m.LastName,
+                        Email=m.Email,
+                        JobTitle=m.JobTitle,
+                        
+                    })
+                    .ToListAsync();
+
+            if (Subordinates == null)
+            {
+                return ApiResponse<IEnumerable<EmployeeNamesDto>>.ErrorResponse("No Subordinates Employee Found");
+            }
+            return ApiResponse<IEnumerable<EmployeeNamesDto>>.SuccessResponse(Subordinates);
+        }
     }
 }

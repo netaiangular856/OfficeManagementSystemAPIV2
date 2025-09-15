@@ -23,7 +23,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
             if (file == null || file.Length == 0)
                 throw new InvalidOperationException("Invalid file");
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf", ".doc", ".docx" };
+            var allowedExtensions = new[] { 
+                // Images
+                ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp",
+                // Documents
+                ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+                // Text files
+                ".txt", ".csv", ".json", ".xml", ".html", ".css", ".js",
+                // Archives
+                ".zip", ".rar", ".7z",
+                // Media
+                ".mp4", ".avi", ".mov", ".mp3", ".wav"
+            };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))

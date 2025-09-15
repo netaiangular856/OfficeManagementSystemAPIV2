@@ -36,7 +36,8 @@ namespace OfficeManagementSystem.Application.Mapping
             // Recommendation mappings
             CreateMap<CreateRecommendationDto, Recommendation>();
             CreateMap<UpdateRecommendationDto, Recommendation>();
-            CreateMap<Recommendation, RecommendationDto>();
+            CreateMap<Recommendation, RecommendationDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FirstName+" " + src.User.LastName));
 
             // Meeting Attachment mappings
             CreateMap<CreateMeetingAttachmentDto, MeetingAttachment>();

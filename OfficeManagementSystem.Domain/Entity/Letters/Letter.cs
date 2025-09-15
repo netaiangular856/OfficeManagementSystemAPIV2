@@ -1,5 +1,6 @@
 using OfficeManagementSystem.Domain.Enums.Letters;
 using OfficeManagementSystem.Domain.Entity.Auth;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OfficeManagementSystem.Domain.Entity.Letters;
 
@@ -7,23 +8,37 @@ public class Letter
 {
     public int Id { get; set; }
 
-    // معلومات الخطاب
+    // معلومات الخطاب الأساسية
     public LetterDirection Direction { get; set; }
     public string Subject { get; set; } = default!;
-    public string Body { get; set; } = default!;        // نص/HTML
-    public Confidentiality Confidentiality { get; set; } = Confidentiality.Public;
+    public string Body { get; set; } = default!;        // نص الرسالة
+    //public Confidentiality Confidentiality { get; set; } = Confidentiality.Public;
 
-    // المرسل إليهم — بدل جدول Recipients: حقول نصية بسيطة (تفصل بـ ; أو سطر جديد)
-    public string To { get; set; } = default!;          // أسماء/إيميلات المستلمين الأساسيين
+    // المرسل إليهم
+    public string To { get; set; } = default!;          // أسماء المستلمين الأساسيين
     public string? Cc { get; set; }                     // اختياري
     public string? Bcc { get; set; }                    // اختياري
 
 
     public DateTime? LetterDate { get; set; }
-
-
-    // المرجعيات البسيطة (بديل LetterReference): نص حر لو حابب تربط بأرقام خطابات أخرى
     public string? ReferenceNumbers { get; set; }       // مثال: "2025/OUT/123; 2025/IN/77"
+
+    // تنسيق الرسالة
+    //public string? BodyFormatting { get; set; }         // JSON للتنسيق (ألوان، خط، حجم، إلخ)
+                                                        // 
+    // حالة الاعتماد والتوقيع
+    public LetterStatus Status { get; set; } = LetterStatus.Draft;
+    public string? ApprovedByUserId { get; set; }       // من وافق على الرسالة
+    [ForeignKey(nameof(ApprovedByUserId))]
+    public AppUser? ApprovedBy { get; set; }
+    public DateTime? ApprovedAt { get; set; }
+    public string? SignatureImagePath { get; set; }     // مسار صورة التوقيع
+    public string? ApprovalNotes { get; set; }          // ملاحظات الاعتماد
+
+    // إرسال الميل
+    public bool IsEmailSent { get; set; } = false;
+    public DateTime? EmailSentAt { get; set; }
+    public string? PdfPath { get; set; }                // مسار ملف PDF المرسل
 
     // التتبع
     public string CreatedByUserId { get; set; } = default!;

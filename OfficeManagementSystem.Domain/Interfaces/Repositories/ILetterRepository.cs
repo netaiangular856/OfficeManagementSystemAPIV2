@@ -12,7 +12,6 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
             Func<IQueryable<Letter>, IOrderedQueryable<Letter>>? orderBy = null);
         Task<IEnumerable<Letter>> GetByCreatorAsync(string creatorUserId);
         Task<IEnumerable<Letter>> GetByDirectionAsync(LetterDirection direction);
-        Task<IEnumerable<Letter>> GetByConfidentialityAsync(Confidentiality confidentiality);
         Task<IEnumerable<Letter>> GetByDateRangeAsync(DateTime from, DateTime to);
         Task<IEnumerable<Letter>> GetBySubjectAsync(string subject);
         Task<bool> ExistsBySubjectAsync(string subject, int? excludeId = null);

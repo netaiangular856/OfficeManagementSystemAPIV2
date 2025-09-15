@@ -19,6 +19,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .Include(l => l.CreatedBy)
                 .Include(l => l.Attachments)
                     .ThenInclude(a => a.Document)
+                .Include(m=>m.ApprovedBy)
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
 
@@ -59,16 +60,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Letter>> GetByConfidentialityAsync(Confidentiality confidentiality)
-        {
-            return await _dbSet
-                .Include(l => l.CreatedBy)
-                .Include(l => l.Attachments)
-                    .ThenInclude(a => a.Document)
-                .Where(l => l.Confidentiality == confidentiality)
-                .OrderByDescending(l => l.CreatedAt)
-                .ToListAsync();
-        }
+        
 
         public async Task<IEnumerable<Letter>> GetByDateRangeAsync(DateTime from, DateTime to)
         {

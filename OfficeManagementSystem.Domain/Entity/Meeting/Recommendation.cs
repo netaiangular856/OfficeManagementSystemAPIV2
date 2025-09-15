@@ -1,4 +1,5 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Auth;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OfficeManagementSystem.Domain.Entity.Meeting
 {
@@ -8,5 +9,8 @@ namespace OfficeManagementSystem.Domain.Entity.Meeting
         public int MeetingId { get; set; }
         public Meeting Meeting { get; set; } = default!;
         public string Text { get; set; } = default!;
+        public string? AssigneeUserId { get; set; }
+        [ForeignKey(nameof(AssigneeUserId))]
+        public AppUser? User { get; set; }
     }
 }

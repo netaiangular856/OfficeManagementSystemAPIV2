@@ -563,6 +563,15 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApprovalNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApprovedByUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Bcc")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -574,9 +583,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<string>("Cc")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Confidentiality")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -591,12 +597,27 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("EmailSentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsEmailSent")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LetterDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PdfPath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReferenceNumbers")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("SignatureImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -615,7 +636,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Confidentiality");
+                    b.HasIndex("ApprovedByUserId");
 
                     b.HasIndex("CreatedAt");
 
@@ -838,6 +859,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AssigneeUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("MeetingId")
                         .HasColumnType("int");
 
@@ -847,6 +871,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssigneeUserId");
 
                     b.HasIndex("MeetingId");
 
@@ -1092,6 +1118,37 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("TaskItemId");
 
                     b.ToTable("TaskAttachments", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskFeedback", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployeeUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FeedbackText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TaskItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeUserId");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.ToTable("TaskFeedbacks");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
@@ -1564,11 +1621,17 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Letters.Letter", b =>
                 {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "ApprovedBy")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByUserId");
+
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ApprovedBy");
 
                     b.Navigation("CreatedBy");
                 });
@@ -1653,6 +1716,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Meeting.Recommendation", b =>
                 {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("AssigneeUserId");
+
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Meeting.Meeting", "Meeting")
                         .WithMany("Recommendations")
                         .HasForeignKey("MeetingId")
@@ -1660,6 +1727,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Meeting");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.UserNotification", b =>
@@ -1733,9 +1802,28 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Task");
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskFeedback", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", "TaskItem")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("TaskItem");
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
                 {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "Assignee")
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Employee", "Assignee")
                         .WithMany()
                         .HasForeignKey("AssigneeUserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1888,6 +1976,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
                 {
                     b.Navigation("Attachments");
+
+                    b.Navigation("Feedbacks");
 
                     b.Navigation("Updates");
                 });

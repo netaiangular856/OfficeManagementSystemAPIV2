@@ -10,9 +10,11 @@ using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
+using OfficeManagementSystem.Domain.Enums.Letters;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -22,17 +24,23 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
         private readonly IAttachmentFileService _attachmentFileService;
+        private readonly ILetterPdfService _letterPdfService;
+        private readonly ILetterEmailService _letterEmailService;
 
         public LetterService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             UserManager<AppUser> userManager,
-            IAttachmentFileService attachmentFileService)
+            IAttachmentFileService attachmentFileService,
+            ILetterPdfService letterPdfService,
+            ILetterEmailService letterEmailService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _attachmentFileService = attachmentFileService;
+            _letterPdfService = letterPdfService;
+            _letterEmailService = letterEmailService;
         }
 
         public async Task<ApiResponse<LetterDto>> CreateAsync(CreateLetterDto createDto, string userId)
@@ -46,16 +54,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<LetterDto>.ErrorResponse("المستخدم غير موجود");
                 }
 
-                // Check if letter with same subject exists
-                var existsBySubject = await _unitOfWork.LetterRepository.ExistsBySubjectAsync(createDto.Subject);
-                if (existsBySubject)
-                {
-                    return ApiResponse<LetterDto>.ErrorResponse("يوجد خطاب بنفس الموضوع");
-                }
+                
 
                 // Create letter
                 var letter = _mapper.Map<Letter>(createDto);
                 letter.CreatedByUserId = userId;
+                letter.Status = LetterStatus.Draft;
+                
+                //// Serialize formatting to JSON
+                //if (createDto.BodyFormatting != null)
+                //{
+                //    letter.BodyFormatting = JsonConvert.SerializeObject(createDto.BodyFormatting);
+                //}
 
                 await _unitOfWork.LetterRepository.AddAsync(letter);
                 await _unitOfWork.SaveAsync();
@@ -92,11 +102,6 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filter = filter == null ? directionFilter : filter.And(directionFilter);
                 }
 
-                if (queryDto.Confidentiality.HasValue)
-                {
-                    var confidentialityFilter = (Expression<Func<Letter, bool>>)(l => l.Confidentiality == queryDto.Confidentiality.Value);
-                    filter = filter == null ? confidentialityFilter : filter.And(confidentialityFilter);
-                }
 
                 if (queryDto.From.HasValue)
                 {
@@ -112,6 +117,68 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 var letters = await _unitOfWork.LetterRepository.GetAllWithDetailsAsync(
                     filter,
+                    q => q.OrderByDescending(l => l.CreatedAt));
+
+                var totalCount = letters.Count();
+                var items = letters
+                    .Skip((queryDto.PageNumber - 1) * queryDto.PageSize)
+                    .Take(queryDto.PageSize)
+                    .ToList();
+
+                var dtos = _mapper.Map<List<LetterDto>>(items);
+
+                var result = new PaginatedResult<LetterDto>
+                {
+                    TotalCount = totalCount,
+                    Page = queryDto.PageNumber,
+                    PageSize = queryDto.PageSize,
+                    Items = dtos
+                };
+
+                return ApiResponse<PaginatedResult<LetterDto>>.SuccessResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<PaginatedResult<LetterDto>>.ErrorResponse($"خطأ في جلب الخطابات: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto)
+        {
+            try
+            {
+                Expression<Func<Letter, bool>>? filter = l => l.Status == LetterStatus.PendingApproval;
+
+                if (!string.IsNullOrWhiteSpace(queryDto.Search))
+                {
+                    filter = l => l.Subject.Contains(queryDto.Search) ||
+                                 l.Body.Contains(queryDto.Search) ||
+                                 l.To.Contains(queryDto.Search) ||
+                                 (l.ReferenceNumbers != null && l.ReferenceNumbers.Contains(queryDto.Search));
+                }
+
+                if (queryDto.Direction.HasValue)
+                {
+                    var directionFilter = (Expression<Func<Letter, bool>>)(l => l.Direction == queryDto.Direction.Value);
+                    filter = filter == null ? directionFilter : filter.And(directionFilter);
+                }
+
+             
+
+                if (queryDto.From.HasValue)
+                {
+                    var fromFilter = (Expression<Func<Letter, bool>>)(l => l.CreatedAt >= queryDto.From.Value);
+                    filter = filter == null ? fromFilter : filter.And(fromFilter);
+                }
+
+                if (queryDto.To.HasValue)
+                {
+                    var toFilter = (Expression<Func<Letter, bool>>)(l => l.CreatedAt <= queryDto.To.Value);
+                    filter = filter == null ? toFilter : filter.And(toFilter);
+                }
+
+                var letters = await _unitOfWork.LetterRepository.GetAllWithDetailsAsync(
+                     filter,
                     q => q.OrderByDescending(l => l.CreatedAt));
 
                 var totalCount = letters.Count();
@@ -154,6 +221,24 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 return ApiResponse<LetterDto>.ErrorResponse($"خطأ في جلب الخطاب: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<Letter>> GetByIdWithDetailsAsync(int id)
+        {
+            try
+            {
+                var letter = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(id);
+                if (letter == null)
+                {
+                    return ApiResponse<Letter>.ErrorResponse("الخطاب غير موجود");
+                }
+
+                return ApiResponse<Letter>.SuccessResponse(letter);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<Letter>.ErrorResponse($"خطأ في جلب الخطاب: {ex.Message}");
             }
         }
 
@@ -312,5 +397,189 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<bool>.ErrorResponse($"خطأ في حذف المرفق: {ex.Message}");
             }
         }
+
+        // Approval Methods
+        public async Task<ApiResponse<LetterDto>> SubmitForApprovalAsync(int letterId, string userId)
+        {
+            try
+            {
+                var letter = await _unitOfWork.LetterRepository.GetByIdAsync(letterId);
+                if (letter == null)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("الخطاب غير موجود");
+                }
+
+                if (letter.Status != LetterStatus.Draft)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("لا يمكن تقديم هذا الخطاب للاعتماد");
+                }
+
+                letter.Status = LetterStatus.PendingApproval;
+                letter.UpdatedAt = DateTime.UtcNow;
+
+                await _unitOfWork.LetterRepository.UpdateAsync(letter);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(letterId);
+                var dto = _mapper.Map<LetterDto>(result);
+
+                return ApiResponse<LetterDto>.SuccessResponse(dto, "تم تقديم الخطاب للاعتماد بنجاح");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<LetterDto>.ErrorResponse($"خطأ في تقديم الخطاب للاعتماد: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<LetterDto>> ApproveLetterAsync(int letterId, ApproveLetterDto approveDto, string approverUserId)
+        {
+            try
+            {
+                var letter = await _unitOfWork.LetterRepository.GetByIdAsync(letterId);
+                if (letter == null)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("الخطاب غير موجود");
+                }
+
+                if (letter.Status != LetterStatus.PendingApproval)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("هذا الخطاب غير مقدم للاعتماد");
+                }
+
+                // Save signature image
+                var signaturePath = await _attachmentFileService.SaveAttachmentAsync(approveDto.SignatureImage, "Signatures");
+                
+                letter.Status = LetterStatus.Approved;
+                letter.ApprovedByUserId = approverUserId;
+                letter.ApprovedAt = DateTime.UtcNow;
+                letter.SignatureImagePath = signaturePath;
+                letter.ApprovalNotes = approveDto.ApprovalNotes;
+                letter.UpdatedAt = DateTime.UtcNow;
+
+                await _unitOfWork.LetterRepository.UpdateAsync(letter);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(letterId);
+                var dto = _mapper.Map<LetterDto>(result);
+
+                return ApiResponse<LetterDto>.SuccessResponse(dto, "تم اعتماد الخطاب بنجاح");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<LetterDto>.ErrorResponse($"خطأ في اعتماد الخطاب: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<LetterDto>> RejectLetterAsync(int letterId, RejectLetterDto rejectDto, string rejectorUserId)
+        {
+            try
+            {
+                var letter = await _unitOfWork.LetterRepository.GetByIdAsync(letterId);
+                if (letter == null)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("الخطاب غير موجود");
+                }
+
+                if (letter.Status != LetterStatus.PendingApproval)
+                {
+                    return ApiResponse<LetterDto>.ErrorResponse("هذا الخطاب غير مقدم للاعتماد");
+                }
+
+                letter.Status = LetterStatus.Rejected;
+                letter.ApprovedByUserId = rejectorUserId;
+                letter.ApprovedAt = DateTime.UtcNow;
+                letter.ApprovalNotes = rejectDto.RejectionReason;
+                letter.UpdatedAt = DateTime.UtcNow;
+
+                await _unitOfWork.LetterRepository.UpdateAsync(letter);
+                await _unitOfWork.SaveAsync();
+
+                var result = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(letterId);
+                var dto = _mapper.Map<LetterDto>(result);
+
+                return ApiResponse<LetterDto>.SuccessResponse(dto, "تم رفض الخطاب");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<LetterDto>.ErrorResponse($"خطأ في رفض الخطاب: {ex.Message}");
+            }
+        }
+
+        // Email Sending Methods
+        public async Task<ApiResponse<LetterEmailStatusDto>> SendLetterEmailAsync(int letterId, SendLetterEmailDto emailDto, string senderUserId)
+        {
+            try
+            {
+               
+                
+                var letter = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(letterId);
+                if (letter == null)
+                {
+                   
+                    return ApiResponse<LetterEmailStatusDto>.ErrorResponse("الخطاب غير موجود");
+                }
+
+                
+                //if (letter.Attachments != null && letter.Attachments.Any())
+                //{
+                //    foreach (var attachment in letter.Attachments)
+                //    {
+                //        Console.WriteLine($"- مرفق: {attachment.Document?.Title}, المسار: {attachment.Document?.StoragePath}");
+                //    }
+                //}
+
+                
+
+                if (letter.Status != LetterStatus.Approved)
+                {
+                    
+                    return ApiResponse<LetterEmailStatusDto>.ErrorResponse("يجب اعتماد الخطاب قبل الإرسال");
+                }
+
+                // Generate PDF with signature
+                
+                var pdfPath = await _letterPdfService.GenerateLetterPdfAsync(letter);
+               
+                
+                // Send email with PDF attachment
+               
+                var emailSent = await _letterEmailService.SendLetterEmailAsync(emailDto, pdfPath, letter);
+               
+                
+                if (emailSent)
+                {
+                    // Update letter status
+                    letter.Status = LetterStatus.Sent;
+                    letter.IsEmailSent = true;
+                    letter.EmailSentAt = DateTime.UtcNow;
+                    letter.PdfPath = pdfPath;
+                    letter.UpdatedAt = DateTime.UtcNow;
+
+                    await _unitOfWork.LetterRepository.UpdateAsync(letter);
+                    await _unitOfWork.SaveAsync();
+
+                    var statusDto = new LetterEmailStatusDto
+                    {
+                        IsEmailSent = true,
+                        EmailSentAt = letter.EmailSentAt,
+                        PdfPath = letter.PdfPath
+                    };
+
+                    return ApiResponse<LetterEmailStatusDto>.SuccessResponse(statusDto, "تم إرسال الخطاب بنجاح");
+                }
+                else
+                {
+                    
+                    return ApiResponse<LetterEmailStatusDto>.ErrorResponse("فشل في إرسال الميل");
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                return ApiResponse<LetterEmailStatusDto>.ErrorResponse($"خطأ في إرسال الخطاب: {ex.Message}");
+            }
+        }
+
+
     }
 }

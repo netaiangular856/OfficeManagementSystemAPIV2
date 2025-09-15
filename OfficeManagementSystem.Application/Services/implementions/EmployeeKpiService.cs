@@ -483,8 +483,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             // Response speed (15% weight)
             // Normalize response speed (lower is better, max 24 hours = 100%)
-            var responseSpeedScore = Math.Max(0, 24 - kpi.ResponseSpeedAvgHours) / 24;
-            score += responseSpeedScore * 15;
+            // Response speed (15%) — فقط لو في Tasks في الفترة
+            if (kpi.TasksAssigned > 0)
+            {
+                // Normalize response speed (lower is better, max 24 hours = 100%)
+                var responseSpeedScore = Math.Max(0, 24 - kpi.ResponseSpeedAvgHours) / 24m;
+                score += responseSpeedScore * 15;
+            }
 
             return Math.Round(score, 2);
         }

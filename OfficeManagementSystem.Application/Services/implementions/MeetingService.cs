@@ -719,13 +719,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var meeting = await _unitOfWork.MeetingRepository.GetByIdWithDetailsAsync(meetingId);
-                if (meeting == null)
+                var Recommendations = await _unitOfWork.RecommendationRepository
+                    .GetAllAsync(m=>m.MeetingId==meetingId,
+                    includeProperties: "User");
+                if (Recommendations == null)
                 {
                     return ApiResponse<List<RecommendationDto>>.ErrorResponse("الاجتماع غير موجود");
                 }
 
-                var dtos = _mapper.Map<List<RecommendationDto>>(meeting.Recommendations);
+                var dtos = _mapper.Map<List<RecommendationDto>>(Recommendations);
                 return ApiResponse<List<RecommendationDto>>.SuccessResponse(dtos);
             }
             catch (Exception ex)
@@ -746,6 +748,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 var recommendation = _mapper.Map<Recommendation>(recommendationDto);
                 recommendation.MeetingId = meetingId;
+                
 
                 var worklog = new WorkflowLog
                 {
@@ -782,7 +785,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 _mapper.Map(recommendationDto, recommendation);
-                // 📝 Log
+                //  Log
                 var worklog = new WorkflowLog
                 {
                     EntityName = "Recommendation",

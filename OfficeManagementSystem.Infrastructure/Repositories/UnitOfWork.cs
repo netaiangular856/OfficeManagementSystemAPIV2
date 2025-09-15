@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity;
+using OfficeManagementSystem.Domain.Entity.Tasks;
 
 namespace OfficeManagementSystem.Infrastructure.Repositories
 {
@@ -25,12 +26,14 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public ITaskRepository TaskRepository { get; }
         public ITaskUpdateRepository TaskUpdateRepository { get; }
         public ITaskAttachmentRepository TaskAttachmentRepository { get; }
+        public ITaskFeedbackRepository TaskFeedbackRepository { get; }
 
         public IDocumentRepository DocumentRepository { get; }
 
         public INotificationRepository NotificationRepository { get; }
 
         public IGenericRepository<UserNotification> UserNotifications { get; }
+
 
 
         // Meeting repositories
@@ -113,6 +116,8 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             
             // Reminder repository
             ReminderRepository = new ReminderRepository(_context);
+
+            TaskFeedbackRepository= new TaskFeedbackRepository(_context);
         }
 
         public Task<int> SaveAsync()

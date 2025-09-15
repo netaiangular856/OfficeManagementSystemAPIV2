@@ -16,9 +16,7 @@ namespace OfficeManagementSystem.Application.DTOs
         
         [MaxLength(2000)]
         public string? Description { get; set; }
-        
-        public int? DeptId { get; set; }
-        
+          
         public string? AssigneeUserId { get; set; }
         
         [Required]
@@ -42,7 +40,7 @@ namespace OfficeManagementSystem.Application.DTOs
         [MaxLength(2000)]
         public string? Description { get; set; }
         
-        public int? DeptId { get; set; }
+        
         
         public string? AssigneeUserId { get; set; }
         
@@ -162,5 +160,23 @@ namespace OfficeManagementSystem.Application.DTOs
         
         [MaxLength(2000)]
         public string? Note { get; set; }
+    }
+
+    public class CreateTaskFeedbackDto
+    {
+        //public int TaskItemId { get; set; }          
+        public string FeedbackText { get; set; } = default!;
+    }
+    public class TaskFeedbackDto
+    {
+        public int Id { get; set; }
+        public int TaskItemId { get; set; }
+
+        public string EmployeeUserId { get; set; } = default!;
+        public string EmployeeName { get; set; } = default!; // ÚÔÇä ÊÚÑÖ ÇÓã ÇáãæÙÝ
+
+        public string FeedbackText { get; set; } = default!;
+
+        public DateTime CreatedAt { get; set; }
     }
 }

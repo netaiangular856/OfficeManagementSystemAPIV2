@@ -10,7 +10,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "task.index")]
+    //[Authorize(Policy = "task.index")]
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _taskService;
@@ -49,11 +49,32 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetTasks([FromQuery] TaskFilterDto filter)
         {
-            var result = await _taskService.GetTasksAsync(filter);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(userId == null)
+            {
+                return BadRequest();
+            }
+            var result = await _taskService.GetTasksAsync(userId,filter);
             
             if (!result.Success)
                 return BadRequest(result);
                 
+            return Ok(result);
+        }
+
+        [HttpGet("employee-tasks")]
+        public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetEmployeeTasks([FromQuery] TaskFilterDto filter)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return BadRequest();
+            }
+            var result = await _taskService.GetEmployeeTaskAsync(userId, filter);
+
+            if (!result.Success)
+                return BadRequest(result);
+
             return Ok(result);
         }
 
@@ -196,5 +217,31 @@ namespace OfficeManagementSystem.API.Controllers
                 
             return Ok(result);
         }
+
+        [HttpGet("{id}/feedback")]
+        public async Task<ActionResult<ApiResponse<List<TaskUpdateDto>>>> GetTaskFeedbacks(int id)
+        {
+            var result = await _taskService.GetTaskFeedbackAsync(id);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/feedback")]
+        public async Task<ActionResult<ApiResponse<TaskUpdateDto>>> CreateTaskFeedback(int id,[FromBody] CreateTaskFeedbackDto createFeedbackDto)
+        {
+            var currentUserId = GetCurrentUserId();
+            var result = await _taskService.CreateTaskFeedbackAsync(id, createFeedbackDto, currentUserId);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return CreatedAtAction(nameof(GetTaskFeedbacks), new { id }, result);
+        }
+
+
+
     }
 }

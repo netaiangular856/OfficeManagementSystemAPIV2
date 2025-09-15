@@ -34,6 +34,14 @@ namespace OfficeManagementSystem.Application.Mapping
             CreateMap<CreateTaskUpdateDto, TaskUpdate>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
+            CreateMap<TaskFeedback, TaskFeedbackDto>()
+                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.FirstName + " " + src.Employee.LastName : null));
+
+
+
+            CreateMap<CreateTaskFeedbackDto, TaskFeedback>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
             // Task Attachment mappings
             CreateMap<TaskAttachment, TaskAttachmentDto>();
         }

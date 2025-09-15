@@ -18,7 +18,7 @@ namespace OfficeManagementSystem.Domain.Entity.Tasks
         public int? DeptId { get; set; }
         public Department Dept { get; set; } = default!;
         public string? AssigneeUserId { get; set; } = default!;
-        public AppUser Assignee { get; set; } = default!;
+        public Employee Assignee { get; set; } = default!;
         public TaskPriority Priority { get; set; }
         public DateTime DueDate { get; set; }
         public TaskStatus Status { get; set; }
@@ -31,5 +31,6 @@ namespace OfficeManagementSystem.Domain.Entity.Tasks
 
         public ICollection<TaskUpdate> Updates { get; set; } = new List<TaskUpdate>();
         public ICollection<TaskAttachment> Attachments { get; set; } = new List<TaskAttachment>();
+        public ICollection<TaskFeedback> Feedbacks { get; set; } = new List<TaskFeedback>();
     }
 }

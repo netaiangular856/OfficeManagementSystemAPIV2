@@ -23,6 +23,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                     .ThenInclude(a => a.Document)
                 .Include(m => m.Minutes)
                 .Include(m => m.Recommendations)
+                    .ThenInclude(m=>m.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
@@ -37,7 +38,8 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .Include(m => m.Attachments)
                     .ThenInclude(a => a.Document)
                 .Include(m => m.Minutes)
-                .Include(m => m.Recommendations);
+                .Include(m => m.Recommendations)
+                    .ThenInclude(m=>m.User);
 
             if (filter != null)
                 query = query.Where(filter);

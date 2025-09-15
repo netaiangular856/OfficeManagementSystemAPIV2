@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using OfficeManagementSystem.Domain.Entity.Partners;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity;
+using OfficeManagementSystem.Domain.Entity.Tasks;
 
 namespace OfficeManagementSystem.Domain.Interfaces.Repositories
 {
@@ -61,6 +62,8 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         
         // Reminder repository
         IReminderRepository ReminderRepository { get; }
+
+        ITaskFeedbackRepository TaskFeedbackRepository { get; }
 
         Task<int> SaveAsync();
     }

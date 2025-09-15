@@ -171,6 +171,7 @@ namespace OfficeManagementSystem.Application.DTOs
         [Required]
         [MaxLength(1000)]
         public string Text { get; set; } = string.Empty;
+        public string? AssigneeUserId { get; set; }
     }
 
     public class UpdateRecommendationDto
@@ -178,6 +179,7 @@ namespace OfficeManagementSystem.Application.DTOs
         [Required]
         [MaxLength(1000)]
         public string Text { get; set; } = string.Empty;
+        public string? AssigneeUserId { get; set; }
     }
 
     public class RecommendationDto
@@ -185,6 +187,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public int Id { get; set; }
         public int MeetingId { get; set; }
         public string Text { get; set; } = string.Empty;
+        public string? AssigneeUserId { get; set; }
+        public string? FullName { get; set; }
     }
 
     // Meeting Attachment DTOs

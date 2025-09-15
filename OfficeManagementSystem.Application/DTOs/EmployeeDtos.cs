@@ -113,4 +113,10 @@ namespace OfficeManagementSystem.Application.DTOs
         public List<string> Roles { get; set; } = new();
         public int SubordinatesCount { get; set; }
     }
+    public record EmployeeNamesDto
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string JobTitle { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+    }
 }
