@@ -102,54 +102,64 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                         // ===== Footer: خلفية ذهبية مع ترقيم في المنتصف =====
                         page.Footer()
-                            .Background(Colors.White)
-                            .PaddingVertical(10)
-                            .PaddingHorizontal(30)
-                            .Element(footer =>
-                            {
-                                if (letter.Status == LetterStatus.Approved)
-                                {
-                                    footer.AlignRight().Width(250)
-                                       .Column(sigCol =>
-                                       {
-                                           sigCol.Spacing(8);
+     .Background(Colors.White)
+     //.PaddingVertical(10)
+     //.PaddingHorizontal(30)
+     .Element(footer =>
+     {
+         if (letter.Status == LetterStatus.Approved)
+         {
+             footer.Column(col =>
+             {
+                 // التوقيع على اليمين (زي ما هو)
+                 col.Item().AlignRight().Width(250)
+                     .Column(sigCol =>
+                     {
+                         sigCol.Spacing(8);
 
-                                           // بلوك التوقيع المحسن
-                                           sigCol.Item()
-                                               .Background("#FFFFFF")
-                                               //.Border(1.5f).BorderColor("#D4AF37")
-                                               .Padding(10)
-                                               .Column(signatureContent =>
-                                               {
-                                                   var signaturePath = !string.IsNullOrEmpty(letter.SignatureImagePath)
-                                                    ? (Path.IsPathRooted(letter.SignatureImagePath)
-                                                        ? letter.SignatureImagePath
-                                                        : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\')))
-                                                    : null;
+                         sigCol.Item()
+                             .Background("#FFFFFF")
+                             .Padding(10)
+                             .Column(signatureContent =>
+                             {
+                                 var signaturePath = !string.IsNullOrEmpty(letter.SignatureImagePath)
+                                     ? (Path.IsPathRooted(letter.SignatureImagePath)
+                                         ? letter.SignatureImagePath
+                                         : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\')))
+                                     : null;
 
-                                                   if (!string.IsNullOrEmpty(signaturePath) && File.Exists(signaturePath))
-                                                   {
-                                                       signatureContent.Item().AlignRight()
-                                                           .Height(40, Unit.Point)
-                                                           .Width(150, Unit.Point)
-                                                           .Image(signaturePath)
-                                                           .FitArea();
-                                                   }
-                                                   else
-                                                   {
-                                                       signatureContent.Item().AlignCenter()
-                                                           .Text("التوقيع")
-                                                           .FontSize(14).Bold()
-                                                           .FontColor("#D4AF37")
-                                                           .FontFamily(FontFor(true, bold: true));
-                                                   }
-                                               });
-                                           
-                                       });
-                                }
-                            });
+                                 if (!string.IsNullOrEmpty(signaturePath) && File.Exists(signaturePath))
+                                 {
+                                     signatureContent.Item().AlignRight()
+                                         .Height(40, Unit.Point)
+                                         .Width(150, Unit.Point)
+                                         .Image(signaturePath)
+                                         .FitArea();
+                                 }
+                                 else
+                                 {
+                                     signatureContent.Item().AlignCenter()
+                                         .Text("التوقيع")
+                                         .FontSize(14).Bold()
+                                         .FontColor("#D4AF37")
+                                         .FontFamily(FontFor(true, bold: true));
+                                 }
+                             });
+                     });
 
-                       
+                 // خط أفقي بعرض الصفحة تحت التوقيع
+                 col.Item()
+                    //.PaddingTop(10)
+                    .Height(40, Unit.Point)              // ارتفاع بسيط علشان يرسم الحد
+                    .Background("#D4AF37")
+                    .BorderTop(10, Unit.Point)
+                    .BorderColor("#D4AF37");
+             });
+         }
+     });
+
+
+
                     });
                 });
 

@@ -167,6 +167,62 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
+        public async Task<TasksOverviewDto> GetTasksOverviewForManagerAsync(DashboardDateFilterDto filter,string userId)
+        {
+            try
+            {
+                var fromDate = DateTime.Now.AddMonths(-3);
+
+
+
+                var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
+                    v => v.Assignee.ManagerId==userId &&( ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate)));
+
+                var totalTasks = tasks.Count();
+                var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
+                var pendingTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.New || t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress);
+                var overdueTasks = tasks.Count(t => t.DueDate < DateTime.Now && t.Status != Domain.Enums.Tasks.TaskStatus.Done);
+
+                // توزيع الحالة
+                var statusDistribution = tasks
+                    .GroupBy(t => t.Status)
+                    .Select(g => new TaskStatusDistributionDto
+                    {
+                        Status = g.Key.ToString(),
+                        Count = g.Count(),
+                        Percentage = totalTasks > 0 ? (double)g.Count() / totalTasks * 100 : 0
+                    })
+                    .ToList();
+
+                // توزيع الأولوية
+                var priorityDistribution = tasks
+                    .GroupBy(t => t.Priority)
+                    .Select(g => new TaskPriorityDistributionDto
+                    {
+                        Priority = g.Key.ToString(),
+                        Count = g.Count(),
+                        Percentage = totalTasks > 0 ? (double)g.Count() / totalTasks * 100 : 0
+                    })
+                    .ToList();
+
+                return new TasksOverviewDto
+                {
+                    TotalTasks = totalTasks,
+                    CompletedTasks = completedTasks,
+                    PendingTasks = pendingTasks,
+                    OverdueTasks = overdueTasks,
+                    CompletionRate = totalTasks > 0 ? (double)completedTasks / totalTasks * 100 : 0,
+                    StatusDistribution = statusDistribution,
+                    PriorityDistribution = priorityDistribution
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TasksOverview Error: {ex}");
+                throw;
+            }
+        }
+
         /// <summary>
         /// الحصول على اتجاه المهام
         /// </summary>

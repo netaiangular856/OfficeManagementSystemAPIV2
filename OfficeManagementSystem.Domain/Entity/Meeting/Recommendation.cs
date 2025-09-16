@@ -12,5 +12,8 @@ namespace OfficeManagementSystem.Domain.Entity.Meeting
         public string? AssigneeUserId { get; set; }
         [ForeignKey(nameof(AssigneeUserId))]
         public AppUser? User { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DueDate { get; set; }
     }
 }

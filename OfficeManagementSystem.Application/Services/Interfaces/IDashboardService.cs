@@ -59,5 +59,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         /// الحصول على ملخص السفريات
         /// </summary>
         Task<TravelsOverviewDto> GetTravelsOverviewAsync(DashboardDateFilterDto filter);
+        Task<TasksOverviewDto> GetTasksOverviewForManagerAsync(DashboardDateFilterDto filter, string userId);
     }
 }

@@ -4,6 +4,7 @@ using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.API.Controllers
@@ -73,6 +74,34 @@ namespace OfficeManagementSystem.API.Controllers
                 };
 
                 var result = await _dashboardService.GetTasksOverviewAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "حدث خطأ أثناء جلب ملخص المهام", error = ex.Message });
+            }
+        }
+
+        [HttpGet("tasks/manager-overview")]
+        public async Task<ActionResult<TasksOverviewDto>> GetTasksManagerOverview(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var filter = new DashboardDateFilterDto
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate
+                };
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if(userId == null)
+                {
+                    return NotFound();
+                }
+
+                var result = await _dashboardService.GetTasksOverviewForManagerAsync(filter, userId);
                 return Ok(result);
             }
             catch (Exception ex)
