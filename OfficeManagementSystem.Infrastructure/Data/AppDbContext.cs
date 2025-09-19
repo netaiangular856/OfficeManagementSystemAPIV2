@@ -66,6 +66,7 @@ namespace OfficeManagementSystem.Infrastructure.Data
 
         //Travels
         public virtual DbSet<Travel> Travels { get; set; }
+        public virtual DbSet<TravelResult> TravelResults { get; set; }
 
         //Reminders
         public virtual DbSet<Reminder> Reminders { get; set; }

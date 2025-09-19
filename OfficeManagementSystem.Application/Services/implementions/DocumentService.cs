@@ -246,11 +246,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var document = await _unitOfWork.DocumentRepository.GetByIdAsync(id);
+                var document = await _unitOfWork.MeetingAttachmentRepository.GetByIdAsync(id);
                 if (document == null)
                     return ApiResponse<byte[]>.ErrorResponse("المستند غير موجود");
 
-                var filePath = Path.Combine(_env.WebRootPath, document.StoragePath);
+                var filePath = Path.Combine(_env.WebRootPath, document.Document.StoragePath);
                 // تأكد إن document.StoragePath بيكون نسبي (مثلاً: "uploads/file.pdf")
 
                 if (!System.IO.File.Exists(filePath))

@@ -5,10 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Visit;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -48,6 +51,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 // Create travel
                 var travel = _mapper.Map<Travel>(createDto);
                 travel.CreatedBy = userId;
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Travel",
+                    EntityId = travel.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"New travel added '{travel.Title}",
+                    UserId = travel.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TravelRepository.AddAsync(travel);
                 await _unitOfWork.SaveAsync();
@@ -155,6 +168,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 _mapper.Map(updateDto, travel);
                 travel.UpdatedAt = DateTime.UtcNow;
 
+                
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Travel",
+                    EntityId = travel.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Update travel '{travel.Title}",
+                    UserId = travel.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
                 await _unitOfWork.TravelRepository.UpdateAsync(travel);
                 await _unitOfWork.SaveAsync();
 
@@ -178,6 +201,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("السفر غير موجود");
                 }
+
+                
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Travel",
+                    EntityId = travel.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Delete travel '{travel.Title}",
+                    UserId = travel.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TravelRepository.DeleteAsync(id);
                 await _unitOfWork.SaveAsync();

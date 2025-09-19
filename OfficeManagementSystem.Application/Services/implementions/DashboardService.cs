@@ -497,7 +497,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         Month = $"{g.Key.Year}-{g.Key.Month:D2}",
                         TotalVisits = g.Count(),
                         CompletedVisits = g.Count(v =>  v.IsCompleted==true),
-                        UpcomingVisits = g.Count(v => v.VisitDate >= DateTime.Now)
+                        UpcomingVisits = g.Count(v => v.VisitDate >= DateTime.Now && v.IsCompleted==false)
                     })
                     .ToList();
 

@@ -215,6 +215,14 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Description { get; set; }
         public DateTime UploadedAt { get; set; }
         public DocumentSource? DocumentSource { get; set; }
+        public int DocumentId { get; set; }
+    }
+
+    public class FileDownloadDto
+    {
+        public byte[] FileBytes { get; set; } = Array.Empty<byte>();
+        public string ContentType { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
     }
 
 

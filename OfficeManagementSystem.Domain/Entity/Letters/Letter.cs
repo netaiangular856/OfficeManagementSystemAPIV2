@@ -1,6 +1,7 @@
 using OfficeManagementSystem.Domain.Enums.Letters;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using System.ComponentModel.DataAnnotations.Schema;
+using OfficeManagementSystem.Domain.Enums.Meeting;
 
 namespace OfficeManagementSystem.Domain.Entity.Letters;
 
@@ -15,7 +16,11 @@ public class Letter
     //public Confidentiality Confidentiality { get; set; } = Confidentiality.Public;
 
     // المرسل إليهم
-    public string To { get; set; } = default!;          // أسماء المستلمين الأساسيين
+    public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
+
+    public string? UserId { get; set; }
+    public AppUser? User { get; set; }
+    public string? To { get; set; } = default!;          // أسماء المستلمين الأساسيين
     public string? Cc { get; set; }                     // اختياري
     public string? Bcc { get; set; }                    // اختياري
 

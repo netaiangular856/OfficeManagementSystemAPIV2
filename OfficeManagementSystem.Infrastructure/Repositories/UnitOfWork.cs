@@ -49,6 +49,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
         // Travel repositories
         public ITravelRepository TravelRepository { get; }
+        public ITravelResultRepository TravelResultRepository { get; }
 
         //Partner
         public IPartnerRepository PartnerRepository { get; }
@@ -93,6 +94,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
             // Travel repositories
             TravelRepository = new TravelRepository(_context);
+            TravelResultRepository = new TravelResultRepository(_context);
 
             // Partner repositories
             PartnerRepository = new PartnerRepository(_context);

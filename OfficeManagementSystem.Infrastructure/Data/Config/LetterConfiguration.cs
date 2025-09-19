@@ -21,7 +21,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .IsRequired();
 
             builder.Property(x => x.To)
-                .IsRequired()
                 .HasMaxLength(2000);
 
             builder.Property(x => x.Cc)

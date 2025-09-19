@@ -603,6 +603,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<bool>("IsEmailSent")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("LetterDate")
                         .HasColumnType("datetime2");
 
@@ -625,7 +628,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("To")
-                        .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
@@ -633,6 +635,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -643,6 +648,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Direction");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Letters", (string)null);
                 });
@@ -1296,6 +1303,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Purpose")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)");
@@ -1319,6 +1329,34 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.ToTable("Travels");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Achievements")
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TravelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TravelId");
+
+                    b.ToTable("TravelResults");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
@@ -1637,9 +1675,15 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("ApprovedBy");
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Letters.LetterAttachment", b =>
@@ -1878,6 +1922,17 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasForeignKey("CreatedByUserId");
 
                     b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelResult", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Visit.Travel", "Travel")
+                        .WithMany()
+                        .HasForeignKey("TravelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Travel");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>

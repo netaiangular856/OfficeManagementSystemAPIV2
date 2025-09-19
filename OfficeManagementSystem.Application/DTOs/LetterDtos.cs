@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using OfficeManagementSystem.Domain.Enums;
 using Newtonsoft.Json;
+using OfficeManagementSystem.Domain.Enums.Meeting;
 
 namespace OfficeManagementSystem.Application.DTOs
 {
@@ -20,7 +21,7 @@ namespace OfficeManagementSystem.Application.DTOs
     //    public bool IsUnderline { get; set; } = false;
     //}
 
-    // Main Letter DTOs
+    // Main Letter DTOs 
     public class CreateLetterDto
     {
         [Required]
@@ -34,9 +35,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string Body { get; set; } = string.Empty;
 
 
-        [Required]
         [MaxLength(1000)]
-        public string To { get; set; } = string.Empty;
+        public string? To { get; set; } = string.Empty;
 
         [MaxLength(1000)]
         public string? Cc { get; set; }
@@ -46,8 +46,11 @@ namespace OfficeManagementSystem.Application.DTOs
 
         public DateTime? LetterDate { get; set; }
 
-        [MaxLength(500)]
-        public string? ReferenceNumbers { get; set; }
+        //[MaxLength(500)]
+        //public string? ReferenceNumbers { get; set; }
+        public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
+
+        public string? UserId { get; set; }
 
         // تنسيق الرسالة
         //public TextFormattingDto? BodyFormatting { get; set; }
@@ -66,9 +69,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string Body { get; set; } = string.Empty;
 
 
-        [Required]
         [MaxLength(1000)]
-        public string To { get; set; } = string.Empty;
+        public string? To { get; set; } = string.Empty;
 
         [MaxLength(1000)]
         public string? Cc { get; set; }
@@ -78,8 +80,11 @@ namespace OfficeManagementSystem.Application.DTOs
 
         public DateTime? LetterDate { get; set; }
 
-        [MaxLength(500)]
-        public string? ReferenceNumbers { get; set; }
+        //[MaxLength(500)]
+        //public string? ReferenceNumbers { get; set; }
+        public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
+
+        public string? UserId { get; set; }
 
         // تنسيق الرسالة
         //public TextFormattingDto? BodyFormatting { get; set; }
@@ -91,7 +96,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public LetterDirection Direction { get; set; }
         public string Subject { get; set; } = string.Empty;
         public string Body { get; set; } = string.Empty;
-        public string To { get; set; } = string.Empty;
+        public string? To { get; set; } = string.Empty;
         public string? Cc { get; set; }
         public string? Bcc { get; set; }
         public DateTime? LetterDate { get; set; }
@@ -118,6 +123,9 @@ namespace OfficeManagementSystem.Application.DTOs
         public string CreatedByName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public AttendeeKind Kind { get; set; } = AttendeeKind.Internal;
+
+        public string? UserId { get; set; }
         public List<LetterAttachmentDto> Attachments { get; set; } = new();
     }
 

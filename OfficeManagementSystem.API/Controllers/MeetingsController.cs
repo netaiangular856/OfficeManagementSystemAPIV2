@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeManagementSystem.Application.DTOs;
+using OfficeManagementSystem.Application.DTOs.Common;
+using OfficeManagementSystem.Application.Services.implementions;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using System.Security.Claims;
 
@@ -267,5 +269,21 @@ namespace OfficeManagementSystem.API.Controllers
             var result = await _meetingService.RemoveRecommendationAsync(recId,userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        /// <summary>
+        /// تحميل مستند الاجتماع
+        /// </summary>
+        [HttpGet("{meetingId}/attachments/{attachmentId}/download")]
+        public async Task<IActionResult> DownloadAttachment(int meetingId, int attachmentId)
+        {
+            var result = await _meetingService.DownloadAttachmentAsync(meetingId, attachmentId);
+            if (result.Success)
+            {
+                return File(result.Data.FileBytes, result.Data.ContentType, result.Data.FileName);
+            }
+            return NotFound(result);
+        }
+
+        
     }
 }

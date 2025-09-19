@@ -26,6 +26,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             return await _dbSet.FindAsync(id);
         }
 
+
         public async Task<IEnumerable<T>> GetAllAsync(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
@@ -48,6 +49,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
             return orderBy != null ? await orderBy(query).ToListAsync() : await query.ToListAsync();
         }
+
 
         public async Task<T> AddAsync(T entity)
         {

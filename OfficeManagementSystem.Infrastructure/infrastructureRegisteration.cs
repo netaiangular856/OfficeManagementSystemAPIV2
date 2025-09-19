@@ -54,6 +54,7 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Travel services
             services.AddScoped<ITravelService, TravelService>();
+            services.AddScoped<ITravelResultService, TravelResultService>();
             
             // Document services
             services.AddScoped<IDocumentService, DocumentService>();

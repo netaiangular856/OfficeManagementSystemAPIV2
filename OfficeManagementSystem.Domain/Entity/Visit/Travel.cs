@@ -26,7 +26,7 @@ namespace OfficeManagementSystem.Domain.Entity.Visit
 
         public string? TransportMode { get; set; } // وسيلة السفر (طيران، قطار، سيارة..)
         public string? Accommodation { get; set; } // مكان الإقامة (فندق/شقة...)
-
+        public bool IsCompleted { get; set; } = false;
 
         public string? CreatedBy { get; set; }
         public AppUser? CreatedByUser { get; set; }

@@ -17,6 +17,8 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         Task<ApiResponse<List<MeetingAttachmentDto>>> GetAttachmentsAsync(int meetingId);
         Task<ApiResponse<MeetingAttachmentDto>> AddAttachmentAsync(int meetingId, CreateMeetingAttachmentDto attachmentDto,string userId);
         Task<ApiResponse<bool>> RemoveAttachmentAsync(int meetingId, int attachmentId,string userId);
+        Task<ApiResponse<FileDownloadDto>> DownloadAttachmentAsync(int meetingId, int attachmentId);
+
 
         // Meeting Attendees
         Task<ApiResponse<List<MeetingAttendeeDto>>> GetAttendeesAsync(int meetingId);

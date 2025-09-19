@@ -1,4 +1,4 @@
-  {
+{
   "login": {
     "welcome_back": "Good to have you again 👋",
     "login_hint": "Please fill in the information to log in!",
@@ -177,8 +177,8 @@
     "employees_description": "Total staff count with average performance score",
     "completion_rate_description": "Overall task completion percentage",
     "completion_rate_description_visits": "Overall visits completion percentage",
-    "status_review":"Review",
-    "status_returned":"Returned",
+    "status_review": "Review",
+    "status_returned": "Returned",
     "status": {
       "new": "New",
       "in_progress": "In Progress",
@@ -286,6 +286,10 @@
       "external": "External",
       "unknown": "Unknown"
     },
+    "select_user": "Select User",
+    "select_user_placeholder": "Choose a user...",
+    "department_auto_filled": "Department will be auto-filled when user is selected",
+    "job_title_optional": "Job title is optional for internal participants",
     "add_success_title": "Visit Added Successfully",
     "add_success_message": "The visit has been added successfully.",
     "edit_success_title": "Visit Updated Successfully",
@@ -394,7 +398,7 @@
     "add_new_role": "Add New Role",
     "search_roles": "Search roles...",
     "search": "Search",
-    "save":"Save",
+    "save": "Save",
     "clear_search": "Clear search",
     "roles_list": "Roles List",
     "roles": "roles",
@@ -495,14 +499,14 @@
     "inactive": "Inactive",
     "save_changes": "Save Changes",
     "saving": "Saving...",
-    "permissions_count":"Permissions",
+    "permissions_count": "Permissions",
     "assign_permissions": "Assign Permissions",
-     "permissions_assigned_success": "Permissions assigned successfully",
-      "select_all": "Select All",
-      "deselect_all": "Deselect All",
-      "loading_permissions": "Loading permissions...",
-      "add_new_permission": "Add New Permission",
-      "currently_assigned": "Currently Assigned"
+    "permissions_assigned_success": "Permissions assigned successfully",
+    "select_all": "Select All",
+    "deselect_all": "Deselect All",
+    "loading_permissions": "Loading permissions...",
+    "add_new_permission": "Add New Permission",
+    "currently_assigned": "Currently Assigned"
   },
   "departments": {
     "title": "Departments",
@@ -588,6 +592,7 @@
     "week": "Week",
     "day": "Day",
     "today": "Today",
+    "events": "Events",
     "search_placeholder": "Search events...",
     "all_types": "All Types",
     "all_statuses": "All Statuses",
@@ -615,7 +620,7 @@
       "task": "Task",
       "visit": "Visit",
       "travel": "Travel",
-      "unknown":"Unknown"
+      "unknown": "Unknown"
     },
     "event_statuses": {
       "scheduled": "Scheduled",
@@ -651,9 +656,9 @@
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
-    "submit":"Submit",
-    "cancel":"Cancel",
-    "update":"Update"
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "update": "Update"
   },
   "employees": {
     "title": "Employees",
@@ -747,7 +752,7 @@
   },
   "common": {
     "loading": "Loading...",
-    "processing":"Processing",
+    "processing": "Processing",
     "to": "to",
     "filters": "Filters",
     "updating": "Updating...",
@@ -995,6 +1000,7 @@
   "letters": {
     "title": "Letters",
     "subtitle": "Manage and track all incoming and outgoing letters",
+    "all_letters": "All Letters",
     "add_letter": "Add Letter",
     "edit_letter": "Edit Letter",
     "delete_letter": "Delete Letter",
@@ -1009,6 +1015,10 @@
     "subject": "Subject",
     "body": "Body",
     "direction": "Direction",
+    "letter_type": "Letter Type",
+    "letter_type_required": "Please select a letter type",
+    "internal_user": "Internal User",
+    "select_user": "Select User",
     "confidentiality": "Confidentiality",
     "to": "To",
     "cc": "CC",
@@ -1043,11 +1053,15 @@
       "0": "Incoming",
       "1": "Outgoing"
     },
+    "letter_types": {
+      "0": "Internal",
+      "1": "External"
+    },
     "confidentialities": {
       "0": "Public",
       "1": "Restricted",
       "2": "Secret",
-      "undefined":"Undefined"
+      "undefined": "Undefined"
     },
     "statuses": {
       "0": "Draft",
@@ -1144,6 +1158,25 @@
     "document_source_3": "Confidential",
     "per_page": "per page",
     "created_by": "Created by"
+  },
+  "letter_details": {
+    "title": "Letter Details",
+    "loading": "Loading letter details...",
+    "error_loading": "Error Loading Details",
+    "try_again_later": "Please try again later",
+    "content": "Content",
+    "recipient_info": "Recipient Information",
+    "letter_info": "Letter Information",
+    "email_info": "Email Information",
+    "system_info": "System Information",
+    "letter_id": "Letter ID",
+    "approved_at": "Approved At",
+    "email_sent_at": "Email Sent At",
+    "pdf_path": "PDF Path",
+    "signature": "Signature",
+    "view_details": "View Details",
+    "created_at": "Created At",
+    "updated_at": "Updated At"
   },
   "documents": {
     "title": "Archive and Documentation",
@@ -1394,6 +1427,8 @@
     "addAttachment": "Add Attachment",
     "dragDropFiles": "Drag file or browse your device",
     "browseFiles": "Browse Files",
+    "managerView": "Manager View",
+    "managerViewDescription": "Showing task statistics for all your employees",
     "myTasks": {
       "title": "My Tasks",
       "subtitle": "Manage your assigned tasks and provide feedback",
@@ -1423,8 +1458,9 @@
     "status_filter": "Status Filter",
     "all_statuses": "All Statuses",
     "from_date": "From Date",
+    "due_date": "Due Date",
     "to_date": "To Date",
-    "ATTENDEE":"Attendee",
+    "ATTENDEE": "Attendee",
     "clear_filters": "Clear Filters",
     "edit": "Edit",
     "delete": "Delete",

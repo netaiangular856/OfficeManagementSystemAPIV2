@@ -1,5 +1,6 @@
 using AutoMapper;
 using LinqKit;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -30,6 +31,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly IAttachmentFileService _attachmentFileService;
+        private readonly IWebHostEnvironment _env;
 
         public MeetingService(
             IUnitOfWork unitOfWork,
@@ -38,7 +40,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             ISendNotificationService notificationService,
             IEmailService emailService,
             IConfiguration configuration,
-            IAttachmentFileService attachmentFileService)
+            IAttachmentFileService attachmentFileService,
+            IWebHostEnvironment env)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -47,6 +50,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _emailService = emailService;
             _configuration = configuration;
             _attachmentFileService = attachmentFileService;
+            _env = env;
         }
 
         public async Task<ApiResponse<MeetingDto>> CreateAsync(CreateMeetingDto createDto, string organizerUserId)
@@ -387,6 +391,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     UploadedAt = document.CreatedAt,
                     Description = document.Description,
                     DocumentSource=document.DocumentSource,
+                    DocumentId=document.Id,
                 };
 
                 return ApiResponse<MeetingAttachmentDto>.SuccessResponse(dto, "تم إضافة المرفق بنجاح");
@@ -423,6 +428,46 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 return ApiResponse<bool>.ErrorResponse($"خطأ في حذف المرفق: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<FileDownloadDto>> DownloadAttachmentAsync(int meetingId, int attachmentId)
+        {
+            try
+            {
+                var attachment = await _unitOfWork.MeetingAttachmentRepository.GetByIdAsync(attachmentId);
+                if (attachment == null || attachment.MeetingId != meetingId)
+                {
+                    return ApiResponse<FileDownloadDto>.ErrorResponse("المرفق غير موجود");
+                }
+
+                var document = await _unitOfWork.DocumentRepository.GetByIdAsync(attachment.DocumentId);
+                if (document == null)
+                {
+                    return ApiResponse<FileDownloadDto>.ErrorResponse("المستند غير موجود");
+                }
+
+                var filePath = Path.Combine(_env.WebRootPath, document.StoragePath);
+                if (!System.IO.File.Exists(filePath))
+                {
+                    return ApiResponse<FileDownloadDto>.ErrorResponse("الملف غير موجود على الخادم");
+                }
+
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                var contentType = GetContentType(Path.GetExtension(document.StoragePath));
+
+                var downloadDto = new FileDownloadDto
+                {
+                    FileBytes = fileBytes,
+                    ContentType = contentType,
+                    FileName = document.Title + Path.GetExtension(document.StoragePath)
+                };
+
+                return ApiResponse<FileDownloadDto>.SuccessResponse(downloadDto, "تم تحميل الملف بنجاح");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<FileDownloadDto>.ErrorResponse($"خطأ في تحميل الملف: {ex.Message}");
             }
         }
 
@@ -842,7 +887,30 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
+        
+
         // Private helper methods
+        private string GetContentType(string fileExtension)
+        {
+            return fileExtension.ToLowerInvariant() switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".txt" => "text/plain",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".zip" => "application/zip",
+                ".rar" => "application/x-rar-compressed",
+                _ => "application/octet-stream"
+            };
+        }
+
         private async Task SendMeetingInvitationsAsync(Meeting meeting)
         {
             try

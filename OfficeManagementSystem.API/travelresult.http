@@ -1,0 +1,44 @@
+### TravelResult API Endpoints
+
+### 1. Create Travel Result
+POST {{baseUrl}}/api/TravelResult
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "travelId": 1,
+  "achievements": "تم إنجاز جميع المهام المطلوبة بنجاح:\n- الحصول على جميع الوثائق المطلوبة\n- إتمام الاجتماعات المخطط لها\n- تحقيق الأهداف المرجوة من السفر"
+}
+
+### 2. Get Travel Results by Travel ID (مطلوب - travelId)
+GET {{baseUrl}}/api/TravelResult?travelId=1&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 3. Get Travel Results with Search
+GET {{baseUrl}}/api/TravelResult?travelId=1&search=إنجاز&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 4. Get Travel Results by Date Range
+GET {{baseUrl}}/api/TravelResult?travelId=1&from=2024-01-01&to=2024-12-31&pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 5. Get Travel Result by ID
+GET {{baseUrl}}/api/TravelResult/1
+Authorization: Bearer {{token}}
+
+### 6. Update Travel Result
+PUT {{baseUrl}}/api/TravelResult/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "achievements": "تم إنجاز جميع المهام المطلوبة بنجاح مع تحديثات إضافية:\n- الحصول على جميع الوثائق المطلوبة\n- إتمام الاجتماعات المخطط لها\n- تحقيق الأهداف المرجوة من السفر\n- إضافة مهام جديدة تم إنجازها"
+}
+
+### 7. Delete Travel Result
+DELETE {{baseUrl}}/api/TravelResult/1
+Authorization: Bearer {{token}}
+
+### Variables (set these in your environment or at the top of the file)
+@baseUrl = https://localhost:7000
+@token = your_jwt_token_here

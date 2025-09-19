@@ -39,6 +39,7 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         
         // Travel repositories
         ITravelRepository TravelRepository { get; }
+        ITravelResultRepository TravelResultRepository { get; }
         
         // Partner repositories
         IPartnerRepository PartnerRepository { get; }

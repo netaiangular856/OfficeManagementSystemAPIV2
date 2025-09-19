@@ -15,6 +15,9 @@ using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using OfficeManagementSystem.Domain.Enums.Meeting;
+using Org.BouncyCastle.Asn1;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -60,7 +63,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var letter = _mapper.Map<Letter>(createDto);
                 letter.CreatedByUserId = userId;
                 letter.Status = LetterStatus.Draft;
-                
+                if (letter.Kind==AttendeeKind.Internal&& createDto.UserId!=null)
+                {
+                    var recever = await _userManager.FindByIdAsync(createDto.UserId);
+                    if (recever == null)
+                    {
+                        return ApiResponse<LetterDto>.ErrorResponse("المستخدم غير موجود");
+                    }
+                    letter.To = recever.Email;
+                }
+                letter.ReferenceNumbers =await GenerateLetterNumberAsync();
                 //// Serialize formatting to JSON
                 //if (createDto.BodyFormatting != null)
                 //{
@@ -100,6 +112,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     var directionFilter = (Expression<Func<Letter, bool>>)(l => l.Direction == queryDto.Direction.Value);
                     filter = filter == null ? directionFilter : filter.And(directionFilter);
+                }
+                if (queryDto.Status.HasValue)
+                {
+                    var statusFilter = (Expression<Func<Letter, bool>>)(l => l.Status == queryDto.Status);
+                    filter = filter == null ? statusFilter : filter.And(statusFilter);
                 }
 
 
@@ -261,6 +278,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 _mapper.Map(updateDto, letter);
                 letter.UpdatedAt = DateTime.UtcNow;
+                if (letter.Kind == AttendeeKind.Internal && updateDto.UserId != null)
+                {
+                    var recever = await _userManager.FindByIdAsync(updateDto.UserId);
+                    if (recever == null)
+                    {
+                        return ApiResponse<LetterDto>.ErrorResponse("المستخدم غير موجود");
+                    }
+                    letter.To = recever.Email;
+                }
+                letter.ReferenceNumbers = await GenerateLetterNumberAsync();
 
                 await _unitOfWork.LetterRepository.UpdateAsync(letter);
                 await _unitOfWork.SaveAsync();
@@ -578,6 +605,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 
                 return ApiResponse<LetterEmailStatusDto>.ErrorResponse($"خطأ في إرسال الخطاب: {ex.Message}");
             }
+        }
+
+        private async Task<string> GenerateLetterNumberAsync()
+        {
+            var year = DateTime.Now.Year;
+            var month = DateTime.Now.Month;
+            var random = new Random();
+            var randomNumber = random.Next(100000, 999999);
+
+            return $"LET-{year}-{month}-{randomNumber}";
         }
 
 

@@ -7,11 +7,23 @@ using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Enums.Letters;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Identity;
+using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
     public class LetterPdfService : ILetterPdfService
     {
+        private readonly UserManager<AppUser> _userManager;
+
+        public LetterPdfService(UserManager<AppUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         public async Task<string> GenerateLetterPdfAsync(Letter letter)
         {
             try
@@ -21,15 +33,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 // تسجيل الخطوط العربية للنتيجة الأرقى
                 // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Regular.ttf");
                 // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Bold.ttf");
+                var userSignature = await _userManager.Users.OfType<Employee>()
+                    .FirstOrDefaultAsync(m=>m.Id==letter.ApprovedByUserId);
 
                 bool IsArabicStart(string s) => !string.IsNullOrWhiteSpace(s) && Regex.IsMatch(s, @"^\s*\p{IsArabic}");
                 string FontFor(bool ar, bool bold = false) =>
                     ar ? (bold ? "Amiri Bold" : "Amiri") : (bold ? "Arial Bold" : "Arial");
 
-                bool subjectAr = IsArabicStart(letter?.Subject ?? "");
-                bool bodyAr = IsArabicStart(letter?.Body ?? "");
+                bool isAr = IsArabicText(letter?.Subject ?? "");
+                //bool bodyAr = IsArabicText(letter?.Body ?? "");
 
-                var fileName = $"Letter_{letter.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var fileName = $"Letter_{letter.Subject}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 var directory = Path.Combine("wwwroot", "pdfs");
                 if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
                 var filePath = Path.Combine(directory, fileName);
@@ -64,6 +78,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                         // ===== المحتوى الرئيسي =====
                         page.Content()
+                        
                             .PaddingVertical(40, Unit.Point)
                             .Column(x =>
                             {
@@ -72,94 +87,139 @@ namespace OfficeManagementSystem.Application.Services.implementions
                                 // النص الرئيسي - محاذاة حسب اللغة
                                 x.Item().PaddingBottom(20).Element(body =>
                                 {
-                                    if (bodyAr)
+                                    if (isAr)
                                     {
-                                        body.AlignRight()
+                                        body
+                                        .ContentFromRightToLeft()
+                                        //.Padding(10,Unit.Point)
                                             .PaddingHorizontal(15, Unit.Point)
+                                            
                                             .Text(t =>
                                             {
                                                 t.DefaultTextStyle(s => s.LineHeight(2.0f));
                                                 t.Span(letter.Body ?? "")
                                                  .FontSize(15).FontColor(TextBody)
-                                                 .FontFamily(FontFor(bodyAr));
+                                                 .FontFamily(FontFor(isAr));
                                             });
                                     }
                                     else
                                     {
-                                        body.AlignLeft()
+                                        body
+                                        .AlignLeft()
                                             .PaddingHorizontal(15, Unit.Point)
                                             .Text(t =>
                                             {
                                                 t.DefaultTextStyle(s => s.LineHeight(2.0f));
                                                 t.Span(letter.Body ?? "")
                                                  .FontSize(15).FontColor(TextBody)
-                                                 .FontFamily(FontFor(bodyAr));
+                                                 .FontFamily(FontFor(isAr));
                                             });
                                     }
+
+                                    // Professional Signature Section
+                                    // Professional Signature Section
+                                    // Professional Signature Section
+                                    if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
+                                    {
+                                        x.Item()
+                                         .PaddingVertical(20, Unit.Point)
+                                         .PaddingLeft(10, Unit.Point)
+                                         .Column(sigCol =>
+                                         {
+                                             sigCol.Item()
+                                                   .Background("#ffffff")
+                                                   .Padding(20, Unit.Point)
+                                                   .Column(signatureContent =>
+                                                   {
+                                                       // Resolve signature image path
+                                                       var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
+                                                           ? letter.SignatureImagePath
+                                                           : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\'));
+
+
+                                                       // 1) صورة التوقيع (إن وُجدت)
+                                                       if (File.Exists(signaturePath))
+                                                       {
+                                                           if (isAr)
+                                                           {
+                                                               signatureContent.Item()
+                                                                               .AlignRight()
+                                                                               .Height(30, Unit.Point)
+                                                                               .Width(120, Unit.Point)
+                                                                               .Image(signaturePath)
+                                                                               
+                                                                               .FitArea();
+                                                           }
+                                                           else
+                                                           {
+                                                               signatureContent.Item()
+                                                                               .AlignLeft()
+                                                                               .Height(30, Unit.Point)
+                                                                               .Width(120, Unit.Point)
+                                                                               .Image(signaturePath)
+                                                                               .FitArea();
+                                                           }
+                                                       }
+                                                       
+
+                                                       // 2) الاسم الكامل والمسمى الوظيفي
+                                                       var approverFullName = $"{userSignature?.FirstName} {userSignature?.LastName}".Trim();
+                                                       var approverJobTitle = userSignature?.JobTitle ?? "";
+
+                                                       // في حال اللغة عربية نخلي المحتوى RTL
+                                                       signatureContent.Item()
+                                                                       .PaddingTop(8)
+                                                                       .Element(nameTitle =>
+                                                                       {
+                                                                           if (isAr)
+                                                                           {
+                                                                               nameTitle.ContentFromRightToLeft()
+                                                                                        .Text(t =>
+                                                                                        {
+                                                                                            t.DefaultTextStyle(s => s.FontFamily(FontFor(true)).FontSize(12).FontColor("#2C3E50"));
+                                                                                            if (!string.IsNullOrWhiteSpace(approverFullName))
+                                                                                                t.Line(approverFullName).FontFamily(FontFor(true, bold: true)).Bold();
+                                                                                            if (!string.IsNullOrWhiteSpace(approverJobTitle))
+                                                                                                t.Line(approverJobTitle).FontFamily(FontFor(true)).FontSize(11).FontColor("#34495E");
+                                                                                        });
+                                                                           }
+                                                                           else
+                                                                           {
+                                                                               nameTitle.AlignLeft()
+                                                                                        .Text(t =>
+                                                                                        {
+                                                                                            t.DefaultTextStyle(s => s.FontFamily(FontFor(false)).FontSize(12).FontColor("#2C3E50"));
+                                                                                            if (!string.IsNullOrWhiteSpace(approverFullName))
+                                                                                                t.Line(approverFullName).FontFamily(FontFor(false, bold: true)).Bold();
+                                                                                            if (!string.IsNullOrWhiteSpace(approverJobTitle))
+                                                                                                t.Line(approverJobTitle).FontFamily(FontFor(false)).FontSize(11).FontColor("#34495E");
+                                                                                        });
+                                                                           }
+                                                                       });
+                                                   });
+                                         });
+                                    }
+
+
                                 });
 
                             });
 
                         // ===== Footer: خلفية ذهبية مع ترقيم في المنتصف =====
                         page.Footer()
-     .Background(Colors.White)
-     //.PaddingVertical(10)
-     //.PaddingHorizontal(30)
-     .Element(footer =>
-     {
-         if (letter.Status == LetterStatus.Approved)
-         {
-             footer.Column(col =>
-             {
-                 // التوقيع على اليمين (زي ما هو)
-                 col.Item().AlignRight().Width(250)
-                     .Column(sigCol =>
-                     {
-                         sigCol.Spacing(8);
-
-                         sigCol.Item()
-                             .Background("#FFFFFF")
-                             .Padding(10)
-                             .Column(signatureContent =>
-                             {
-                                 var signaturePath = !string.IsNullOrEmpty(letter.SignatureImagePath)
-                                     ? (Path.IsPathRooted(letter.SignatureImagePath)
-                                         ? letter.SignatureImagePath
-                                         : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\')))
-                                     : null;
-
-                                 if (!string.IsNullOrEmpty(signaturePath) && File.Exists(signaturePath))
-                                 {
-                                     signatureContent.Item().AlignRight()
-                                         .Height(40, Unit.Point)
-                                         .Width(150, Unit.Point)
-                                         .Image(signaturePath)
-                                         .FitArea();
-                                 }
-                                 else
-                                 {
-                                     signatureContent.Item().AlignCenter()
-                                         .Text("التوقيع")
-                                         .FontSize(14).Bold()
-                                         .FontColor("#D4AF37")
-                                         .FontFamily(FontFor(true, bold: true));
-                                 }
-                             });
-                     });
-
-                 // خط أفقي بعرض الصفحة تحت التوقيع
-                 col.Item()
-                    //.PaddingTop(10)
-                    .Height(40, Unit.Point)              // ارتفاع بسيط علشان يرسم الحد
-                    .Background("#D4AF37")
-                    .BorderTop(10, Unit.Point)
-                    .BorderColor("#D4AF37");
-             });
-         }
-     });
-
-
-
+                            .Height(35, Unit.Point)
+                            .Background("#D4AF37")
+                            .BorderTop(1, Unit.Point)
+                            .BorderColor("#D4AF37")
+                            .AlignCenter()
+                            .PaddingVertical(10, Unit.Point)
+                            .Text(x =>
+                            {
+                                x.Span("صفحة ").FontSize(9).FontColor("#ffffff");
+                                x.CurrentPageNumber().FontSize(9).FontColor("#ffffff");
+                                x.Span(" من ").FontSize(9).FontColor("#ffffff");
+                                x.TotalPages().FontSize(9).FontColor("#ffffff");
+                            });
                     });
                 });
 
@@ -188,5 +248,27 @@ namespace OfficeManagementSystem.Application.Services.implementions
         //        return null;
         //    }
         //}
+
+        private static bool IsArabicText(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+
+            foreach (var c in s)
+            {
+                if (char.IsWhiteSpace(c) || char.IsControl(c)) continue;
+
+                // Arabic blocks
+                int u = c;
+                bool isArabic =
+                    (u >= 0x0600 && u <= 0x06FF) ||   // Arabic
+                    (u >= 0x0750 && u <= 0x077F) ||   // Arabic Supplement
+                    (u >= 0x08A0 && u <= 0x08FF) ||   // Arabic Extended-A
+                    (u >= 0xFB50 && u <= 0xFDFF) ||   // Arabic Presentation Forms-A
+                    (u >= 0xFE70 && u <= 0xFEFF);     // Arabic Presentation Forms-B
+
+                return isArabic;
+            }
+            return false;
+        }
     }
 }

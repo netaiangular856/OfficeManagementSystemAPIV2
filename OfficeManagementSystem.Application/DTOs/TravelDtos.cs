@@ -47,6 +47,7 @@ namespace OfficeManagementSystem.Application.DTOs
 
         public string? TransportMode { get; set; }
         public string? Accommodation { get; set; }
+        public bool IsCompleted { get; set; }
     }
 
     public class TravelDto
@@ -63,6 +64,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? CreatedByUserName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsCompleted { get; set; }
     }
 
     public class TravelQueryDto : PaginationDto
