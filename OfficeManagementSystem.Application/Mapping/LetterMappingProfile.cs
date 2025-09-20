@@ -13,12 +13,14 @@ namespace OfficeManagementSystem.Application.Mapping
             // Letter mappings
             CreateMap<CreateLetterDto, Letter>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.BodyHtml, opt => opt.MapFrom(src => src.BodyHtml))
                 ;
 
             CreateMap<UpdateLetterDto, Letter>()
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.BodyHtml, opt => opt.MapFrom(src => src.BodyHtml))
                 ;
 
             CreateMap<Letter, LetterDto>()

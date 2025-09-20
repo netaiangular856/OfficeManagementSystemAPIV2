@@ -168,3 +168,4 @@ DELETE /api/TravelResult/{id}
 ## التكامل
 
 تم تسجيل جميع الخدمات في dependency injection container وتم إضافة TravelResults إلى AppDbContext.
+

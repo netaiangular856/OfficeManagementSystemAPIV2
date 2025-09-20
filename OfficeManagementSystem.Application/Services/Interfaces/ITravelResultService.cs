@@ -12,3 +12,4 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         Task<ApiResponse<bool>> DeleteAsync(int id, string userId);
     }
 }
+

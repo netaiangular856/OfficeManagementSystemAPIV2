@@ -1,17 +1,14 @@
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
-using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Enums.Letters;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
-using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
+using PuppeteerSharp;
+using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -28,202 +25,23 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                QuestPDF.Settings.License = LicenseType.Community;
+                // التأكد من تحميل Puppeteer
+                await EnsureBrowserDownloadedAsync();
 
-                // تسجيل الخطوط العربية للنتيجة الأرقى
-                // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Regular.ttf");
-                // FontManager.RegisterFontFromFile("wwwroot/fonts/Amiri-Bold.ttf");
                 var userSignature = await _userManager.Users.OfType<Employee>()
-                    .FirstOrDefaultAsync(m=>m.Id==letter.ApprovedByUserId);
+                    .FirstOrDefaultAsync(m => m.Id == letter.ApprovedByUserId);
 
-                bool IsArabicStart(string s) => !string.IsNullOrWhiteSpace(s) && Regex.IsMatch(s, @"^\s*\p{IsArabic}");
-                string FontFor(bool ar, bool bold = false) =>
-                    ar ? (bold ? "Amiri Bold" : "Amiri") : (bold ? "Arial Bold" : "Arial");
-
-                bool isAr = IsArabicText(letter?.Subject ?? "");
-                //bool bodyAr = IsArabicText(letter?.Body ?? "");
-
-                var fileName = $"Letter_{letter.Subject}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var fileName = $"Letter_{letter.Subject?.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 var directory = Path.Combine("wwwroot", "pdfs");
                 if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
                 var filePath = Path.Combine(directory, fileName);
 
-                const string Gold = "#D4AF37";
-                const string TextDark = "#2C3E50";
-                const string TextBody = "#34495E";
+                // إنشاء HTML مع CSS متقدم
+                var htmlContent = await GenerateLetterHtmlAsync(letter, userSignature);
 
-                var document = Document.Create(container =>
-                {
-                    container.Page(page =>
-                    {
-                        page.Size(PageSizes.A4);
-                        //page.Margin(2.5f, Unit.Centimetre);
-                        page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(13).FontFamily("Arial"));
+                // تحويل HTML إلى PDF باستخدام Puppeteer
+                await ConvertHtmlToPdfAsync(htmlContent, filePath);
 
-                        // ===== Header: خلفية ذهبية مع نص في المنتصف =====
-                        page.Header()
-                            .Background(Gold)
-                            .PaddingTop(10)
-                            .AlignCenter()
-                            .PaddingVertical(10, Unit.Point)
-                            .Text(t =>
-                            {
-                                t.Span(letter.Subject??"")
-                                 .FontSize(22).Bold().FontColor("#2C3E50")
-                                 .FontFamily(FontFor(true, bold: true));
-                                t.Line("");
-                                
-                            });
-
-                        // ===== المحتوى الرئيسي =====
-                        page.Content()
-                        
-                            .PaddingVertical(40, Unit.Point)
-                            .Column(x =>
-                            {
-                               
-
-                                // النص الرئيسي - محاذاة حسب اللغة
-                                x.Item().PaddingBottom(20).Element(body =>
-                                {
-                                    if (isAr)
-                                    {
-                                        body
-                                        .ContentFromRightToLeft()
-                                        //.Padding(10,Unit.Point)
-                                            .PaddingHorizontal(15, Unit.Point)
-                                            
-                                            .Text(t =>
-                                            {
-                                                t.DefaultTextStyle(s => s.LineHeight(2.0f));
-                                                t.Span(letter.Body ?? "")
-                                                 .FontSize(15).FontColor(TextBody)
-                                                 .FontFamily(FontFor(isAr));
-                                            });
-                                    }
-                                    else
-                                    {
-                                        body
-                                        .AlignLeft()
-                                            .PaddingHorizontal(15, Unit.Point)
-                                            .Text(t =>
-                                            {
-                                                t.DefaultTextStyle(s => s.LineHeight(2.0f));
-                                                t.Span(letter.Body ?? "")
-                                                 .FontSize(15).FontColor(TextBody)
-                                                 .FontFamily(FontFor(isAr));
-                                            });
-                                    }
-
-                                    // Professional Signature Section
-                                    // Professional Signature Section
-                                    // Professional Signature Section
-                                    if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
-                                    {
-                                        x.Item()
-                                         .PaddingVertical(20, Unit.Point)
-                                         .PaddingLeft(10, Unit.Point)
-                                         .Column(sigCol =>
-                                         {
-                                             sigCol.Item()
-                                                   .Background("#ffffff")
-                                                   .Padding(20, Unit.Point)
-                                                   .Column(signatureContent =>
-                                                   {
-                                                       // Resolve signature image path
-                                                       var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
-                                                           ? letter.SignatureImagePath
-                                                           : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\'));
-
-
-                                                       // 1) صورة التوقيع (إن وُجدت)
-                                                       if (File.Exists(signaturePath))
-                                                       {
-                                                           if (isAr)
-                                                           {
-                                                               signatureContent.Item()
-                                                                               .AlignRight()
-                                                                               .Height(30, Unit.Point)
-                                                                               .Width(120, Unit.Point)
-                                                                               .Image(signaturePath)
-                                                                               
-                                                                               .FitArea();
-                                                           }
-                                                           else
-                                                           {
-                                                               signatureContent.Item()
-                                                                               .AlignLeft()
-                                                                               .Height(30, Unit.Point)
-                                                                               .Width(120, Unit.Point)
-                                                                               .Image(signaturePath)
-                                                                               .FitArea();
-                                                           }
-                                                       }
-                                                       
-
-                                                       // 2) الاسم الكامل والمسمى الوظيفي
-                                                       var approverFullName = $"{userSignature?.FirstName} {userSignature?.LastName}".Trim();
-                                                       var approverJobTitle = userSignature?.JobTitle ?? "";
-
-                                                       // في حال اللغة عربية نخلي المحتوى RTL
-                                                       signatureContent.Item()
-                                                                       .PaddingTop(8)
-                                                                       .Element(nameTitle =>
-                                                                       {
-                                                                           if (isAr)
-                                                                           {
-                                                                               nameTitle.ContentFromRightToLeft()
-                                                                                        .Text(t =>
-                                                                                        {
-                                                                                            t.DefaultTextStyle(s => s.FontFamily(FontFor(true)).FontSize(12).FontColor("#2C3E50"));
-                                                                                            if (!string.IsNullOrWhiteSpace(approverFullName))
-                                                                                                t.Line(approverFullName).FontFamily(FontFor(true, bold: true)).Bold();
-                                                                                            if (!string.IsNullOrWhiteSpace(approverJobTitle))
-                                                                                                t.Line(approverJobTitle).FontFamily(FontFor(true)).FontSize(11).FontColor("#34495E");
-                                                                                        });
-                                                                           }
-                                                                           else
-                                                                           {
-                                                                               nameTitle.AlignLeft()
-                                                                                        .Text(t =>
-                                                                                        {
-                                                                                            t.DefaultTextStyle(s => s.FontFamily(FontFor(false)).FontSize(12).FontColor("#2C3E50"));
-                                                                                            if (!string.IsNullOrWhiteSpace(approverFullName))
-                                                                                                t.Line(approverFullName).FontFamily(FontFor(false, bold: true)).Bold();
-                                                                                            if (!string.IsNullOrWhiteSpace(approverJobTitle))
-                                                                                                t.Line(approverJobTitle).FontFamily(FontFor(false)).FontSize(11).FontColor("#34495E");
-                                                                                        });
-                                                                           }
-                                                                       });
-                                                   });
-                                         });
-                                    }
-
-
-                                });
-
-                            });
-
-                        // ===== Footer: خلفية ذهبية مع ترقيم في المنتصف =====
-                        page.Footer()
-                            .Height(35, Unit.Point)
-                            .Background("#D4AF37")
-                            .BorderTop(1, Unit.Point)
-                            .BorderColor("#D4AF37")
-                            .AlignCenter()
-                            .PaddingVertical(10, Unit.Point)
-                            .Text(x =>
-                            {
-                                x.Span("صفحة ").FontSize(9).FontColor("#ffffff");
-                                x.CurrentPageNumber().FontSize(9).FontColor("#ffffff");
-                                x.Span(" من ").FontSize(9).FontColor("#ffffff");
-                                x.TotalPages().FontSize(9).FontColor("#ffffff");
-                            });
-                    });
-                });
-
-                document.GeneratePdf(filePath);
                 return filePath;
             }
             catch (Exception ex)
@@ -234,20 +52,513 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        //private TextFormattingDto? DeserializeFormatting(string? formattingJson)
-        //{
-        //    if (string.IsNullOrEmpty(formattingJson))
-        //        return null;
+        private async Task EnsureBrowserDownloadedAsync()
+        {
+            using var browserFetcher = new BrowserFetcher();
+            await browserFetcher.DownloadAsync();
+        }
 
-        //    try
-        //    {
-        //        return JsonConvert.DeserializeObject<TextFormattingDto>(formattingJson);
-        //    }
-        //    catch
-        //    {
-        //        return null;
-        //    }
-        //}
+        private async Task ConvertHtmlToPdfAsync(string htmlContent, string outputPath)
+        {
+            using var browserFetcher = new BrowserFetcher();
+            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = true,
+                Args = new[] { 
+                    "--no-sandbox", 
+                    "--disable-setuid-sandbox",
+                    "--disable-web-security",
+                    "--allow-file-access-from-files"
+                }
+            });
+
+            await using var page = await browser.NewPageAsync();
+            
+            // تعيين viewport للجودة الأفضل
+            await page.SetViewportAsync(new ViewPortOptions
+            {
+                Width = 1200,
+                Height = 800,
+                DeviceScaleFactor = 2
+            });
+            
+            await page.SetContentAsync(htmlContent, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+            });
+            
+            var pdfOptions = new PdfOptions
+            {
+                Format = PuppeteerSharp.Media.PaperFormat.A4,
+                MarginOptions = new PuppeteerSharp.Media.MarginOptions
+                {
+                    Top = "1cm",
+                    Right = "1cm",
+                    Bottom = "1cm",
+                    Left = "1cm"
+                },
+                PrintBackground = true,
+                PreferCSSPageSize = true,
+                Scale = 1.0m
+            };
+
+            await page.PdfAsync(outputPath, pdfOptions);
+        }
+
+        private async Task<string> GenerateLetterHtmlAsync(Letter letter, Employee? userSignature)
+        {
+            var isArabic = IsArabicText(letter.Subject ?? "");
+            // استخدام BodyHtml دائماً إذا كان موجود
+            var bodyContent = letter.BodyHtml ?? "لا يوجد محتوى";
+                
+            // Debug: طباعة المحتوى للتأكد (يمكن إزالته في الإنتاج)
+            if (string.IsNullOrWhiteSpace(letter.BodyHtml))
+            {
+                Console.WriteLine($"Warning: BodyHtml is empty, using Body instead");
+            }
+                
+
+            var html = new StringBuilder();
+            html.AppendLine("<!DOCTYPE html>");
+            html.AppendLine("<html dir='" + (isArabic ? "rtl" : "ltr") + "'>");
+            html.AppendLine("<head>");
+            html.AppendLine("<meta charset='UTF-8'>");
+            html.AppendLine("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+            html.AppendLine("<title>Letter</title>");
+            html.AppendLine(GetAdvancedCSS());
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
+            html.AppendLine("<div class='page-container'>");
+            
+            // Professional Header
+            html.AppendLine("<div class='letter-header'>");
+            html.AppendLine($"<h1 class='letter-title'>{letter.Subject}</h1>");
+            html.AppendLine("</div>");
+            
+            // Professional Content
+            html.AppendLine("<div class='letter-content'>");
+            // إدراج المحتوى HTML مباشرة
+            html.Append(bodyContent);
+            html.AppendLine("</div>");
+            
+            // Signature Section
+            if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
+            {
+                html.AppendLine("<div class='signature-section'>");
+                
+                // إصلاح مسار صورة التوقيع
+                var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
+                    ? letter.SignatureImagePath
+                    : Path.Combine("wwwroot", letter.SignatureImagePath.TrimStart('/', '\\'));
+
+                // التحقق من وجود الصورة وإضافة المسار الصحيح
+                if (File.Exists(signaturePath))
+                {
+                    try
+                    {
+                        // تحويل الصورة إلى Base64 للتأكد من ظهورها في PDF
+                        var imageBytes = await File.ReadAllBytesAsync(signaturePath);
+                        var base64Image = Convert.ToBase64String(imageBytes);
+                        var extension = Path.GetExtension(signaturePath).ToLower();
+                        var mimeType = extension switch
+                        {
+                            ".png" => "image/png",
+                            ".jpg" or ".jpeg" => "image/jpeg",
+                            ".gif" => "image/gif",
+                            ".bmp" => "image/bmp",
+                            _ => "image/jpeg"
+                        };
+                        
+                        html.AppendLine($"<img src='data:{mimeType};base64,{base64Image}' class='signature-image' alt='Signature'>");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"خطأ في تحميل صورة التوقيع: {ex.Message}");
+                        html.AppendLine("<div class='signature-placeholder'>[خطأ في تحميل صورة التوقيع]</div>");
+                    }
+                }
+                else
+                {
+                    // إذا لم توجد الصورة، أضف placeholder
+                    html.AppendLine("<div class='signature-placeholder'>[صورة التوقيع غير متوفرة]</div>");
+                }
+
+                // الاسم والوظيفة تحت الصورة
+                var approverFullName = $"{userSignature?.FirstName} {userSignature?.LastName}".Trim();
+                var approverJobTitle = userSignature?.JobTitle ?? "";
+
+                html.AppendLine("<div class='signature-info'>");
+                if (!string.IsNullOrWhiteSpace(approverFullName))
+                    html.AppendLine($"<div class='signature-name'>{approverFullName}</div>");
+                if (!string.IsNullOrWhiteSpace(approverJobTitle))
+                    html.AppendLine($"<div class='signature-title'>{approverJobTitle}</div>");
+                html.AppendLine("</div>");
+                
+                html.AppendLine("</div>");
+            }
+            
+            // Professional Footer
+            html.AppendLine("<div class='letter-footer'>");
+            html.AppendLine("<div class='page-info'>");
+            html.AppendLine("<span class='footer-text'>صفحة <span class='page-number'></span> من <span class='total-pages'></span></span>");
+            html.AppendLine("<span class='footer-separator'> | </span>");
+            html.AppendLine("<span class='footer-date'>تاريخ الطباعة: " + DateTime.Now.ToString("dd/MM/yyyy") + "</span>");
+            html.AppendLine("</div>");
+            html.AppendLine("</div>");
+            html.AppendLine("</div>"); // Close page-container
+            
+            html.AppendLine("</body>");
+            html.AppendLine("</html>");
+
+            return html.ToString();
+        }
+
+        private string GetAdvancedCSS()
+        {
+            return @"
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Amiri', 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #2C3E50;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    /* Professional Page Layout */
+    .page-container {
+        //max-width: 210mm;
+        //margin: 0 auto;
+        background: white;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    /* Professional Header */
+    .letter-header {
+        background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+        padding: 30px 20px;
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        border-bottom: 4px solid #A67C00;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    
+    .letter-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #A67C00, #D4AF37, #A67C00);
+    }
+    
+    .letter-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+        font-family: 'Amiri', 'Arial', sans-serif;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    
+    /* Professional Content */
+    .letter-content {
+        padding: 30px 25px;
+        min-height: 400px;
+        font-size: 17px;
+        line-height: 2.2;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        margin: 20px;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Advanced Text Formatting Support */
+    .letter-content h1, .letter-content h2, .letter-content h3,
+    .letter-content h4, .letter-content h5, .letter-content h6 {
+        margin: 20px 0 15px 0;
+        font-weight: bold;
+        font-family: 'Amiri', 'Arial', sans-serif;
+        color: #2C3E50;
+    }
+    
+    .letter-content h2 {
+        font-size: 24px;
+        border-bottom: 2px solid #D4AF37;
+        padding-bottom: 10px;
+    }
+    
+    .letter-content p {
+        margin: 15px 0;
+        text-align: justify;
+        line-height: 1.8;
+    }
+    
+    .letter-content ul, .letter-content ol {
+        margin: 15px 0;
+        padding-right: 30px;
+        padding-left: 30px;
+    }
+    
+    .letter-content li {
+        margin: 8px 0;
+        line-height: 1.6;
+    }
+    
+    /* Support for mixed content (Arabic/English) */
+    .letter-content strong, .letter-content b {
+        font-weight: bold;
+        color: #2C3E50;
+    }
+    
+    .letter-content em, .letter-content i {
+        font-style: italic;
+    }
+    
+    .letter-content u {
+        text-decoration: underline;
+    }
+    
+    /* Text Alignment Support */
+    .letter-content .ql-align-center {
+        text-align: center;
+    }
+    
+    .letter-content .ql-align-right {
+        text-align: right;
+    }
+    
+    .letter-content .ql-align-left {
+        text-align: left;
+    }
+    
+    .letter-content .ql-align-justify {
+        text-align: justify;
+    }
+    
+    /* Font Weight Support */
+    .letter-content strong, .letter-content b {
+        font-weight: bold;
+    }
+    
+    /* Color Support */
+    .letter-content .ql-color-red { color: #e74c3c; }
+    .letter-content .ql-color-blue { color: #3498db; }
+    .letter-content .ql-color-green { color: #27ae60; }
+    .letter-content .ql-color-yellow { color: #f1c40f; }
+    .letter-content .ql-color-purple { color: #9b59b6; }
+    .letter-content .ql-color-orange { color: #e67e22; }
+    
+    /* Background Color Support */
+    .letter-content .ql-bg-red { background-color: #e74c3c; color: white; }
+    .letter-content .ql-bg-blue { background-color: #3498db; color: white; }
+    .letter-content .ql-bg-green { background-color: #27ae60; color: white; }
+    .letter-content .ql-bg-yellow { background-color: #f1c40f; color: black; }
+    
+    /* Font Size Support */
+    .letter-content .ql-size-small { font-size: 12px; }
+    .letter-content .ql-size-large { font-size: 18px; }
+    .letter-content .ql-size-huge { font-size: 22px; }
+    
+    /* RTL Support */
+    [dir='rtl'] .letter-content ul,
+    [dir='rtl'] .letter-content ol {
+        padding-right: 30px;
+        padding-left: 0;
+    }
+    
+     .letter-content .ql-align-right {
+        text-align: right;
+    }
+    
+    /* Signature Section */
+    .signature-section {
+        margin-top: 60px;
+        padding: 30px 20px;
+        //border-top: 2px solid #D4AF37;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 8px;
+        //box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        text-align: left;
+    }
+    
+    .signature-image {
+        max-height: 100px;
+        max-width: 300px;
+        margin-bottom: 20px;
+        display: block;
+        //border: 2px solid #D4AF37;
+        border-radius: 4px;
+        padding: 8px;
+        //background: white;
+        //box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-left: 0;
+        margin-right: auto;
+    }
+    
+    .signature-placeholder {
+        height: 100px;
+        width: 300px;
+        border: 2px dashed #D4AF37;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        color: #6c757d;
+        font-style: italic;
+        border-radius: 4px;
+        font-family: 'Amiri', 'Arial', sans-serif;
+        margin-left: 0;
+        margin-right: auto;
+    }
+    
+    .signature-info {
+        margin-top: 15px;
+        padding: 15px;
+        //background: white;
+        border-radius: 6px;
+        //border-left: 4px solid #D4AF37;
+    }
+    
+    [dir='rtl'] .signature-info {
+        border-left: none;
+        //border-right: 4px solid #D4AF37;
+    }
+    
+    .signature-name {
+        font-weight: bold;
+        font-size: 18px;
+        color: #2C3E50;
+        margin-bottom: 8px;
+        font-family: 'Amiri', 'Arial', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .signature-title {
+        font-size: 16px;
+        color: #495057;
+        font-family: 'Amiri', 'Arial', sans-serif;
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+    
+    /* Professional Footer */
+    .letter-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+        padding: 12px 20px;
+        text-align: center;
+        color: white;
+        font-size: 13px;
+        border-top: 3px solid #A67C00;
+        box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .page-info {
+        font-family: 'Amiri', 'Arial', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .footer-text, .footer-date {
+        font-size: 12px;
+        opacity: 0.95;
+    }
+    
+    .footer-separator {
+        opacity: 0.7;
+        font-weight: 300;
+    }
+    
+    /* Add margin to content to avoid footer overlap */
+    body {
+        margin-bottom: 65px;
+    }
+    
+    /* Ensure proper page breaks */
+    .signature-section {
+        page-break-inside: avoid;
+        margin-bottom: 80px;
+    }
+    
+    /* Print Styles */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .letter-header,
+        .letter-footer {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+    
+    /* CKEditor/Quill Specific Styles */
+    .letter-content .ql-editor {
+        padding: 0;
+    }
+    
+    /* Custom styles for inline formatting */
+    .letter-content span[style*='color'] {
+        color: inherit !important;
+    }
+    
+    .letter-content span[style*='background-color'] {
+        background-color: inherit !important;
+    }
+    
+    .letter-content span[style*='font-weight'] {
+        font-weight: inherit !important;
+    }
+    
+    /* Page Break Support */
+    .page-break {
+        page-break-before: always;
+        break-before: page;
+        margin: 20px 0;
+        border-top: 2px solid #D4AF37;
+        padding-top: 20px;
+    }
+    
+    /* Ensure proper text rendering */
+    .letter-content * {
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+</style>";
+        }
 
         private static bool IsArabicText(string s)
         {

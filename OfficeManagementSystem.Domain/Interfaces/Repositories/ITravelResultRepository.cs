@@ -11,3 +11,4 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
             Func<IQueryable<TravelResult>, IOrderedQueryable<TravelResult>>? orderBy = null);
     }
 }
+

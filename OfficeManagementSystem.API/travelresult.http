@@ -42,3 +42,4 @@ Authorization: Bearer {{token}}
 ### Variables (set these in your environment or at the top of the file)
 @baseUrl = https://localhost:7000
 @token = your_jwt_token_here
+

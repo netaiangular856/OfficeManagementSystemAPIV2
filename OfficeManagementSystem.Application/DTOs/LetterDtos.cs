@@ -34,6 +34,7 @@ namespace OfficeManagementSystem.Application.DTOs
         [Required]
         public string Body { get; set; } = string.Empty;
 
+        public string? BodyHtml { get; set; }  // HTML content from rich text editor
 
         [MaxLength(1000)]
         public string? To { get; set; } = string.Empty;
@@ -68,6 +69,7 @@ namespace OfficeManagementSystem.Application.DTOs
         [Required]
         public string Body { get; set; } = string.Empty;
 
+        public string? BodyHtml { get; set; }  // HTML content from rich text editor
 
         [MaxLength(1000)]
         public string? To { get; set; } = string.Empty;
@@ -96,6 +98,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public LetterDirection Direction { get; set; }
         public string Subject { get; set; } = string.Empty;
         public string Body { get; set; } = string.Empty;
+        public string? BodyHtml { get; set; }  // HTML content from rich text editor
         public string? To { get; set; } = string.Empty;
         public string? Cc { get; set; }
         public string? Bcc { get; set; }

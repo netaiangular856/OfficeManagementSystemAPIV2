@@ -13,6 +13,7 @@ public class Letter
     public LetterDirection Direction { get; set; }
     public string Subject { get; set; } = default!;
     public string Body { get; set; } = default!;        // نص الرسالة
+    public string? BodyHtml { get; set; }               // نص الرسالة بتنسيق HTML (من CKEditor/Quill)
     //public Confidentiality Confidentiality { get; set; } = Confidentiality.Public;
 
     // المرسل إليهم
