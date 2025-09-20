@@ -8,6 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize(Policy = "travel.index")]
     //[Authorize(Policy = "travelresult.index")]
     public class TravelResultController : ControllerBase
     {

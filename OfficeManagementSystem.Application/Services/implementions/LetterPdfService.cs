@@ -557,6 +557,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         max-width: 100%;
         word-wrap: break-word;
     }
+
 </style>";
         }
 

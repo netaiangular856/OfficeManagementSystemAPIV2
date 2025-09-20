@@ -45,7 +45,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _configuration = configuration;
             this.emailService = emailService;
         }
-
+        
         public async Task<ApiResponse<PaginatedResult<EmployeeDto>>> GetEmployeesAsync(Params parameters)
         {
             try
@@ -54,8 +54,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .Include(u => u.Department)
                     .Include(u => u.Manager)
                     .Where(u => string.IsNullOrEmpty(parameters.Search) ||
-                                u.FirstName.Contains(parameters.Search) ||
-                                u.LastName.Contains(parameters.Search) ||
+                                u.FirstName.ToLower().Contains(parameters.Search.Trim().ToLower()) ||
+                                u.LastName.ToLower().Contains(parameters.Search.Trim().ToLower()) ||
+                                (u.FirstName + " " + u.LastName).Contains(parameters.Search.Trim().ToLower()) ||
+                               (u.LastName + " " + u.FirstName).Contains(parameters.Search.Trim().ToLower()) ||
                                 u.Email.Contains(parameters.Search) ||
                                 u.JobTitle.Contains(parameters.Search))
                     .OrderByDescending(u => u.CreatedAt)

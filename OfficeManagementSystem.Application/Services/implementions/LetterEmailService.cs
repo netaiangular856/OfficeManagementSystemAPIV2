@@ -97,8 +97,6 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // Add email body
                 var emailBody = !string.IsNullOrEmpty(emailDto.EmailBody)? GenerateDefaultEmailBody(emailDto.EmailBody): GenerateDefaultEmailBody(letter.Body);
-                
-                    
 
                 var bodyPart = new TextPart(MimeKit.Text.TextFormat.Html)
                 {

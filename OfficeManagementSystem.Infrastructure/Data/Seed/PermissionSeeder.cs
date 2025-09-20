@@ -93,7 +93,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
                 // Letters Controller Permissions
                 #region
                 new Permission { Name = "letter.index", DisplayName = "Letters page", Description = "View all letters", Controller = "letters", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
-        
+                new Permission { Name = "letterApproval.index", DisplayName = "Letters Approval page", Description = "View all letters need to Approve", Controller = "letters", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
 #endregion
                 // Partners Controller Permissions
                 #region
@@ -118,6 +118,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
                 // Tasks Controller Permissions
                 #region
                 new Permission { Name = "travel.index", DisplayName = "Travels page", Description = "View all travels", Controller = "travels", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
+
                
 #endregion
             };

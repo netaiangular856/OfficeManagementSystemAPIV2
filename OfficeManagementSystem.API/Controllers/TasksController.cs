@@ -61,6 +61,16 @@ namespace OfficeManagementSystem.API.Controllers
                 
             return Ok(result);
         }
+        [HttpGet("all")]
+        public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetAllTasks([FromQuery] TaskFilterDto filter)
+        {
+            var result = await _taskService.GetAllTasksAsync( filter);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
 
         [HttpGet("employee-tasks")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetEmployeeTasks([FromQuery] TaskFilterDto filter)
@@ -240,8 +250,5 @@ namespace OfficeManagementSystem.API.Controllers
 
             return CreatedAtAction(nameof(GetTaskFeedbacks), new { id }, result);
         }
-
-
-
     }
 }

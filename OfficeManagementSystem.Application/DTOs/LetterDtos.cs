@@ -31,8 +31,8 @@ namespace OfficeManagementSystem.Application.DTOs
         [MaxLength(500)]
         public string Subject { get; set; } = string.Empty;
 
-        [Required]
-        public string Body { get; set; } = string.Empty;
+        //[Required]
+        //public string Body { get; set; } = string.Empty;
 
         public string? BodyHtml { get; set; }  // HTML content from rich text editor
 
@@ -66,8 +66,8 @@ namespace OfficeManagementSystem.Application.DTOs
         [MaxLength(500)]
         public string Subject { get; set; } = string.Empty;
 
-        [Required]
-        public string Body { get; set; } = string.Empty;
+        //[Required]
+        //public string Body { get; set; } = string.Empty;
 
         public string? BodyHtml { get; set; }  // HTML content from rich text editor
 

@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using OfficeManagementSystem.Domain.Enums.Meeting;
 using Org.BouncyCastle.Asn1;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Text.RegularExpressions;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -63,6 +64,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var letter = _mapper.Map<Letter>(createDto);
                 letter.CreatedByUserId = userId;
                 letter.Status = LetterStatus.Draft;
+                letter.Body = HtmlToPlainText(letter.BodyHtml);
                 if (letter.Kind==AttendeeKind.Internal&& createDto.UserId!=null)
                 {
                     var recever = await _userManager.FindByIdAsync(createDto.UserId);
@@ -271,13 +273,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // Check if letter with same subject exists (excluding current letter)
                 var existsBySubject = await _unitOfWork.LetterRepository.ExistsBySubjectAsync(updateDto.Subject, id);
-                if (existsBySubject)
-                {
-                    return ApiResponse<LetterDto>.ErrorResponse("يوجد خطاب بنفس الموضوع");
-                }
+                //if (existsBySubject)
+                //{
+                //    return ApiResponse<LetterDto>.ErrorResponse("يوجد خطاب بنفس الموضوع");
+                //}
 
                 _mapper.Map(updateDto, letter);
                 letter.UpdatedAt = DateTime.UtcNow;
+                letter.Body = HtmlToPlainText(letter.BodyHtml);
                 if (letter.Kind == AttendeeKind.Internal && updateDto.UserId != null)
                 {
                     var recever = await _userManager.FindByIdAsync(updateDto.UserId);
@@ -615,6 +618,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var randomNumber = random.Next(100000, 999999);
 
             return $"LET-{year}-{month}-{randomNumber}";
+        }
+        private static string HtmlToPlainText(string html)
+        {
+            return Regex.Replace(html, "<.*?>", string.Empty)  // يشيل التاجات
+                         .Replace("&nbsp;", " ")
+                         .Trim();
         }
 
 

@@ -23,6 +23,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إنشاء خطاب جديد
         /// </summary>
         [HttpPost]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> Create([FromBody] CreateLetterDto createDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -39,6 +40,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب جميع الخطابات مع إمكانية البحث والتصفية
         /// </summary>
         [HttpGet]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> GetAll([FromQuery] LetterQueryDto queryDto)
         {
             var result = await _letterService.GetAllAsync(queryDto);
@@ -47,6 +49,7 @@ namespace OfficeManagementSystem.API.Controllers
             return Ok(result);
         }
         [HttpGet("approval")]
+        //[Authorize(Policy = "letterApproval.index")]
         public async Task<IActionResult> GetAllForApproval([FromQuery] LetterQueryDto queryDto)
         {
             var result = await _letterService.GetAllForApprovalAsync(queryDto);
@@ -69,6 +72,8 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث خطاب محدد
         /// </summary>
         [HttpPut("{id}")]
+        //[Authorize(Policy = "letter.index")]
+
         public async Task<IActionResult> Update(int id, [FromBody] UpdateLetterDto updateDto)
         {
             var result = await _letterService.UpdateAsync(id, updateDto);
@@ -79,6 +84,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف خطاب
         /// </summary>
         [HttpDelete("{id}")]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _letterService.DeleteAsync(id);
@@ -100,6 +106,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إضافة مرفق للخطاب
         /// </summary>
         [HttpPost("{id}/attachments")]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> AddAttachment(int id, [FromForm] CreateLetterAttachmentDto attachmentDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -115,6 +122,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف مرفق من الخطاب
         /// </summary>
         [HttpDelete("{id}/attachments/{attachmentId}")]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> RemoveAttachment(int id, int attachmentId)
         {
             var result = await _letterService.RemoveAttachmentAsync(id, attachmentId);
@@ -126,6 +134,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تقديم الخطاب للاعتماد
         /// </summary>
         [HttpPost("{id}/submit-for-approval")]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> SubmitForApproval(int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -142,6 +151,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// اعتماد الخطاب مع التوقيع
         /// </summary>
         [HttpPost("{id}/approve")]
+        //[Authorize(Policy = "letterApproval.index")]
         public async Task<IActionResult> ApproveLetter(int id, [FromForm] ApproveLetterDto approveDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -158,6 +168,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// رفض الخطاب
         /// </summary>
         [HttpPost("{id}/reject")]
+        //[Authorize(Policy = "letterApproval.index")]
         public async Task<IActionResult> RejectLetter(int id, [FromBody] RejectLetterDto rejectDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -175,6 +186,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إرسال الخطاب عبر الميل
         /// </summary>
         [HttpPost("{id}/send-email")]
+        //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> SendLetterEmail(int id, [FromBody] SendLetterEmailDto emailDto)
         {
             

@@ -53,8 +53,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var query = _userManager.Users
                     .Include(u => u.Department)
                     .Where(u => string.IsNullOrEmpty(parameters.Search) ||
-                                u.FirstName.Contains(parameters.Search) ||
-                                u.LastName.Contains(parameters.Search) ||
+                                u.FirstName.ToLower().Contains(parameters.Search.Trim().ToLower()) ||
+                                u.LastName.ToLower().Contains(parameters.Search.Trim().ToLower()) ||
+                                (u.FirstName + " " + u.LastName).Contains(parameters.Search.Trim().ToLower()) ||
+                               (u.LastName + " " + u.FirstName).Contains(parameters.Search.Trim().ToLower()) ||
                                 u.Email.Contains(parameters.Search))
                     .OrderByDescending(u => u.CreatedAt)
                     .AsQueryable();

@@ -73,6 +73,52 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<TaskDto>.ErrorResponse($"Error creating task: {ex.Message}");
             }
         }
+        public async Task<ApiResponse<PaginatedResult<TaskDto>>> GetAllTasksAsync(TaskFilterDto filter)
+        {
+            try
+            {
+                var allTasks = await _unitOfWork.TaskRepository
+                    .GetAllAsync( includeProperties: "Dept,Assignee,CreatedBy");
+
+                // Apply filters in memory
+                var filteredTasks = allTasks.AsQueryable();
+
+                if (filter.Status.HasValue)
+                    filteredTasks = filteredTasks.Where(t => t.Status == filter.Status.Value);
+
+                if (filter.DueDateFrom.HasValue)
+                    filteredTasks = filteredTasks.Where(t => t.DueDate >= filter.DueDateFrom.Value);
+
+                if (filter.DueDateTo.HasValue)
+                    filteredTasks = filteredTasks.Where(t => t.DueDate <= filter.DueDateTo.Value);
+
+                // Get total count
+                var totalCount = filteredTasks.Count();
+
+                // Apply pagination
+                var pagedTasks = filteredTasks
+                    .Skip((filter.Page - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // Map to DTOs
+                var taskDtos = _mapper.Map<List<TaskDto>>(pagedTasks);
+
+                var result = new PaginatedResult<TaskDto>
+                {
+                    TotalCount = totalCount,
+                    Page = filter.Page,
+                    PageSize = filter.PageSize,
+                    Items = taskDtos
+                };
+
+                return ApiResponse<PaginatedResult<TaskDto>>.SuccessResponse(result, "Tasks retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<PaginatedResult<TaskDto>>.ErrorResponse($"Error retrieving tasks: {ex.Message}");
+            }
+        }
 
         public async Task<ApiResponse<PaginatedResult<TaskDto>>> GetTasksAsync(string managerId,TaskFilterDto filter)
         {
