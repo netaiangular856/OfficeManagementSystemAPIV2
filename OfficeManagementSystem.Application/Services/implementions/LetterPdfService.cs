@@ -557,6 +557,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
         max-width: 100%;
         word-wrap: break-word;
     }
+.letter-content table { width:100%; border-collapse:collapse; table-layout:fixed; margin:16px 0; }
+.letter-content th, .letter-content td { border:1px solid #dee2e6; padding:8px 10px; vertical-align:top; word-break:break-word; }
+.letter-content thead { display: table-header-group; }
+.letter-content tfoot { display: table-footer-group; }
+.letter-content tr { page-break-inside: avoid; break-inside: avoid; }
+
+/* دعم محاذاة جاية من Quill أو CKEditor */
+.letter-content .ql-align-right, .letter-content [style*=""text-align:right""]  { text-align:right !important; }
+.letter-content .ql-align-center, .letter-content [style*=""text-align:center""]{ text-align:center !important; }
+.letter-content .ql-align-left,  .letter-content [style*=""text-align:left""]   { text-align:left !important; }
+
+/* فاصل صفحة */
+.page-break { page-break-before: always; break-before: page; }
+
 
 </style>";
         }

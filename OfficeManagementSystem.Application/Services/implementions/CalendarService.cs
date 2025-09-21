@@ -6,6 +6,7 @@ using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Entity.Visit;
+using OfficeManagementSystem.Domain.Enums.Calendar;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,35 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 return ApiResponse<List<CalendarEventDto>>.ErrorResponse($"خطأ في جلب جميع الأحداث: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<CalendarStatsDto>> GetCalendarStatsAsync(string userId, CalendarPeriod period = CalendarPeriod.Day)
+        {
+            try
+            {
+                var (startDate, endDate) = GetDateRange(period);
+                
+                var stats = new CalendarStatsDto
+                {
+                    Period = period,
+                    PeriodName = GetPeriodName(period),
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    MeetingsCount = await GetMeetingsCountAsync(userId, startDate, endDate),
+                    TasksCount = await GetTasksCountAsync(userId, startDate, endDate),
+                    VisitsCount = await GetVisitsCountAsync(userId, startDate, endDate),
+                    TravelsCount = await GetTravelsCountAsync(userId, startDate, endDate),
+                    TotalEventsCount = 0
+                };
+
+                stats.TotalEventsCount = stats.MeetingsCount + stats.TasksCount + stats.VisitsCount + stats.TravelsCount;
+
+                return ApiResponse<CalendarStatsDto>.SuccessResponse(stats);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<CalendarStatsDto>.ErrorResponse($"خطأ في جلب إحصائيات التقويم: {ex.Message}");
             }
         }
 
@@ -149,6 +179,67 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 t.StartDate >= DateTime.UtcNow); // فقط السفريات القادمة
 
             return _mapper.Map<IEnumerable<CalendarEventDto>>(travelsQuery);
+        }
+
+        private (DateTime startDate, DateTime endDate) GetDateRange(CalendarPeriod period)
+        {
+            var now = DateTime.UtcNow;
+            var startOfDay = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Utc);
+            
+            return period switch
+            {
+                CalendarPeriod.Day => (startOfDay, startOfDay.AddDays(1).AddTicks(-1)),
+                CalendarPeriod.Week => (startOfDay.AddDays(-(int)startOfDay.DayOfWeek), startOfDay.AddDays(7 - (int)startOfDay.DayOfWeek).AddTicks(-1)),
+                CalendarPeriod.Month => (new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month), 23, 59, 59, DateTimeKind.Utc)),
+                _ => (startOfDay, startOfDay.AddDays(1).AddTicks(-1))
+            };
+        }
+
+        private string GetPeriodName(CalendarPeriod period)
+        {
+            return period switch
+            {
+                CalendarPeriod.Day => "اليوم",
+                CalendarPeriod.Week => "الأسبوع",
+                CalendarPeriod.Month => "الشهر",
+                _ => "اليوم"
+            };
+        }
+
+        private async Task<int> GetMeetingsCountAsync(string userId, DateTime startDate, DateTime endDate)
+        {
+            var meetings = await _unitOfWork.MeetingRepository.GetAllAsync(m => 
+                (m.OrganizerUserId == userId || m.Attendees.Any(a => a.UserId == userId)) &&
+                m.StartAt >= startDate && m.StartAt <= endDate);
+            
+            return meetings.Count();
+        }
+
+        private async Task<int> GetTasksCountAsync(string userId, DateTime startDate, DateTime endDate)
+        {
+            var tasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
+                (t.AssigneeUserId == userId || t.CreatedByUserId == userId) &&
+                t.CreatedAt >= startDate && t.CreatedAt <= endDate);
+            
+            return tasks.Count();
+        }
+
+        private async Task<int> GetVisitsCountAsync(string userId, DateTime startDate, DateTime endDate)
+        {
+            var visits = await _unitOfWork.VisitRepository.GetAllAsync(v => 
+                v.CreatedBy == userId &&
+                v.VisitDate >= startDate && v.VisitDate <= endDate);
+            
+            return visits.Count();
+        }
+
+        private async Task<int> GetTravelsCountAsync(string userId, DateTime startDate, DateTime endDate)
+        {
+            var travels = await _unitOfWork.TravelRepository.GetAllAsync(t => 
+                t.CreatedBy == userId &&
+                t.StartDate >= startDate && t.StartDate <= endDate);
+            
+            return travels.Count();
         }
 
         #endregion

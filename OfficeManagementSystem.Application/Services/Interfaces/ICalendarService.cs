@@ -1,5 +1,6 @@
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
+using OfficeManagementSystem.Domain.Enums.Calendar;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -22,5 +23,13 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         /// </summary>
         /// <returns>قائمة جميع الأحداث</returns>
         Task<ApiResponse<List<CalendarEventDto>>> GetAllSystemEventsAsync();
+
+        /// <summary>
+        /// الحصول على إحصائيات التقويم للمستخدم
+        /// </summary>
+        /// <param name="userId">معرف المستخدم</param>
+        /// <param name="period">الفترة الزمنية</param>
+        /// <returns>إحصائيات التقويم</returns>
+        Task<ApiResponse<CalendarStatsDto>> GetCalendarStatsAsync(string userId, CalendarPeriod period = CalendarPeriod.Day);
     }
 }

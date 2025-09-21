@@ -64,8 +64,8 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Letter services
             services.AddScoped<ILetterService, LetterService>();
-            services.AddScoped<ILetterPdfService, LetterPdfServiceIronPdf>();
-            //services.AddScoped<ILetterPdfService, LetterPdfService>();
+            //services.AddScoped<ILetterPdfService, LetterPdfServiceIronPdf>();
+            services.AddScoped<ILetterPdfService, LetterPdfService>();
             services.AddScoped<ILetterEmailService, LetterEmailService>();
             
             

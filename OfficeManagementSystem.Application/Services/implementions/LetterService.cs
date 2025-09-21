@@ -621,10 +621,39 @@ namespace OfficeManagementSystem.Application.Services.implementions
         }
         private static string HtmlToPlainText(string html)
         {
-            return Regex.Replace(html, "<.*?>", string.Empty)  // يشيل التاجات
-                         .Replace("&nbsp;", " ")
-                         .Trim();
+            if (string.IsNullOrWhiteSpace(html))
+                return string.Empty;
+
+            // 1) استبدال التاجات اللي بتعمل فواصل
+            html = Regex.Replace(html, @"<(br|BR)\s*/?>", "\n");       // <br>
+            html = Regex.Replace(html, @"</(p|div|h[1-6])>", "\n");    // إغلاق فقرة/عنوان
+            html = Regex.Replace(html, @"</li>", "\n- ");              // عناصر قائمة تبدأ بشرطة
+
+            // 2) دعم الجداول
+            html = Regex.Replace(html, @"<td.*?>", "\t");              // بداية خلية → Tab
+            html = Regex.Replace(html, @"<th.*?>", "\t");              // رأس جدول → Tab
+            html = Regex.Replace(html, @"</tr>", "\n");                // نهاية صف → سطر جديد
+
+            // 3) استبدال أكواد HTML الشائعة
+            html = html.Replace("&nbsp;", " ")
+                       .Replace("&amp;", "&")
+                       .Replace("&lt;", "<")
+                       .Replace("&gt;", ">")
+                       .Replace("&quot;", "\"")
+                       .Replace("&#39;", "'");
+
+            // 4) إزالة باقي التاجات
+            html = Regex.Replace(html, "<.*?>", string.Empty);
+
+            // 5) تنظيف المسافات والأسطر
+            html = Regex.Replace(html, @"\n\s+\n", "\n"); // يشيل فراغات بين الأسطر
+            html = Regex.Replace(html, @"\n{2,}", "\n");  // يمنع تكرار أسطر فاضية
+            html = Regex.Replace(html, @"\t{2,}", "\t");  // يمنع تكرار Tabs
+
+            return html.Trim();
         }
+
+
 
 
     }
