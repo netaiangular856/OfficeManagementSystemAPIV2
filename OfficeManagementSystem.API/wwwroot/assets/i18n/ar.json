@@ -580,7 +580,7 @@
     }
   },
   "sidebar": {
-    "dashboard": "لوحة التحكم",
+    "dashboard": "احصائيات",
     "users": "المستخدمين",
     "roles": "الادوار والصلاحيات",
     "tasks": "المهام",
@@ -647,7 +647,17 @@
       "completed": "مكتمل",
       "cancelled": "ملغي",
       "overdue": "متأخر"
-    }
+    },
+    "mini_calendar": "تقويم سريع",
+    "todays_events": "أحداث اليوم",
+    "quick_actions": "إجراءات سريعة",
+    "view_all_events": "عرض جميع الأحداث",
+    "total_events": "إجمالي الأحداث",
+    "meetings": "الاجتماعات",
+    "tasks": "المهام",
+    "visits": "الزيارات",
+    "travels": "الرحلات",
+    "more": "المزيد"
   },
   "reminders": {
     "title": "إدارة التذكيرات",
@@ -655,6 +665,7 @@
     "edit_reminder": "تعديل التذكير",
     "all_reminders": "جميع تذكيراتي",
     "reminder_title": "عنوان التذكير",
+    "reminder": "تذكير",
     "reminder_description": "الوصف",
     "event_time": "وقت الحدث",
     "reminder_time": "وقت التذكير",
@@ -776,8 +787,8 @@
     "updated_at": "تاريخ التحديث",
     "delete_confirmation_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
     "to": "إلى",
-    "add":"إضافة",
-    "details":"التفاصيل",
+    "add": "إضافة",
+    "details": "التفاصيل",
     "filters": "الفلترة",
     "updating": "جاري التحديث...",
     "saving": "جاري الحفظ...",
@@ -842,7 +853,7 @@
     "to_date": "إلى تاريخ",
     "items_per_page": "عدد العناصر في الصفحة",
     "clear_filters": "مسح الفلترة",
-    "created_at":"تاريخ الإنشاء"
+    "created_at": "تاريخ الإنشاء"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -1270,7 +1281,7 @@
     "subtitle": "تتبع ومراقبة أنشطة وتغييرات النظام",
     "workflow_items": "عناصر سير العمل",
     "no_items_found": "لم يتم العثور على عناصر سير العمل",
-    "try_adjusting_filters": "حاول تعديل معايير البحث أو المرشحات",
+    "try_adjusting_filters": "حاول تعديل معايير البحث أو التصفية",
     "search_placeholder": "البحث بالوصف أو نوع الموضوع أو نوع الإجراء...",
     "id": "المعرف",
     "entity_type": "نوع الموضوع",
@@ -1284,7 +1295,7 @@
     "filter_by_action_type": "تصفية حسب نوع الإجراء",
     "from_date": "من تاريخ",
     "to_date": "إلى تاريخ",
-    "apply_filters": "تطبيق المرشحات",
+    "apply_filters": "تطبيق التصفية",
     "action_types": {
       "Created": "تم الإنشاء",
       "Updated": "تم التحديث",
@@ -1340,6 +1351,21 @@
       "completionRate": "معدل الإنجاز",
       "completionRateSubtitle": "مؤشر الكفاءة"
     },
+    "assignee":"المكلف",
+    "priority":"الأولوية",
+    "due_date":"تاريخ التسليم",
+    "created_at":"تاريخ الإنشاء",
+    "updates":"التحديثات",
+    "attachments":"المرفقات",
+    "all_statuses":"جميع الحالات",
+    "stats":"الإحصائيات",
+    "discription_placeholder":"أدخل وصف المهمة",
+    "title_placeholder":"أدخل عنوان المهمة",
+    "select_assignee":"اختر المكلف",
+    "select_priority":"اختر الأولوية",
+    "select_status":"اختر الحالة",
+    "select_due_date":"اختر تاريخ التسليم",
+    "select_created_at":"اختر تاريخ الإنشاء",
     "insights": {
       "statusDistribution": "توزيع الحالات",
       "priorityDistribution": "توزيع الأولويات"
@@ -1387,7 +1413,13 @@
       "noUpdates": "لا توجد تحديثات بعد",
       "noAssignee": "لا يوجد مسؤول",
       "feedback": "الملاحظات",
-      "noFeedback": "لا يوجد ملاحظات"
+      "noFeedback": "لا يوجد ملاحظات",
+      "title_placeholder": "أدخل عنوان المهمة",
+      "description_placeholder": "أدخل وصف المهمة",
+      "select_assignee": "اختر المكلف",
+      "select_priority": "اختر الأولوية",
+      "stats": "الإحصائيات"
+
     },
     "actions": {
       "view": "عرض",
@@ -1480,7 +1512,43 @@
         "bulkReassignSuccess": "تم إعادة تعيين المهام بنجاح",
         "bulkReassignError": "فشل في إعادة تعيين المهام"
       }
-    }
+    },
+    "all_tasks": {
+      "title": "جميع المهام",
+      "subtitle": "عرض وتصفية جميع المهام في المنظمة",
+      "filters": "التصفية",
+      "status": "الحالة",
+      "due_date_from": "تاريخ التسليم من",
+      "due_date_to": "تاريخ التسليم إلى",
+      "clear_filters": "مسح التصفية",
+      "showing": "عرض",
+      "of": "من",
+      "tasks": "مهام",
+      "items_per_page": "عناصر لكل صفحة",
+      "page": "صفحة",
+      "no_tasks": "لم يتم العثور على مهام",
+      "no_tasks_description": "حاول تعديل التصفية لرؤية المزيد من المهام",
+      "title_column": "العنوان",
+      "description": "الوصف",
+      "assignee": "المكلف",
+      "department": "القسم",
+      "priority": "الأولوية",
+      "due_date": "تاريخ الاستحقاق",
+      "created_at": "تاريخ الإنشاء",
+      "updates": "التحديثات",
+      "attachments": "المرفقات",
+      "all_statuses": "جميع الحالات",
+      "stats": "الإحصائيات"
+    },
+    
+    "add_task_success": "تم إنشاء المهمة بنجاح",
+    "add_task_error": "فشل في إنشاء المهمة",
+    "edit_task_success": "تم تحديث المهمة بنجاح",
+    "edit_task_error": "فشل في تحديث المهمة",
+    "delete_task": "حذف المهمة",
+    "confirm_delete_task": "هل أنت متأكد من حذف المهمة '{name}'؟",
+    "delete_task_success": "تم حذف المهمة بنجاح",
+    "delete_task_error": "فشل في حذف المهمة"
   },
 
   "meetings": {

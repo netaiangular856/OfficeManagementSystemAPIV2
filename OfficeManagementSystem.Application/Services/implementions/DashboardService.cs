@@ -181,7 +181,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
                 var pendingTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.New || t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress);
-                var overdueTasks = tasks.Count(t => t.DueDate < DateTime.Now && t.Status != Domain.Enums.Tasks.TaskStatus.Done);
+                var overdueTasks = tasks.Count(t => t.DueDate < DateTime.Now && t.Status != Domain.Enums.Tasks.TaskStatus.Done && t.Status == Domain.Enums.Tasks.TaskStatus.Late);
 
                 // توزيع الحالة
                 var statusDistribution = tasks

@@ -64,8 +64,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,
-                Args = new[] { 
-                    "--no-sandbox", 
+                Args = new[] {
+                    "--no-sandbox",
                     "--disable-setuid-sandbox",
                     "--disable-web-security",
                     "--allow-file-access-from-files"
@@ -73,20 +73,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
             });
 
             await using var page = await browser.NewPageAsync();
-            
+
             // تعيين viewport للجودة الأفضل
             await page.SetViewportAsync(new ViewPortOptions
             {
-                Width = 1200,
+                Width = 1400,
                 Height = 800,
                 DeviceScaleFactor = 2
             });
-            
+
             await page.SetContentAsync(htmlContent, new NavigationOptions
             {
                 WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
             });
-            
+
             var pdfOptions = new PdfOptions
             {
                 Format = PuppeteerSharp.Media.PaperFormat.A4,
@@ -94,7 +94,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     Top = "1cm",
                     Right = "1cm",
-                    Bottom = "1cm",
+                    Bottom = "2cm",
                     Left = "1cm"
                 },
                 PrintBackground = true,
@@ -110,13 +110,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var isArabic = IsArabicText(letter.Subject ?? "");
             // استخدام BodyHtml دائماً إذا كان موجود
             var bodyContent = letter.BodyHtml ?? "لا يوجد محتوى";
-                
+
             // Debug: طباعة المحتوى للتأكد (يمكن إزالته في الإنتاج)
             if (string.IsNullOrWhiteSpace(letter.BodyHtml))
             {
                 Console.WriteLine($"Warning: BodyHtml is empty, using Body instead");
             }
-                
+
 
             var html = new StringBuilder();
             html.AppendLine("<!DOCTYPE html>");
@@ -129,23 +129,23 @@ namespace OfficeManagementSystem.Application.Services.implementions
             html.AppendLine("</head>");
             html.AppendLine("<body>");
             html.AppendLine("<div class='page-container'>");
-            
+
             // Professional Header
             html.AppendLine("<div class='letter-header'>");
             html.AppendLine($"<h1 class='letter-title'>{letter.Subject}</h1>");
             html.AppendLine("</div>");
-            
+
             // Professional Content
             html.AppendLine("<div class='letter-content'>");
             // إدراج المحتوى HTML مباشرة
             html.Append(bodyContent);
             html.AppendLine("</div>");
-            
+
             // Signature Section
             if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
             {
                 html.AppendLine("<div class='signature-section'>");
-                
+
                 // إصلاح مسار صورة التوقيع
                 var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
                     ? letter.SignatureImagePath
@@ -168,7 +168,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                             ".bmp" => "image/bmp",
                             _ => "image/jpeg"
                         };
-                        
+
                         html.AppendLine($"<img src='data:{mimeType};base64,{base64Image}' class='signature-image' alt='Signature'>");
                     }
                     catch (Exception ex)
@@ -193,10 +193,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (!string.IsNullOrWhiteSpace(approverJobTitle))
                     html.AppendLine($"<div class='signature-title'>{approverJobTitle}</div>");
                 html.AppendLine("</div>");
-                
+
                 html.AppendLine("</div>");
             }
-            
+
             // Professional Footer
             html.AppendLine("<div class='letter-footer'>");
             html.AppendLine("<div class='page-info'>");
@@ -206,7 +206,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             html.AppendLine("</div>");
             html.AppendLine("</div>");
             html.AppendLine("</div>"); // Close page-container
-            
+
             html.AppendLine("</body>");
             html.AppendLine("</html>");
 
@@ -280,13 +280,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
     /* Professional Content */
     .letter-content {
         padding: 30px 25px;
-        min-height: 400px;
+        //min-height: 400px;
         font-size: 17px;
         line-height: 2.2;
         background: white;
         border-radius: 8px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        margin: 20px;
+        //box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        margin:30px 20px;
         border: 1px solid #e9ecef;
     }
     
@@ -390,8 +390,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Signature Section */
     .signature-section {
-        margin-top: 60px;
-        padding: 30px 20px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        padding: 20px;
         //border-top: 2px solid #D4AF37;
         background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
         border-radius: 8px;
@@ -468,17 +469,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
         left: 0;
         right: 0;
         background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
-        padding: 12px 20px;
+        padding: 8px 20px;
         text-align: center;
         color: white;
-        font-size: 13px;
-        border-top: 3px solid #A67C00;
-        box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
-        height: 45px;
+        font-size: 12px;
+        border-top: 2px solid #A67C00;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        height: 35px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
+        margin-bottom: 0;
     }
     
     .page-info {
@@ -491,7 +493,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
     }
     
     .footer-text, .footer-date {
-        font-size: 12px;
+        font-size: 11px;
         opacity: 0.95;
     }
     
@@ -502,13 +504,32 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Add margin to content to avoid footer overlap */
     body {
-        margin-bottom: 65px;
+        margin-bottom: 60px;
+        padding-bottom: 0;
+    }
+    
+    /* Ensure content doesn't overlap with footer */
+    .page-container {
+        min-height: auto;
+        padding-bottom: 60px;
     }
     
     /* Ensure proper page breaks */
     .signature-section {
         page-break-inside: avoid;
-        margin-bottom: 80px;
+        margin-bottom: 40px;
+    }
+    
+    /* Ensure content doesn't overlap with footer */
+    .letter-content ol,
+    .letter-content ul {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+    
+    .letter-content ol li,
+    .letter-content ul li {
+        margin-bottom: 8px;
     }
     
     /* Print Styles */
@@ -516,12 +537,71 @@ namespace OfficeManagementSystem.Application.Services.implementions
         body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            margin-bottom: 0;
         }
         
         .letter-header,
         .letter-footer {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+        }
+        
+        /* Ensure footer appears on every page */
+        .letter-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        /* Add page margins to avoid content overlap */
+        @page {
+            margin-bottom: 60px;
+            margin-top: 0;
+        }
+        
+        /* Remove extra spacing on subsequent pages */
+        .page-container {
+            min-height: auto;
+            padding-bottom: 0;
+        }
+        
+        /* Ensure content starts at top of page */
+        .letter-content {
+            margin-top: 0;
+        }
+        
+        /* Add margin-top for subsequent pages */
+        .page-break + .letter-content {
+            margin-top: 20px;
+        }
+        
+        /* Add margin-top for content after page break */
+        .letter-content:first-child {
+            margin-top: 20px;
+        }
+        
+        /* Remove extra spacing from header */
+        .letter-header {
+            margin-bottom: 20px;
+        }
+        
+        /* Ensure proper spacing for signature */
+        .signature-section {
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        /* Ensure content doesn't overlap with footer in print */
+        .letter-content ol,
+        .letter-content ul {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+        
+        .letter-content ol li,
+        .letter-content ul li {
+            margin-bottom: 8px;
         }
     }
     
@@ -547,9 +627,25 @@ namespace OfficeManagementSystem.Application.Services.implementions
     .page-break {
         page-break-before: always;
         break-before: page;
-        margin: 20px 0;
+        margin: 0;
         border-top: 2px solid #D4AF37;
         padding-top: 20px;
+    }
+    
+    /* Ensure proper page breaks and spacing */
+    .letter-content + .page-break {
+        margin-top: 0;
+    }
+    
+    /* Add margin-top for content after page breaks */
+    .page-break + .letter-content {
+        margin-top: 20px;
+        padding-top: 0;
+    }
+    
+    /* Add margin-top for first content on new pages */
+    .letter-content:first-child {
+        margin-top: 20px;
     }
     
     /* Ensure proper text rendering */
