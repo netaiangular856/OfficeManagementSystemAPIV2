@@ -567,22 +567,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 // Generate PDF with signature
-                
-                var pdfPath = await _letterPdfService.GenerateLetterPdfAsync(letter);
+                var pdfBytes = await _letterPdfService.GenerateLetterPdfAsync(letter);
                
-                
                 // Send email with PDF attachment
+                var emailSent = await _letterEmailService.SendLetterEmailAsync(emailDto, pdfBytes, letter);
                
-                var emailSent = await _letterEmailService.SendLetterEmailAsync(emailDto, pdfPath, letter);
-               
-                
                 if (emailSent)
                 {
                     // Update letter status
                     letter.Status = LetterStatus.Sent;
                     letter.IsEmailSent = true;
                     letter.EmailSentAt = DateTime.UtcNow;
-                    letter.PdfPath = pdfPath;
+                    letter.PdfPath = null; // لا نحفظ مسار ملف بعد الآن
                     letter.UpdatedAt = DateTime.UtcNow;
 
                     await _unitOfWork.LetterRepository.UpdateAsync(letter);
@@ -592,7 +588,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     {
                         IsEmailSent = true,
                         EmailSentAt = letter.EmailSentAt,
-                        PdfPath = letter.PdfPath
+                        PdfPath = null // لا نحفظ مسار ملف بعد الآن
                     };
 
                     return ApiResponse<LetterEmailStatusDto>.SuccessResponse(statusDto, "تم إرسال الخطاب بنجاح");

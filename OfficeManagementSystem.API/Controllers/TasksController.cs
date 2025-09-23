@@ -34,6 +34,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks
         [HttpPost]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskDto>>> CreateTask([FromBody] CreateTaskDto createTaskDto)
         {
             var currentUserId = GetCurrentUserId();
@@ -47,6 +49,7 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks
         [HttpGet]
+        [Authorize(Policy = "task.index")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetTasks([FromQuery] TaskFilterDto filter)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -62,6 +65,7 @@ namespace OfficeManagementSystem.API.Controllers
             return Ok(result);
         }
         [HttpGet("all")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetAllTasks([FromQuery] TaskFilterDto filter)
         {
             var result = await _taskService.GetAllTasksAsync( filter);
@@ -73,6 +77,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet("employee-tasks")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetEmployeeTasks([FromQuery] TaskFilterDto filter)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -90,6 +95,9 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}
         [HttpGet("{id}")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskDto>>> GetTaskById(int id)
         {
             var result = await _taskService.GetTaskByIdAsync(id);
@@ -102,6 +110,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // PUT api/v1/tasks/{id}
         [HttpPut("{id}")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskDto>>> UpdateTask(int id, [FromBody] UpdateTaskDto updateTaskDto)
         {
             var result = await _taskService.UpdateTaskAsync(id, updateTaskDto);
@@ -114,6 +124,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // DELETE api/v1/tasks/{id}
         [HttpDelete("{id}")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteTask(int id)
         {
             var result = await _taskService.DeleteTaskAsync(id);
@@ -126,6 +138,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/{id}/status
         [HttpPost("{id}/status")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<bool>>> CloseTask(int id, [FromBody] CloseTaskDto closeTaskDto)
         {
             var currentUserId = GetCurrentUserId();
@@ -139,6 +153,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/bulk/status
         [HttpPost("bulk/status")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<bool>>> BulkCloseTasks([FromBody] BulkCloseTasksDto bulkCloseDto)
         {
             var currentUserId = GetCurrentUserId();
@@ -152,6 +168,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/bulk/reassign
         [HttpPost("bulk/reassign")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<bool>>> BulkReassignTasks([FromBody] BulkReassignTasksDto bulkReassignDto)
         {
             var currentUserId = GetCurrentUserId();
@@ -165,6 +183,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/{id}/updates
         [HttpPost("{id}/updates")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskUpdateDto>>> CreateTaskUpdate(int id, [FromBody] CreateTaskUpdateDto createUpdateDto)
         {
             var currentUserId = GetCurrentUserId();
@@ -178,6 +198,9 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}/updates
         [HttpGet("{id}/updates")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<List<TaskUpdateDto>>>> GetTaskUpdates(int id)
         {
             var result = await _taskUpdateService.GetTaskUpdatesAsync(id);
@@ -190,6 +213,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // POST api/v1/tasks/{id}/attachments
         [HttpPost("{id}/attachments")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskAttachmentDto>>> UploadAttachment(int id, [FromForm]UplodeTaskDto UplodeDto)
         {
             if (UplodeDto.File == null || UplodeDto.File.Length == 0)
@@ -206,6 +231,9 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}/attachments
         [HttpGet("{id}/attachments")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<List<TaskAttachmentDto>>>> GetTaskAttachments(int id)
         {
             var result = await _taskAttachmentService.GetTaskAttachmentsAsync(id);
@@ -218,6 +246,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // DELETE api/v1/tasks/{id}/attachments/{attachmentId}
         [HttpDelete("{id}/attachments/{attachmentId}")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteAttachment(int id, int attachmentId)
         {
             var result = await _taskAttachmentService.DeleteAttachmentAsync(id, attachmentId);
@@ -229,6 +259,9 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}/feedback")]
+        [Authorize(Policy = "task.index")]
+        [Authorize(Policy = "allTasks.index")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<List<TaskUpdateDto>>>> GetTaskFeedbacks(int id)
         {
             var result = await _taskService.GetTaskFeedbackAsync(id);
@@ -240,6 +273,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpPost("{id}/feedback")]
+        [Authorize(Policy = "MyTasks.index")]
         public async Task<ActionResult<ApiResponse<TaskUpdateDto>>> CreateTaskFeedback(int id,[FromBody] CreateTaskFeedbackDto createFeedbackDto)
         {
             var currentUserId = GetCurrentUserId();

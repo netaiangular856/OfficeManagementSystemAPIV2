@@ -4,12 +4,29 @@ using OfficeManagementSystem.Infrastructure;
 using OfficeManagementSystem.Infrastructure.Data;
 using OfficeManagementSystem.Infrastructure.Data.Seed;
 using System.ComponentModel;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 namespace OfficeManagementSystem.API
 {
     public class Program
     {
         public static async Task Main(string[] args)
         {
+            //إعداد مسار مكتبة wkhtmltox
+            var wkhtmltoxPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "wkhtmltox");
+            if (Directory.Exists(wkhtmltoxPath))
+            {
+                var dllPath = Path.Combine(wkhtmltoxPath, "libwkhtmltox.dll");
+                if (File.Exists(dllPath))
+                {
+                    // إضافة المسار إلى PATH البيئة
+                    var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+                    if (!currentPath.Contains(wkhtmltoxPath))
+                    {
+                        Environment.SetEnvironmentVariable("PATH", $"{wkhtmltoxPath};{currentPath}");
+                    }
+                }
+            }
 
             var builder = WebApplication.CreateBuilder(args);
 

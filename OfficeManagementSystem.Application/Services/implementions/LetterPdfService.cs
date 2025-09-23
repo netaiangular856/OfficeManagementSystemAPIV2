@@ -9,70 +9,81 @@ using PuppeteerSharp;
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
     public class LetterPdfService : ILetterPdfService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<LetterPdfService> _logger;
+        private static bool _browserDownloaded = false;
+        private static readonly object _downloadLock = new object();
 
-        public LetterPdfService(UserManager<AppUser> userManager)
+        public LetterPdfService(UserManager<AppUser> userManager, ILogger<LetterPdfService> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
 
-        public async Task<string> GenerateLetterPdfAsync(Letter letter)
+        public async Task<byte[]> GenerateLetterPdfAsync(Letter letter)
         {
             try
             {
-                // التأكد من تحميل Puppeteer
-                await EnsureBrowserDownloadedAsync();
+                // التأكد من تحميل Puppeteer مرة واحدة فقط
+                EnsureBrowserDownloaded();
 
                 var userSignature = await _userManager.Users.OfType<Employee>()
                     .FirstOrDefaultAsync(m => m.Id == letter.ApprovedByUserId);
 
-                var fileName = $"Letter_{letter.Subject?.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-                var directory = Path.Combine("wwwroot", "pdfs");
-                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-                var filePath = Path.Combine(directory, fileName);
-
                 // إنشاء HTML مع CSS متقدم
                 var htmlContent = await GenerateLetterHtmlAsync(letter, userSignature);
 
-                // تحويل HTML إلى PDF باستخدام Puppeteer
-                await ConvertHtmlToPdfAsync(htmlContent, filePath);
+                // تحويل HTML إلى PDF وإرجاعه كـ byte array
+                var pdfBytes = await ConvertHtmlToPdfAsync(htmlContent);
 
-                return filePath;
+                _logger.LogInformation("PDF generated successfully for letter {LetterId}", letter.Id);
+                return pdfBytes;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"خطأ في إنشاء PDF: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                _logger.LogError(ex, "خطأ في إنشاء PDF للرسالة {LetterId}", letter.Id);
                 throw;
             }
         }
 
-        private async Task EnsureBrowserDownloadedAsync()
+        private void EnsureBrowserDownloaded()
         {
-            using var browserFetcher = new BrowserFetcher();
-            await browserFetcher.DownloadAsync();
+            if (_browserDownloaded) return;
+
+            lock (_downloadLock)
+            {
+                if (_browserDownloaded) return; // Double-check pattern
+
+                _logger.LogInformation("Downloading Puppeteer browser...");
+                using var browserFetcher = new BrowserFetcher();
+                browserFetcher.DownloadAsync().Wait();
+                _browserDownloaded = true;
+                _logger.LogInformation("Puppeteer browser downloaded successfully");
+            }
         }
 
-        private async Task ConvertHtmlToPdfAsync(string htmlContent, string outputPath)
+        private async Task<byte[]> ConvertHtmlToPdfAsync(string htmlContent)
         {
-            using var browserFetcher = new BrowserFetcher();
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
                 Headless = true,
                 Args = new[] {
                     "--no-sandbox",
                     "--disable-setuid-sandbox",
                     "--disable-web-security",
-                    "--allow-file-access-from-files"
+                    "--allow-file-access-from-files",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu"
                 }
             });
 
-            await using var page = await browser.NewPageAsync();
+            using var page = await browser.NewPageAsync();
 
             // تعيين viewport للجودة الأفضل
             await page.SetViewportAsync(new ViewPortOptions
@@ -84,7 +95,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             await page.SetContentAsync(htmlContent, new NavigationOptions
             {
-                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 },
+                Timeout = 15000 // 15 ثانية
             });
 
             var pdfOptions = new PdfOptions
@@ -92,17 +104,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 Format = PuppeteerSharp.Media.PaperFormat.A4,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
                 {
-                    Top = "1cm",
-                    Right = "1cm",
-                    Bottom = "2cm",
-                    Left = "1cm"
+                    Top = "0cm",
+                    Right = "0cm",
+                    Bottom = "0cm",
+                    Left = "0cm"
                 },
                 PrintBackground = true,
                 PreferCSSPageSize = true,
                 Scale = 1.0m
             };
 
-            await page.PdfAsync(outputPath, pdfOptions);
+            return await page.PdfDataAsync(pdfOptions);
         }
 
         private async Task<string> GenerateLetterHtmlAsync(Letter letter, Employee? userSignature)
@@ -236,13 +248,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Professional Page Layout */
     .page-container {
-        //max-width: 210mm;
-        //margin: 0 auto;
         background: white;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
+        //box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        overflow: visible;
         position: relative;
+        width: 100%;
+        min-height: 100vh;
     }
     
     /* Professional Header */
@@ -251,9 +262,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
         padding: 30px 20px;
         text-align: center;
         color: white;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
         border-bottom: 4px solid #A67C00;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        //box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         position: relative;
     }
     
@@ -279,21 +290,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Professional Content */
     .letter-content {
-        padding: 30px 25px;
-        //min-height: 400px;
+        padding: 20px 15px;
         font-size: 17px;
         line-height: 2.2;
         background: white;
         border-radius: 8px;
-        //box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        margin:30px 20px;
-        border: 1px solid #e9ecef;
+        margin: 10px 10px 20px 10px;
+        //border: 1px solid #e9ecef;
     }
     
     /* Advanced Text Formatting Support */
     .letter-content h1, .letter-content h2, .letter-content h3,
     .letter-content h4, .letter-content h5, .letter-content h6 {
-        margin: 20px 0 15px 0;
+        margin: 5px 0 25px 0;
         font-weight: bold;
         font-family: 'Amiri', 'Arial', sans-serif;
         color: #2C3E50;
@@ -481,6 +490,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         justify-content: center;
         z-index: 1000;
         margin-bottom: 0;
+        margin-top: 0;
     }
     
     .page-info {
@@ -504,14 +514,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Add margin to content to avoid footer overlap */
     body {
-        margin-bottom: 60px;
-        padding-bottom: 0;
+        margin: 0;
+        padding: 0;
     }
     
     /* Ensure content doesn't overlap with footer */
     .page-container {
         min-height: auto;
-        padding-bottom: 60px;
+        padding-bottom: 50px;
+        margin: 0;
     }
     
     /* Ensure proper page breaks */
@@ -556,14 +567,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
         
         /* Add page margins to avoid content overlap */
         @page {
-            margin-bottom: 60px;
-            margin-top: 0;
+            margin: 0;
+            size: A4;
         }
         
         /* Remove extra spacing on subsequent pages */
         .page-container {
             min-height: auto;
-            padding-bottom: 0;
+            padding-bottom: 50px;
         }
         
         /* Ensure content starts at top of page */
@@ -692,5 +703,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
             return false;
         }
+
     }
+
 }

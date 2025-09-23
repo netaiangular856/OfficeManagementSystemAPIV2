@@ -26,7 +26,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _enableSsl = true; // Gmail requires SSL
         }
 
-        public async Task<bool> SendLetterEmailAsync(SendLetterEmailDto emailDto, string pdfPath, Letter letter)
+        public async Task<bool> SendLetterEmailAsync(SendLetterEmailDto emailDto, byte[] pdfBytes, Letter letter)
         {
             try
             {
@@ -106,11 +106,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
 
                 // Add PDF attachment
-                if (File.Exists(pdfPath))
+                if (pdfBytes != null && pdfBytes.Length > 0)
                 {
                     var pdfAttachment = new MimePart("application", "pdf")
                     {
-                        Content = new MimeContent(File.OpenRead(pdfPath)),
+                        Content = new MimeContent(new MemoryStream(pdfBytes)),
                         ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         FileName = $"Letter_{letter.Subject}.pdf"

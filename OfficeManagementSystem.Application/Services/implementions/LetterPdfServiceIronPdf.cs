@@ -21,25 +21,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _userManager = userManager;
         }
 
-        public async Task<string> GenerateLetterPdfAsync(Letter letter)
+        public async Task<byte[]> GenerateLetterPdfAsync(Letter letter)
         {
             try
             {
                 var userSignature = await _userManager.Users.OfType<Employee>()
                     .FirstOrDefaultAsync(m => m.Id == letter.ApprovedByUserId);
 
-                var fileName = $"Letter_{letter.Subject?.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-                var directory = Path.Combine("wwwroot", "pdfs");
-                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-                var filePath = Path.Combine(directory, fileName);
-
                 // إنشاء HTML مع CSS متقدم
                 var htmlContent = await GenerateLetterHtmlAsync(letter, userSignature);
 
-                // تحويل HTML إلى PDF باستخدام IronPDF
-                await ConvertHtmlToPdfAsync(htmlContent, filePath);
+                // تحويل HTML إلى PDF وإرجاعه كـ byte array
+                var pdfBytes = await ConvertHtmlToPdfAsync(htmlContent);
 
-                return filePath;
+                return pdfBytes;
             }
             catch (Exception ex)
             {
@@ -49,7 +44,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        private async Task ConvertHtmlToPdfAsync(string htmlContent, string outputPath)
+        private async Task<byte[]> ConvertHtmlToPdfAsync(string htmlContent)
         {
             try
             {
@@ -60,13 +55,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var pdfOptions = new ChromePdfRenderOptions
                 {
                     PaperSize = IronPdf.Rendering.PdfPaperSize.A4,
-                    MarginTop = 20,
-                    MarginRight = 20,
-                    MarginBottom = 20,
-                    MarginLeft = 20,
+                    MarginTop = 0,
+                    MarginRight = 0,
+                    MarginBottom = 0,
+                    MarginLeft = 0,
                     PrintHtmlBackgrounds = true,
                     CssMediaType = IronPdf.Rendering.PdfCssMediaType.Print,
-                    ViewPortWidth = 1200,
+                    ViewPortWidth = 1400,
                     ViewPortHeight = 800,
                     EnableJavaScript = true
                 };
@@ -74,10 +69,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 // تحويل HTML إلى PDF
                 var pdf = await renderer.RenderHtmlAsPdfAsync(htmlContent);
                 
-                // حفظ الملف
-                pdf.SaveAs(outputPath);
-                
-                Console.WriteLine($"تم إنشاء PDF بنجاح: {outputPath}");
+                // إرجاع PDF كـ byte array
+                return pdf.BinaryData;
             }
             catch (Exception ex)
             {
@@ -219,9 +212,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
     .page-container {
         background: white;
         box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
+        overflow: visible;
         position: relative;
+        width: 100%;
+        min-height: 100vh;
     }
     
     /* Professional Header */
@@ -259,13 +253,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
     /* Professional Content */
     .letter-content {
         padding: 30px 25px;
-        min-height: 400px;
         font-size: 17px;
         line-height: 2.2;
         background: white;
         border-radius: 8px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-        margin: 20px;
+        margin: 30px 20px;
         border: 1px solid #e9ecef;
     }
     
@@ -369,10 +361,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Signature Section */
     .signature-section {
-        margin-top: 60px;
-        padding: 30px 20px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        padding: 20px;
+        //border-top: 2px solid #D4AF37;
         background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
         border-radius: 8px;
+        //box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         text-align: left;
     }
     
@@ -381,8 +376,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         max-width: 300px;
         margin-bottom: 20px;
         display: block;
+        //border: 2px solid #D4AF37;
         border-radius: 4px;
         padding: 8px;
+        //background: white;
+        //box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin-left: 0;
         margin-right: auto;
     }
@@ -407,11 +405,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
     .signature-info {
         margin-top: 15px;
         padding: 15px;
+        //background: white;
         border-radius: 6px;
+        //border-left: 4px solid #D4AF37;
     }
     
     [dir='rtl'] .signature-info {
         border-left: none;
+        //border-right: 4px solid #D4AF37;
     }
     
     .signature-name {
@@ -439,17 +440,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
         left: 0;
         right: 0;
         background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
-        padding: 12px 20px;
+        padding: 8px 20px;
         text-align: center;
         color: white;
-        font-size: 13px;
-        border-top: 3px solid #A67C00;
-        box-shadow: 0 -3px 15px rgba(0,0,0,0.2);
-        height: 45px;
+        font-size: 12px;
+        border-top: 2px solid #A67C00;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        height: 35px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1000;
+        margin-bottom: 0;
     }
     
     .page-info {
@@ -462,7 +464,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
     }
     
     .footer-text, .footer-date {
-        font-size: 12px;
+        font-size: 11px;
         opacity: 0.95;
     }
     
@@ -473,13 +475,33 @@ namespace OfficeManagementSystem.Application.Services.implementions
     
     /* Add margin to content to avoid footer overlap */
     body {
-        margin-bottom: 65px;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Ensure content doesn't overlap with footer */
+    .page-container {
+        min-height: auto;
+        padding-bottom: 50px;
+        margin: 0;
     }
     
     /* Ensure proper page breaks */
     .signature-section {
         page-break-inside: avoid;
-        margin-bottom: 80px;
+        margin-bottom: 40px;
+    }
+    
+    /* Ensure content doesn't overlap with footer */
+    .letter-content ol,
+    .letter-content ul {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+    
+    .letter-content ol li,
+    .letter-content ul li {
+        margin-bottom: 8px;
     }
     
     /* Print Styles */
@@ -487,12 +509,71 @@ namespace OfficeManagementSystem.Application.Services.implementions
         body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            margin-bottom: 0;
         }
         
         .letter-header,
         .letter-footer {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+        }
+        
+        /* Ensure footer appears on every page */
+        .letter-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        /* Add page margins to avoid content overlap */
+        @page {
+            margin: 0;
+            size: A4;
+        }
+        
+        /* Remove extra spacing on subsequent pages */
+        .page-container {
+            min-height: auto;
+            padding-bottom: 50px;
+        }
+        
+        /* Ensure content starts at top of page */
+        .letter-content {
+            margin-top: 0;
+        }
+        
+        /* Add margin-top for subsequent pages */
+        .page-break + .letter-content {
+            margin-top: 20px;
+        }
+        
+        /* Add margin-top for content after page break */
+        .letter-content:first-child {
+            margin-top: 20px;
+        }
+        
+        /* Remove extra spacing from header */
+        .letter-header {
+            margin-bottom: 20px;
+        }
+        
+        /* Ensure proper spacing for signature */
+        .signature-section {
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        /* Ensure content doesn't overlap with footer in print */
+        .letter-content ol,
+        .letter-content ul {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+        
+        .letter-content ol li,
+        .letter-content ul li {
+            margin-bottom: 8px;
         }
     }
     
@@ -518,9 +599,25 @@ namespace OfficeManagementSystem.Application.Services.implementions
     .page-break {
         page-break-before: always;
         break-before: page;
-        margin: 20px 0;
+        margin: 0;
         border-top: 2px solid #D4AF37;
         padding-top: 20px;
+    }
+    
+    /* Ensure proper page breaks and spacing */
+    .letter-content + .page-break {
+        margin-top: 0;
+    }
+    
+    /* Add margin-top for content after page breaks */
+    .page-break + .letter-content {
+        margin-top: 20px;
+        padding-top: 0;
+    }
+    
+    /* Add margin-top for first content on new pages */
+    .letter-content:first-child {
+        margin-top: 20px;
     }
     
     /* Ensure proper text rendering */

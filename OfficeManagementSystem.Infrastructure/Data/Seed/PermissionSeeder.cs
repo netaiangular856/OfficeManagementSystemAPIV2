@@ -113,7 +113,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
                 // Tasks Controller Permissions
                 #region
                 new Permission { Name = "task.index", DisplayName = "Tasks page", Description = "View all tasks", Controller = "tasks", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
-               
+               new Permission { Name = "allTasks.index", DisplayName = "Manager Tasks page", Description = "View all tasks for Manager", Controller = "tasks", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
+               new Permission { Name = "MyTasks.index", DisplayName = "My Tasks page", Description = "View all tasks for employee", Controller = "tasks", Action = "get", IsActive = true, CreatedAt = DateTime.UtcNow },
 #endregion
                 // Tasks Controller Permissions
                 #region

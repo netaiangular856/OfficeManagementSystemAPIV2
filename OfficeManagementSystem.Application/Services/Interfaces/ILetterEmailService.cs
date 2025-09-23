@@ -5,6 +5,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
 {
     public interface ILetterEmailService 
     {
-        Task<bool> SendLetterEmailAsync(SendLetterEmailDto emailDto, string pdfPath, Letter letter);
+        Task<bool> SendLetterEmailAsync(SendLetterEmailDto emailDto, byte[] pdfBytes, Letter letter);
     }
 }

@@ -23,6 +23,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 using OfficeManagementSystem.Application.Services.BackgroundServices;
 using Microsoft.AspNetCore.Authorization;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 
 namespace OfficeManagementSystem.Infrastructure
 {
@@ -64,8 +66,9 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Letter services
             services.AddScoped<ILetterService, LetterService>();
-            services.AddScoped<ILetterPdfService, LetterPdfServiceIronPdf>();
+            //services.AddScoped<ILetterPdfService, LetterPdfServiceIronPdf>();
             //services.AddScoped<ILetterPdfService, LetterPdfService>();
+            services.AddScoped<ILetterPdfService, LetterPdfServiceDinkToPdf>();
             services.AddScoped<ILetterEmailService, LetterEmailService>();
             
             
@@ -114,7 +117,8 @@ namespace OfficeManagementSystem.Infrastructure
 
             services.AddSingleton<IAuthorizationPolicyProvider, DynamicAuthorizationPolicyProvider>();
 
-
+            // DinkToPdf Converter
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

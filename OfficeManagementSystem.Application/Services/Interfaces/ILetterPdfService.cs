@@ -4,6 +4,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
 {
     public interface ILetterPdfService
     {
-        Task<string> GenerateLetterPdfAsync(Letter letter);
+        Task<byte[]> GenerateLetterPdfAsync(Letter letter);
     }
 }
