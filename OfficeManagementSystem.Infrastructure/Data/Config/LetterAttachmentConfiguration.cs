@@ -19,9 +19,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(x => x.Document)
-                .WithMany()
+                .WithMany(x=>x.LetterAttachments)
                 .HasForeignKey(x => x.DocumentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
+
 
 
             // Indexes

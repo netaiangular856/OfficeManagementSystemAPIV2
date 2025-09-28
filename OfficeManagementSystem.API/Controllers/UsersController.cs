@@ -411,5 +411,11 @@ namespace OfficeManagementSystem.API.Controllers
             var result =await _userService.GetUserNameIdAsync(search);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+        [HttpGet("manager-names")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<ManagerNameIdDto>>>> GetManagerNames([FromQuery] string? search)
+        {
+            var result = await _userService.GetManagerNameIdAsync(search);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

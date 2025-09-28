@@ -467,5 +467,42 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<IEnumerable<UserNameIdDto>>.ErrorResponse("An error occurred while retrieving users");
             }
         }
+
+        public async Task<ApiResponse<IEnumerable<ManagerNameIdDto>>> GetManagerNameIdAsync(string? search)
+        {
+            try
+            {
+                var users = await _userManager.GetUsersInRoleAsync("Manager");
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    search = search.Trim().ToLower();
+                    users = users.Where(u =>
+                        (u.FirstName + " " + u.LastName).ToLower().Contains(search) ||
+                        u.UserName.ToLower().Contains(search))
+                        .ToList();
+                }
+
+                var result = users.Select(m => new ManagerNameIdDto
+                {
+                    Id = m.Id,
+                    Name = m.FirstName + " " + m.LastName
+                })
+                .ToList();
+
+                if (!result.Any())
+                {
+                    return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse("no user to show");
+                }
+
+                return ApiResponse<IEnumerable<ManagerNameIdDto>>.SuccessResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting users");
+                return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse("An error occurred while retrieving users");
+            }
+        }
+
     }
 }

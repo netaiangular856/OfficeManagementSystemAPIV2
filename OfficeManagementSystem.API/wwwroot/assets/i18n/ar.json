@@ -75,7 +75,7 @@
     "achievement_created": "تم إنشاء الإنجاز بنجاح",
     "achievement_updated": "تم تحديث الإنجاز بنجاح",
     "achievement_deleted": "تم حذف الإنجاز بنجاح",
-    "title": "إدارة السفر",
+    "title": "إدارة المشاركات الخارجية",
     "is_completed": "السفر مكتمل",
     "add_travel": "إضافة سفر",
     "edit_travel": "تعديل السفر",
@@ -624,7 +624,7 @@
     "overdue": "متأخر",
     "user_events": "أحداث المستخدم",
     "my_events": "أحداثي",
-    "my_calendar": "تقويمي",
+    "my_calendar": "جدول الاعمال",
     "system_calendar": "تقويم النظام",
     "system_events": "أحداث النظام",
     "view_all": "عرض الكل",
@@ -669,6 +669,7 @@
     "reminder_description": "الوصف",
     "event_time": "وقت الحدث",
     "reminder_time": "وقت التذكير",
+    "confirm_delete_message":"هل أنت متأكد من حذف هذا التذكير؟",
     "title_placeholder": "أدخل عنوان التذكير",
     "description_placeholder": "أدخل وصف التذكير",
     "create_success": "تم إنشاء التذكير بنجاح",
@@ -679,7 +680,7 @@
     "delete_error": "فشل في حذف التذكير",
     "load_error": "فشل في تحميل التذكيرات",
     "validation_error": "وقت التذكير يجب أن يكون قبل وقت الحدث",
-    "confirm_delete": "هل أنت متأكد من حذف هذا التذكير؟",
+    "confirm_delete": "تأكيد الحذف",
     "no_reminders": "لا توجد تذكيرات",
     "no_reminders_description": "ابدأ بإنشاء تذكيرك الأول لتبقى منظمًا.",
     "add_first_reminder": "إضافة أول تذكير",
@@ -1219,6 +1220,7 @@
     "add_document_success": "تم إضافة المستند بنجاح",
     "edit_document_success": "تم تحديث المستند بنجاح",
     "delete_document_success": "تم حذف المستند بنجاح",
+    "delete_constraint_error": "لا يمكن حذف المستند. قد يكون مرتبطاً بسجلات أخرى.",
     "download_success": "تم تحميل المستند بنجاح",
     "type": "النوع",
     "source": "المصدر",
@@ -1331,8 +1333,21 @@
     }
   },
   "tasks": {
+    "due_date_from":"من تاريخ",
+    "due_date_to":"الي تاريخ",
+    "clear_filters":"حذف التصفية",
+    "description_placeholder":"أدخل وصف المهمة",
     "title": "المهام",
     "subtitle": "تابع واضف المهام الخاصة بك وتقدم في المهام",
+    "filters": {
+      "dueDateFrom": "تاريخ التسليم من ",
+      "dueDateTo": "تاريخ التسليم من ",
+      "clearFilters": "حذف التصفية",
+      "employee": "الموظف",
+      "selectEmployee": "اختر الموظف",
+      "searchEmployeePlaceholder": "اكتب للبحث عن الموظفين...",
+      "showAllEmployees": "عرض جميع الموظفين"
+    },
     "pagination": {
       "note": "يتم عرض حتى 5 مهام لكل عمود في كل صفحة"
     },
@@ -1359,7 +1374,6 @@
     "attachments":"المرفقات",
     "all_statuses":"جميع الحالات",
     "stats":"الإحصائيات",
-    "discription_placeholder":"أدخل وصف المهمة",
     "title_placeholder":"أدخل عنوان المهمة",
     "select_assignee":"اختر المكلف",
     "select_priority":"اختر الأولوية",
@@ -1397,7 +1411,7 @@
       "title": "عنوان المهمة",
       "description": "الوصف",
       "department": "القسم",
-      "assignee": "المسؤول",
+      "assignee": "المكلف",
       "priority": "الأولوية",
       "dueDate": "تاريخ التسليم",
       "createdAt": "تاريخ الإنشاء",
@@ -1415,7 +1429,6 @@
       "feedback": "الملاحظات",
       "noFeedback": "لا يوجد ملاحظات",
       "title_placeholder": "أدخل عنوان المهمة",
-      "description_placeholder": "أدخل وصف المهمة",
       "select_assignee": "اختر المكلف",
       "select_priority": "اختر الأولوية",
       "stats": "الإحصائيات"
@@ -1492,6 +1505,10 @@
     "myTasks": {
       "title": "مهامي",
       "subtitle": "إدارة المهام المخصصة لك وتقديم الملاحظات",
+      "due_date_from":"من تاريخ",
+      "due_date_to":"الي تاريخ",
+      "clear_filters":"حذف التصفية",
+
       "form": {
         "feedbackText": "الملاحظات",
         "feedbackPlaceholder": "أدخل ملاحظاتك حول هذه المهمة...",
@@ -1515,6 +1532,7 @@
     },
     "all_tasks": {
       "title": "جميع المهام",
+      "createdBy": "انشئ بواسطة",
       "subtitle": "عرض وتصفية جميع المهام في المنظمة",
       "filters": "التصفية",
       "status": "الحالة",
@@ -1533,14 +1551,18 @@
       "assignee": "المكلف",
       "department": "القسم",
       "priority": "الأولوية",
-      "due_date": "تاريخ الاستحقاق",
+      "due_date": "تاريخ التسليم",
       "created_at": "تاريخ الإنشاء",
       "updates": "التحديثات",
       "attachments": "المرفقات",
       "all_statuses": "جميع الحالات",
-      "stats": "الإحصائيات"
+      "stats": "الإحصائيات",
+      "manager_search": "البحث عن المدير",
+      "search_manager_placeholder": "اكتب للبحث عن المدراء...",
+      "select_manager": "اختر المدير",
+      "all_managers": "جميع المدراء",
+      "show_all_managers": "عرض جميع المدراء"
     },
-    
     "add_task_success": "تم إنشاء المهمة بنجاح",
     "add_task_error": "فشل في إنشاء المهمة",
     "edit_task_success": "تم تحديث المهمة بنجاح",

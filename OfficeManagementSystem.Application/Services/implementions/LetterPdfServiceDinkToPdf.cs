@@ -142,7 +142,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             html.AppendLine("<title>Letter</title>");
             html.AppendLine(GetAdvancedCSS());
             html.AppendLine("</head>");
-            html.AppendLine("<body style='font-family: Amiri, Arial, sans-serif; line-height: 1.6; color: #2C3E50; background: #f8f9fa; min-height: 100vh; margin: 0; padding: 0;'>");
+            html.AppendLine("<body style='font-family: Amiri, Arial, sans-serif; line-height: 1.6; color: #2C3E50;  min-height: 100vh; margin: 0; padding: 0;'>");
             html.AppendLine("<div class='page-container' style='background: white; overflow: visible; position: relative; width: 100%; min-height: 100vh; margin: 0; padding-bottom: 50px;'>");
 
             // Professional Header
@@ -159,7 +159,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             // Signature Section
             if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
             {
-                html.AppendLine("<div class='signature-section' style='margin-top: 40px; margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: left;'>");
+                html.AppendLine("<div class='signature-section' style='margin-top: 40px; margin-bottom: 20px; padding: 20px;  border-radius: 8px; text-align: left;'>");
 
                 // إصلاح مسار صورة التوقيع
                 var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
@@ -189,13 +189,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     catch (Exception ex)
                     {
                         Console.WriteLine($"خطأ في تحميل صورة التوقيع: {ex.Message}");
-                        html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: #f8f9fa; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
+                        html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;  color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
                     }
                 }
                 else
                 {
                     // إذا لم توجد الصورة، أضف placeholder
-                    html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background: #f8f9fa; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
+                    html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
                 }
 
                 // الاسم والوظيفة تحت الصورة
@@ -262,7 +262,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 <body>
   <div class='footer-wrap'>
     <div class='footer-inner'>
-      <div class='center'> تاريخ الطباعة: " + DateTime.Now.ToString("dd/MM/yyyy") + @"</div>
+      <div class='center'> تاريخ الانشاء: " + DateTime.Now.ToString("dd/MM/yyyy") + @"</div>
     </div>
   </div>
 </body>
@@ -357,7 +357,7 @@ body {
         {
             return @"
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+    //@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
     
     * {
         margin: 0;
@@ -366,12 +366,11 @@ body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
-    
     body {
         font-family: 'Amiri', 'Arial', sans-serif;
         line-height: 1.6;
         color: #2C3E50;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        //background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
         min-height: 100vh;
         position: relative;
         -webkit-print-color-adjust: exact;

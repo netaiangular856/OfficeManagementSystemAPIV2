@@ -502,6 +502,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .Where(e => e.ManagerId == managerId)
                     .Select(m=>new EmployeeNamesDto
                     {
+                        Id=m.Id,
                         FullName=m.FirstName+m.LastName,
                         Email=m.Email,
                         JobTitle=m.JobTitle,

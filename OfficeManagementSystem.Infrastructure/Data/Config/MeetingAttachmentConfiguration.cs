@@ -22,7 +22,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.HasOne(x => x.Document)
                 .WithMany(x=>x.MeetingAttachments)
                 .HasForeignKey(x => x.DocumentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
 
             // Indexes

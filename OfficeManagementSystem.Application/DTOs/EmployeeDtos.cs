@@ -115,6 +115,7 @@ namespace OfficeManagementSystem.Application.DTOs
     }
     public record EmployeeNamesDto
     {
+        public string Id { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string JobTitle { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

@@ -1692,9 +1692,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Letters.LetterAttachment", b =>
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Documents.Document", "Document")
-                        .WithMany()
+                        .WithMany("LetterAttachments")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Letters.Letter", "Letter")
@@ -1724,7 +1724,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Documents.Document", "Document")
                         .WithMany("MeetingAttachments")
                         .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Meeting.Meeting", "Meeting")
@@ -2006,6 +2006,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Documents.Document", b =>
                 {
+                    b.Navigation("LetterAttachments");
+
                     b.Navigation("MeetingAttachments");
 
                     b.Navigation("TaskAttachments");

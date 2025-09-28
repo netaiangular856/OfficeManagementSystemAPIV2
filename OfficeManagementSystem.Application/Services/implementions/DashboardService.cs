@@ -382,6 +382,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var toDate = filter.ToDate ?? DateTime.Now;
 
             var kpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync();
+            var employees = _userManager.Users.OfType<Employee>();
 
             var trendData = kpis
                 .GroupBy(k => k.PeriodStart)
@@ -390,7 +391,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     Date = g.Key.ToDateTime(TimeOnly.MinValue),
                     AverageKpiScore = (double)g.Average(k => k.Score),
-                    TotalEmployees = g.Count(),
+                    TotalEmployees = employees.Count(),
                     HighPerformers = g.Count(k => k.Score >= 80),
                     AveragePerformers = g.Count(k => k.Score >= 60 && k.Score < 80),
                     LowPerformers = g.Count(k => k.Score < 60)

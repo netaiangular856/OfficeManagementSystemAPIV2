@@ -85,6 +85,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime? DueDateTo { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+        public string? UserSearchId { get; set; }
     }
 
     // Task Update DTOs

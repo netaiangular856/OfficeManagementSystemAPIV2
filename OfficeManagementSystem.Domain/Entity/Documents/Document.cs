@@ -1,4 +1,5 @@
 ﻿using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
@@ -27,5 +28,6 @@ namespace OfficeManagementSystem.Domain.Entity.Documents
         
         public ICollection<TaskAttachment> TaskAttachments { get; set; } = new List<TaskAttachment>();
         public ICollection<MeetingAttachment> MeetingAttachments { get; set; } = new List<MeetingAttachment>();
+        public ICollection<LetterAttachment> LetterAttachments { get; set; } = new List<LetterAttachment>();
     }
 }

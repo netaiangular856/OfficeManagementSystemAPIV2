@@ -192,8 +192,8 @@ namespace OfficeManagementSystem.API.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 IsEssential = true,
                 //Domain = "localhost",
                 Expires = DateTime.Now.AddDays(30)
@@ -206,8 +206,8 @@ namespace OfficeManagementSystem.API.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 IsEssential = true,
                 //Domain = "localhost",
                 Expires = DateTime.Now.AddDays(-1)

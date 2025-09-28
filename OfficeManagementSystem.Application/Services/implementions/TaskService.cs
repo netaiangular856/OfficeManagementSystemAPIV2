@@ -92,6 +92,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (filter.DueDateTo.HasValue)
                     filteredTasks = filteredTasks.Where(t => t.DueDate <= filter.DueDateTo.Value);
 
+                if (!string.IsNullOrEmpty(filter.UserSearchId))
+                    filteredTasks = filteredTasks.Where(t => t.Assignee.ManagerId == filter.UserSearchId);
+
                 // Get total count
                 var totalCount = filteredTasks.Count();
 
@@ -138,6 +141,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 if (filter.DueDateTo.HasValue)
                     filteredTasks = filteredTasks.Where(t => t.DueDate <= filter.DueDateTo.Value);
+
+                if (!string.IsNullOrEmpty(filter.UserSearchId))
+                    filteredTasks = filteredTasks.Where(t => t.AssigneeUserId == filter.UserSearchId);
 
                 // Get total count
                 var totalCount = filteredTasks.Count();
