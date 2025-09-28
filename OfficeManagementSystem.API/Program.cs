@@ -72,14 +72,14 @@ namespace OfficeManagementSystem.API
                 app.UseSwaggerUI(options =>
                 {
                     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Office Management API V1");
-                    options.RoutePrefix = "swagger"; 
+                    options.RoutePrefix = "swagger";
                 });
             }
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Office Management API V1");
-                options.RoutePrefix = "swagger"; 
+                options.RoutePrefix = "swagger";
             });
 
             // ======= Middleware =======

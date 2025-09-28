@@ -127,6 +127,24 @@ namespace OfficeManagementSystem.Application.Services.implementions
             // استخدام BodyHtml دائماً إذا كان موجود
             var bodyContent = letter.BodyHtml ?? "لا يوجد محتوى";
 
+            // تجهيز شعار الجهة من wwwroot/Images/logo.png لعرضه يمين ويسار الهيدر
+            string? logoRight = null;
+            string? logoLeft = null;
+            try
+            {
+                var logoPath = Path.Combine("wwwroot", "Images", "logo.png");
+                if (File.Exists(logoPath))
+                {
+                    var bytes = await File.ReadAllBytesAsync(logoPath);
+                    var b64 = Convert.ToBase64String(bytes);
+                    var dataUrl = $"data:image/png;base64,{b64}";
+                    var imgStyle = "max-height:60px; width:auto; display:block;";
+                    logoRight = "<img src='" + dataUrl + "' class='logo-img logo-right' style='" + imgStyle + "' alt='Logo'>";
+                    logoLeft  = "<img src='" + dataUrl + "' class='logo-img logo-left'  style='" + imgStyle + "' alt='Logo'>";
+                }
+            }
+            catch { }
+
             // Debug: طباعة المحتوى للتأكد (يمكن إزالته في الإنتاج)
             if (string.IsNullOrWhiteSpace(letter.BodyHtml))
             {
@@ -145,9 +163,26 @@ namespace OfficeManagementSystem.Application.Services.implementions
             html.AppendLine("<body style='font-family: Amiri, Arial, sans-serif; line-height: 1.6; color: #2C3E50;  min-height: 100vh; margin: 0; padding: 0;'>");
             html.AppendLine("<div class='page-container' style='background: white; overflow: visible; position: relative; width: 100%; min-height: 100vh; margin: 0; padding-bottom: 50px;'>");
 
-            // Professional Header
-            html.AppendLine("<div class='letter-header' style='background: #D4AF37; padding: 30px 20px; text-align: center; color: white; margin-bottom: 10px; border-bottom: 4px solid #A67C00;'>");
-            html.AppendLine($"<h1 class='letter-title' style='font-size: 28px; font-weight: bold; margin: 0; font-family: Amiri, Arial, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); text-transform: uppercase; direction: rtl; unicode-bidi: bidi-override;'>{letter.Subject}</h1>");
+            // Professional Header using table layout for reliable left/right placement in wkhtmltopdf
+            html.AppendLine("<div class='letter-header' style='background: #D4AF37; padding: 20px; color: white; margin-bottom: 10px; border-bottom: 4px solid #A67C00;'>");
+            html.AppendLine("  <table style='width:100%; border-collapse:collapse;'><tr>");
+
+            // يمين
+            if (!string.IsNullOrEmpty(logoRight))
+                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:right;'>" + logoRight + "</td>");
+            else
+                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:right;'></td>");
+
+            // العنوان وسط
+            html.AppendLine($"    <td style='text-align:center;'><h1 class='letter-title' style='font-size: 24px; font-weight: bold; margin: 0; font-family: Amiri, Arial, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); text-transform: uppercase; direction: rtl; unicode-bidi: bidi-override;'>{letter.Subject}</h1></td>");
+
+            // شمال
+            if (!string.IsNullOrEmpty(logoLeft))
+                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:left;'>" + logoLeft + "</td>");
+            else
+                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:left;'></td>");
+
+            html.AppendLine("  </tr></table>");
             html.AppendLine("</div>");
 
             // Professional Content
@@ -159,7 +194,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             // Signature Section
             if (letter.Status == LetterStatus.Approved && !string.IsNullOrEmpty(letter.SignatureImagePath))
             {
-                html.AppendLine("<div class='signature-section' style='margin-top: 40px; margin-bottom: 20px; padding: 20px;  border-radius: 8px; text-align: left;'>");
+                html.AppendLine("<div class='signature-section' style='margin-top: 20px; margin-bottom: 10px; padding: 20px;  border-radius: 8px; text-align: left;'>");
 
                 // إصلاح مسار صورة التوقيع
                 var signaturePath = Path.IsPathRooted(letter.SignatureImagePath)
@@ -184,18 +219,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
                             _ => "image/jpeg"
                         };
 
-                        html.AppendLine($"<img src='data:{mimeType};base64,{base64Image}' class='signature-image' style='max-height: 100px; max-width: 300px; margin-bottom: 20px; display: block; border-radius: 4px; padding: 8px; margin-left: 0; margin-right: auto;' alt='Signature'>");
+                        html.AppendLine($"<img src='data:{mimeType};base64,{base64Image}' class='signature-image' style='max-height: 80px; max-width: 300px; margin-bottom: 10px; display: block; border-radius: 4px; padding: 8px; margin-left: 0; margin-right: auto;' alt='Signature'>");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"خطأ في تحميل صورة التوقيع: {ex.Message}");
-                        html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;  color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
+                        html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;  color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
                     }
                 }
                 else
                 {
                     // إذا لم توجد الصورة، أضف placeholder
-                    html.AppendLine("<div class='signature-placeholder' style='height: 100px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
+                    html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
                 }
 
                 // الاسم والوظيفة تحت الصورة
@@ -539,8 +574,8 @@ body {
     
     /* Signature Section */
     .signature-section {
-        margin-top: 40px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 10px;
         padding: 20px;
         //border-top: 2px solid #D4AF37;
         //background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
@@ -552,9 +587,9 @@ body {
     }
     
     .signature-image {
-        max-height: 100px;
+        max-height: 80px;
         max-width: 300px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         display: block;
         //border: 2px solid #D4AF37;
         border-radius: 4px;
@@ -566,7 +601,7 @@ body {
     }
     
     .signature-placeholder {
-        height: 100px;
+        height: 80px;
         width: 300px;
         border: 2px dashed #D4AF37;
         display: flex;
