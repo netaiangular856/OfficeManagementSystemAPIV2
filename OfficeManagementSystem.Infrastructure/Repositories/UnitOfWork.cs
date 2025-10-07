@@ -54,6 +54,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         //Partner
         public IPartnerRepository PartnerRepository { get; }
         public IGenericRepository<PartnerContact> PartnerContactRepository { get; }
+        public IPartnerEmployeeRepository PartnerEmployeeRepository { get; }
 
         //Letter
         public IGenericRepository<LetterAttachment> LetterAttachmentRepository { get; }
@@ -99,6 +100,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             // Partner repositories
             PartnerRepository = new PartnerRepository(_context);
             PartnerContactRepository = new GenericRepository<PartnerContact>(_context);
+            PartnerEmployeeRepository = new PartnerEmployeeRepository(_context);
 
             // Letter repositories
             LetterRepository = new LetterRepository(_context);

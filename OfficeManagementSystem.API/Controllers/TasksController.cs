@@ -95,9 +95,8 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}
         [HttpGet("{id}")]
-        [Authorize(Policy = "task.index")]
-        [Authorize(Policy = "allTasks.index")]
-        [Authorize(Policy = "MyTasks.index")]
+        [Authorize]
+    
         public async Task<ActionResult<ApiResponse<TaskDto>>> GetTaskById(int id)
         {
             var result = await _taskService.GetTaskByIdAsync(id);
@@ -198,9 +197,7 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}/updates
         [HttpGet("{id}/updates")]
-        [Authorize(Policy = "task.index")]
-        [Authorize(Policy = "allTasks.index")]
-        [Authorize(Policy = "MyTasks.index")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<List<TaskUpdateDto>>>> GetTaskUpdates(int id)
         {
             var result = await _taskUpdateService.GetTaskUpdatesAsync(id);
@@ -231,9 +228,7 @@ namespace OfficeManagementSystem.API.Controllers
 
         // GET api/v1/tasks/{id}/attachments
         [HttpGet("{id}/attachments")]
-        [Authorize(Policy = "task.index")]
-        [Authorize(Policy = "allTasks.index")]
-        [Authorize(Policy = "MyTasks.index")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<List<TaskAttachmentDto>>>> GetTaskAttachments(int id)
         {
             var result = await _taskAttachmentService.GetTaskAttachmentsAsync(id);
@@ -259,9 +254,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}/feedback")]
-        [Authorize(Policy = "task.index")]
-        [Authorize(Policy = "allTasks.index")]
-        [Authorize(Policy = "MyTasks.index")]
+        [Authorize]
         public async Task<ActionResult<ApiResponse<List<TaskUpdateDto>>>> GetTaskFeedbacks(int id)
         {
             var result = await _taskService.GetTaskFeedbackAsync(id);

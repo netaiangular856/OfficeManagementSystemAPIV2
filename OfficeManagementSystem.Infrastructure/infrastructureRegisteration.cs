@@ -50,6 +50,7 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Meeting services
             services.AddScoped<IMeetingService, MeetingService>();
+            services.AddScoped<IMeetingEmailService, MeetingEmailService>();
             
             // Visit services
             services.AddScoped<IVisitService, VisitService>();
@@ -109,6 +110,7 @@ namespace OfficeManagementSystem.Infrastructure
 
             services.AddScoped<IImageMangementService, ImageMangementService>();
             services.AddScoped<IAttachmentFileService, AttachmentFileService>();
+            services.AddScoped<IPartnerEmployeeService, PartnerEmployeeService>();
 
             //File
             services.AddSingleton<IFileProvider>(

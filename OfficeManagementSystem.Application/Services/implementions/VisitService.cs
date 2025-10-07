@@ -6,11 +6,14 @@ using Microsoft.Extensions.Configuration;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Visit;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Meeting;
 using OfficeManagementSystem.Domain.Enums.Visit;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace OfficeManagementSystem.Application.Services.implementions
@@ -54,6 +57,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 // Create visit
                 var visit = _mapper.Map<Visit>(createDto);
                 visit.CreatedBy = organizerUserId;
+
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Visit",
+                    EntityId = visit.Id,
+                    ActionType = WorkflowActionType.Created,
+                    Description = $"New Visit added '{visit.Title}",
+                    UserId = visit.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.VisitRepository.AddAsync(visit);
                 await _unitOfWork.SaveAsync();
@@ -164,6 +177,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 _mapper.Map(updateDto, visit);
                 visit.UpdatedAt = DateTime.UtcNow;
 
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Visit",
+                    EntityId = visit.Id,
+                    ActionType = WorkflowActionType.Updated,
+                    Description = $"Visit Updated '{visit.Title}",
+                    UserId = visit.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
+
                 await _unitOfWork.VisitRepository.UpdateAsync(visit);
                 await _unitOfWork.SaveAsync();
 
@@ -187,7 +210,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     return ApiResponse<bool>.ErrorResponse("الزيارة غير موجودة");
                 }
-
+                var worklog = new WorkflowLog
+                {
+                    EntityName = "Visit",
+                    EntityId = visit.Id,
+                    ActionType = WorkflowActionType.Deleted,
+                    Description = $"Visit Deleted '{visit.Title}",
+                    UserId = visit.CreatedBy // أو خده من الـ Context حسب المستخدم الحالي
+                };
+                await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
                 await _unitOfWork.VisitRepository.DeleteAsync(id);
                 await _unitOfWork.SaveAsync();
 

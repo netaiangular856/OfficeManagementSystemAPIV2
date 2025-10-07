@@ -49,6 +49,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Description = UplodeDto.Description,
                     CreatedByUserId = currentUserId,
                     CreatedAt = DateTime.UtcNow,
+                    FileSize=UplodeDto.File.Length
                 };
 
                 var worklog = new WorkflowLog

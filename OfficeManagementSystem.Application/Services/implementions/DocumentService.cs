@@ -66,6 +66,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 document.CreatedByUserId = userId;
                 document.StoragePath = filePath;
                 document.FileSize= fileSize;
+                
+                // Use CreatedAt from user if provided, otherwise use current time
+                if (createDto.CreatedAt.HasValue)
+                {
+                    document.CreatedAt = createDto.CreatedAt.Value;
+                }
+                else
+                {
+                    document.CreatedAt = DateTime.UtcNow;
+                }
+                
+                // Generate reference number based on CreatedAt date
+                document.ReferenceNumber = document.GenerateDocumentReference(document.CreatedAt);
 
                 await _unitOfWork.DocumentRepository.AddAsync(document);
                 await _unitOfWork.SaveAsync();
@@ -246,11 +259,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var document = await _unitOfWork.MeetingAttachmentRepository.GetByIdAsync(id);
+                var document = await _unitOfWork.DocumentRepository.GetByIdAsync(id);
                 if (document == null)
                     return ApiResponse<byte[]>.ErrorResponse("المستند غير موجود");
 
-                var filePath = Path.Combine(_env.WebRootPath, document.Document.StoragePath);
+                var filePath = Path.Combine(_env.WebRootPath, document.StoragePath);
                 // تأكد إن document.StoragePath بيكون نسبي (مثلاً: "uploads/file.pdf")
 
                 if (!System.IO.File.Exists(filePath))

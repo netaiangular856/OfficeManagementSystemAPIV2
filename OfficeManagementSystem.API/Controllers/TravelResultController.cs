@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "travel.index")]
+    //[Authorize(Policy = "travel.index")]
     public class TravelResultController : ControllerBase
     {
         private readonly ITravelResultService _travelResultService;
@@ -19,6 +19,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "travel.index")]
         public async Task<IActionResult> Create([FromBody] CreateTravelResultDto createDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -36,6 +37,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetByTravelId([FromQuery] int travelId)
         {
             var result = await _travelResultService.GetAllAsync(travelId);
@@ -47,6 +49,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _travelResultService.GetByIdAsync(id);
@@ -58,6 +61,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "travel.index")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTravelResultDto updateDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -74,6 +78,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "travel.index")]
         public async Task<IActionResult> Delete(int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

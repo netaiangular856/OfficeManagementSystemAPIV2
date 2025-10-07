@@ -10,7 +10,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "meeting.index")]
+    //[Authorize(Policy = "meeting.index")]
     public class MeetingsController : ControllerBase
     {
         private readonly IMeetingService _meetingService;
@@ -24,6 +24,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إنشاء اجتماع جديد
         /// </summary>
         [HttpPost]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> Create([FromBody] CreateMeetingDto createDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,6 +41,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب جميع الاجتماعات مع إمكانية البحث والتصفية
         /// </summary>
         [HttpGet]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> GetAll([FromQuery] MeetingQueryDto queryDto)
         {
             var result = await _meetingService.GetAllAsync(queryDto);
@@ -50,6 +52,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب اجتماع محدد بالمعرف
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _meetingService.GetByIdAsync(id);
@@ -60,6 +63,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث اجتماع محدد
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMeetingDto updateDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -71,6 +75,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث حالة الاجتماع
         /// </summary>
         [HttpPatch("{id}/status")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateMeetingStatusDto statusDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -82,6 +87,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف اجتماع
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> Delete(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -94,6 +100,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب مرفقات الاجتماع
         /// </summary>
         [HttpGet("{meetingId}/attachments")]
+        [Authorize]
         public async Task<IActionResult> GetAttachments(int meetingId)
         {
             var result = await _meetingService.GetAttachmentsAsync(meetingId);
@@ -104,6 +111,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إضافة مرفق للاجتماع
         /// </summary>
         [HttpPost("{meetingId}/attachments")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> AddAttachment(int meetingId, [FromForm] CreateMeetingAttachmentDto attachmentDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -119,6 +127,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف مرفق من الاجتماع
         /// </summary>
         [HttpDelete("{meetingId}/attachments/{id}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> RemoveAttachment(int meetingId, int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -133,6 +142,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب حضور الاجتماع
         /// </summary>
         [HttpGet("{id}/attendees")]
+        [Authorize]
         public async Task<IActionResult> GetAttendees(int id)
         {
             var result = await _meetingService.GetAttendeesAsync(id);
@@ -143,6 +153,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إضافة حضور للاجتماع
         /// </summary>
         [HttpPost("{id}/attendees")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> AddAttendee(int id, [FromBody] CreateMeetingAttendeeDto attendeeDto)
         {
             var result = await _meetingService.AddAttendeeAsync(id, attendeeDto);
@@ -153,6 +164,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث حضور الاجتماع
         /// </summary>
         [HttpPut("{id}/attendees/{attendeeId}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> UpdateAttendee(int id, int attendeeId, [FromBody] UpdateMeetingAttendeeDto attendeeDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -166,6 +178,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف حضور من الاجتماع
         /// </summary>
         [HttpDelete("{id}/attendees/{attendeeId}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> RemoveAttendee(int id, int attendeeId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -179,6 +192,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث حالة حضور الاجتماع (RSVP)
         /// </summary>
         [HttpPatch("{id}/attendees/{attendeeId}/status")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> UpdateAttendeeStatus(int id, int attendeeId, [FromBody] UpdateAttendeeStatusDto statusDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -194,6 +208,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب محاضر الاجتماع
         /// </summary>
         [HttpGet("{id}/minutes")]
+        [Authorize]
         public async Task<IActionResult> GetMinutes(int id)
         {
             var result = await _meetingService.GetMinutesAsync(id);
@@ -204,6 +219,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إنشاء محاضر للاجتماع
         /// </summary>
         [HttpPost("{id}/minutes")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> CreateMinutes(int id, [FromBody] CreateMeetingMinutesDto minutesDto)
         {
             var result = await _meetingService.CreateMinutesAsync(id, minutesDto);
@@ -214,6 +230,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث محاضر الاجتماع
         /// </summary>
         [HttpPut("{id}/minutes")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> UpdateMinutes(int id, [FromBody] UpdateMeetingMinutesDto minutesDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -228,6 +245,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب توصيات الاجتماع
         /// </summary>
         [HttpGet("{id}/recommendations")]
+        [Authorize]
         public async Task<IActionResult> GetRecommendations(int id)
         {
             var result = await _meetingService.GetRecommendationsAsync(id);
@@ -238,6 +256,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إضافة توصية للاجتماع
         /// </summary>
         [HttpPost("{id}/recommendations")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> AddRecommendation(int id, [FromBody] CreateRecommendationDto recommendationDto)
         {
             var result = await _meetingService.AddRecommendationAsync(id, recommendationDto);
@@ -248,6 +267,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث توصية
         /// </summary>
         [HttpPut("recommendations/{recId}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> UpdateRecommendation(int recId, [FromBody] UpdateRecommendationDto recommendationDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -261,6 +281,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف توصية
         /// </summary>
         [HttpDelete("recommendations/{recId}")]
+        [Authorize(Policy = "meeting.index")]
         public async Task<IActionResult> RemoveRecommendation(int recId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -274,6 +295,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحميل مستند الاجتماع
         /// </summary>
         [HttpGet("{meetingId}/attachments/{attachmentId}/download")]
+        [Authorize]
         public async Task<IActionResult> DownloadAttachment(int meetingId, int attachmentId)
         {
             var result = await _meetingService.DownloadAttachmentAsync(meetingId, attachmentId);

@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "visits.index")]
+    //[Authorize(Policy = "visits.index")]
     public class VisitsController : ControllerBase
     {
         private readonly IVisitService _visitService;
@@ -22,6 +22,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إنشاء زيارة جديدة
         /// </summary>
         [HttpPost]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> Create([FromBody] CreateVisitDto createDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -38,6 +39,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب جميع الزيارات مع إمكانية البحث والتصفية
         /// </summary>
         [HttpGet]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> GetAll([FromQuery] VisitQueryDto queryDto)
         {
             var result = await _visitService.GetAllAsync(queryDto);
@@ -48,6 +50,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب زيارة محددة بالمعرف
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _visitService.GetByIdAsync(id);
@@ -58,6 +61,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// تحديث زيارة محددة
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateVisitDto updateDto)
         {
             var result = await _visitService.UpdateAsync(id, updateDto);
@@ -68,6 +72,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف زيارة
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _visitService.DeleteAsync(id);
@@ -79,6 +84,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب مشاركي الزيارة
         /// </summary>
         [HttpGet("{id}/participants")]
+        [Authorize]
         public async Task<IActionResult> GetParticipants(int id)
         {
             var result = await _visitService.GetParticipantsAsync(id);
@@ -89,6 +95,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// إضافة مشارك للزيارة
         /// </summary>
         [HttpPost("{id}/participants")]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> AddParticipant(int id, [FromBody] CreateVisitParticipantDto participantDto)
         {
             var result = await _visitService.AddParticipantAsync(id, participantDto);
@@ -99,6 +106,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// حذف مشارك من الزيارة
         /// </summary>
         [HttpDelete("{id}/participants/{participantId}")]
+        [Authorize(Policy = "visits.index")]
         public async Task<IActionResult> RemoveParticipant(int id, int participantId)
         {
             var result = await _visitService.RemoveParticipantAsync(id, participantId);

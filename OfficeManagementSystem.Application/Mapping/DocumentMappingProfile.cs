@@ -11,7 +11,7 @@ namespace OfficeManagementSystem.Application.Mapping
         {
             // Document mappings
             CreateMap<CreateDocumentDto, Document>()
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // Will be set by service based on user input
                 .ForMember(dest => dest.StoragePath, opt => opt.Ignore()); // Will be set by service
 
             CreateMap<UpdateDocumentDto, Document>()

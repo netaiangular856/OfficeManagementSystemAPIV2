@@ -44,6 +44,7 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         // Partner repositories
         IPartnerRepository PartnerRepository { get; }
         IGenericRepository<PartnerContact> PartnerContactRepository { get; }
+        IPartnerEmployeeRepository PartnerEmployeeRepository { get; }
         
         // Letter repositories
         ILetterRepository LetterRepository { get; }

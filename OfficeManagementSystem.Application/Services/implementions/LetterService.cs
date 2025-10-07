@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using LinqKit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -58,14 +58,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<LetterDto>.ErrorResponse("المستخدم غير موجود");
                 }
 
-                
+
 
                 // Create letter
                 var letter = _mapper.Map<Letter>(createDto);
                 letter.CreatedByUserId = userId;
                 letter.Status = LetterStatus.Draft;
                 letter.Body = HtmlToPlainText(letter.BodyHtml);
-                if (letter.Kind==AttendeeKind.Internal&& createDto.UserId!=null)
+                if (letter.Kind == AttendeeKind.Internal && createDto.UserId != null)
                 {
                     var recever = await _userManager.FindByIdAsync(createDto.UserId);
                     if (recever == null)
@@ -74,7 +74,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     }
                     letter.To = recever.Email;
                 }
-                letter.ReferenceNumbers =await GenerateLetterNumberAsync();
+                letter.ReferenceNumbers = await GenerateLetterNumberAsync();
                 //// Serialize formatting to JSON
                 //if (createDto.BodyFormatting != null)
                 //{
@@ -104,7 +104,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 if (!string.IsNullOrWhiteSpace(queryDto.Search))
                 {
-                    filter = l => l.Subject.Contains(queryDto.Search) || 
+                    filter = l => l.Subject.Contains(queryDto.Search) ||
                                  l.Body.Contains(queryDto.Search) ||
                                  l.To.Contains(queryDto.Search) ||
                                  (l.ReferenceNumbers != null && l.ReferenceNumbers.Contains(queryDto.Search));
@@ -182,7 +182,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filter = filter == null ? directionFilter : filter.And(directionFilter);
                 }
 
-             
+
 
                 if (queryDto.From.HasValue)
                 {
@@ -478,7 +478,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // Save signature image
                 var signaturePath = await _attachmentFileService.SaveAttachmentAsync(approveDto.SignatureImage, "Signatures");
-                
+
                 letter.Status = LetterStatus.Approved;
                 letter.ApprovedByUserId = approverUserId;
                 letter.ApprovedAt = DateTime.UtcNow;
@@ -540,16 +540,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-               
-                
+
+
                 var letter = await _unitOfWork.LetterRepository.GetByIdWithDetailsAsync(letterId);
                 if (letter == null)
                 {
-                   
+
                     return ApiResponse<LetterEmailStatusDto>.ErrorResponse("الخطاب غير موجود");
                 }
 
-                
+
                 //if (letter.Attachments != null && letter.Attachments.Any())
                 //{
                 //    foreach (var attachment in letter.Attachments)
@@ -558,20 +558,20 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 //    }
                 //}
 
-                
+
 
                 if (letter.Status != LetterStatus.Approved)
                 {
-                    
+
                     return ApiResponse<LetterEmailStatusDto>.ErrorResponse("يجب اعتماد الخطاب قبل الإرسال");
                 }
 
                 // Generate PDF with signature
                 var pdfBytes = await _letterPdfService.GenerateLetterPdfAsync(letter);
-               
+
                 // Send email with PDF attachment
                 var emailSent = await _letterEmailService.SendLetterEmailAsync(emailDto, pdfBytes, letter);
-               
+
                 if (emailSent)
                 {
                     // Update letter status
@@ -595,13 +595,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
                 else
                 {
-                    
+
                     return ApiResponse<LetterEmailStatusDto>.ErrorResponse("فشل في إرسال الميل");
                 }
             }
             catch (Exception ex)
             {
-                
+
                 return ApiResponse<LetterEmailStatusDto>.ErrorResponse($"خطأ في إرسال الخطاب: {ex.Message}");
             }
         }
@@ -648,9 +648,6 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             return html.Trim();
         }
-
-
-
 
     }
 }

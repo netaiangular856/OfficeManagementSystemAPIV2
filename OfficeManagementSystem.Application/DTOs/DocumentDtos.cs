@@ -20,6 +20,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Description { get; set; }
 
         public IFormFile File { get; set; }
+        
+        public DateTime? CreatedAt { get; set; }
     }
 
     public class UpdateDocumentDto
@@ -50,6 +52,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string FileName { get; set; } = string.Empty;
         public string FileExtension { get; set; } = string.Empty;
         public long? FileSize { get; set; }
+        public string? ReferenceNumber { get; set; }
     }
 
     public class DocumentQueryDto

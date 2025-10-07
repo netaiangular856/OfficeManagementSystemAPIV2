@@ -22,4 +22,5 @@ public class Partner
     public string? Note { get; set; }
 
     public ICollection<PartnerContact> Contacts { get; set; } = new List<PartnerContact>();
+    public ICollection<PartnerEmployee> Employees { get; set; } = new List<PartnerEmployee>();
 }

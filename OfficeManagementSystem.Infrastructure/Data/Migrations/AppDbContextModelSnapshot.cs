@@ -438,6 +438,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<long?>("FileSize")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("ReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("StoragePath")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -1056,6 +1059,64 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.HasIndex("PartnerId");
 
                     b.ToTable("PartnerContacts", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.PartnerEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("JobTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("PartnerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("PartnerId");
+
+                    b.ToTable("PartnerEmployees", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Reminder", b =>
@@ -1825,6 +1886,25 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Partner");
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.PartnerEmployee", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Partners.Partner", "Partner")
+                        .WithMany("Employees")
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Partner");
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Reminder", b =>
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "User")
@@ -2037,6 +2117,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>
                 {
                     b.Navigation("Contacts");
+
+                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>

@@ -42,6 +42,7 @@ namespace OfficeManagementSystem.Infrastructure.Data
         // Partners
         public virtual DbSet<Partner> Partners { get; set; }
         public virtual DbSet<PartnerContact> PartnerContacts { get; set; }
+        public virtual DbSet<PartnerEmployee> PartnerEmployees { get; set; }
 
         // Meetings
         public virtual DbSet<Meeting> Meetings { get; set; }

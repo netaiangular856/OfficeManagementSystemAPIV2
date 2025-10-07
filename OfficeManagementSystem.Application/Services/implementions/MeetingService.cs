@@ -29,6 +29,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private readonly UserManager<AppUser> _userManager;
         private readonly ISendNotificationService _notificationService;
         private readonly IEmailService _emailService;
+        private readonly IMeetingEmailService _meetingEmailService;
         private readonly IConfiguration _configuration;
         private readonly IAttachmentFileService _attachmentFileService;
         private readonly IWebHostEnvironment _env;
@@ -39,6 +40,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             UserManager<AppUser> userManager,
             ISendNotificationService notificationService,
             IEmailService emailService,
+            IMeetingEmailService meetingEmailService,
             IConfiguration configuration,
             IAttachmentFileService attachmentFileService,
             IWebHostEnvironment env)
@@ -48,6 +50,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _userManager = userManager;
             _notificationService = notificationService;
             _emailService = emailService;
+            _meetingEmailService = meetingEmailService;
             _configuration = configuration;
             _attachmentFileService = attachmentFileService;
             _env = env;
@@ -355,6 +358,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     CreatedByUserId = userId,
                     CreatedAt = DateTime.UtcNow,
                     DocumentSource=attachmentDto.DocumentSource,
+                    FileSize=attachmentDto.File.Length
                 };
                 var worklog = new WorkflowLog
                 {
@@ -713,7 +717,27 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var result = await _unitOfWork.MeetingMinutesRepository.GetByIdAsync(minutes.Id);
                 var dto = _mapper.Map<MeetingMinutesDto>(result);
 
-                return ApiResponse<MeetingMinutesDto>.SuccessResponse(dto, "تم إنشاء المحاضر بنجاح");
+                // إرسال محضر الاجتماع عبر البريد الإلكتروني لجميع الحضور
+                try
+                {
+                    var meetingWithDetails = await _unitOfWork.MeetingRepository.GetByIdWithDetailsAsync(meetingId);
+                    if (meetingWithDetails != null)
+                    {
+                        
+                        
+                        var emailSent = await _meetingEmailService.SendMeetingMinutesEmailAsync(meetingWithDetails, minutes);
+                        
+                    }
+                    
+                }
+                catch (Exception emailEx)
+                {
+                    Console.WriteLine($"❌ خطأ في إرسال البريد الإلكتروني: {emailEx.Message}");
+                    Console.WriteLine($"Stack trace: {emailEx.StackTrace}");
+                    // لا نوقف العملية، المحضر تم حفظه بنجاح
+                }
+
+                return ApiResponse<MeetingMinutesDto>.SuccessResponse(dto, "تم إنشاء المحاضر بنجاح وإرسال البريد الإلكتروني");
             }
             catch (Exception ex)
             {
@@ -751,7 +775,39 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var result = await _unitOfWork.MeetingMinutesRepository.GetByIdAsync(existingMinutes.Id);
                 var dto = _mapper.Map<MeetingMinutesDto>(result);
 
-                return ApiResponse<MeetingMinutesDto>.SuccessResponse(dto, "تم تحديث المحاضر بنجاح");
+                // إرسال محضر الاجتماع المحدث عبر البريد الإلكتروني لجميع الحضور
+                try
+                {
+                    Console.WriteLine($"🔄 محاولة إرسال محضر الاجتماع المحدث للاجتماع رقم: {meetingId}");
+                    var meetingWithDetails = await _unitOfWork.MeetingRepository.GetByIdWithDetailsAsync(meetingId);
+                    if (meetingWithDetails != null)
+                    {
+                        Console.WriteLine($"✓ تم جلب تفاصيل الاجتماع بنجاح");
+                        Console.WriteLine($"عدد الحضور المحملين: {meetingWithDetails.Attendees?.Count ?? 0}");
+                        
+                        var emailSent = await _meetingEmailService.SendMeetingMinutesEmailAsync(meetingWithDetails, existingMinutes);
+                        if (emailSent)
+                        {
+                            Console.WriteLine("✅ تم إرسال محضر الاجتماع المحدث عبر البريد الإلكتروني بنجاح");
+                        }
+                        else
+                        {
+                            Console.WriteLine("❌ فشل في إرسال محضر الاجتماع المحدث عبر البريد الإلكتروني");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"❌ فشل في جلب تفاصيل الاجتماع للاجتماع رقم: {meetingId}");
+                    }
+                }
+                catch (Exception emailEx)
+                {
+                    Console.WriteLine($"❌ خطأ في إرسال البريد الإلكتروني: {emailEx.Message}");
+                    Console.WriteLine($"Stack trace: {emailEx.StackTrace}");
+                    // لا نوقف العملية، المحضر تم تحديثه بنجاح
+                }
+
+                return ApiResponse<MeetingMinutesDto>.SuccessResponse(dto, "تم تحديث المحاضر بنجاح وإرسال البريد الإلكتروني");
             }
             catch (Exception ex)
             {

@@ -25,9 +25,21 @@ namespace OfficeManagementSystem.Domain.Entity.Documents
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public long? FileSize { get; set; }
-        
+        public string? ReferenceNumber { get; set; }
+
         public ICollection<TaskAttachment> TaskAttachments { get; set; } = new List<TaskAttachment>();
         public ICollection<MeetingAttachment> MeetingAttachments { get; set; } = new List<MeetingAttachment>();
         public ICollection<LetterAttachment> LetterAttachments { get; set; } = new List<LetterAttachment>();
+
+        public string GenerateDocumentReference(DateTime referenceDate)
+        {
+            var year = referenceDate.Year;
+            var month = referenceDate.Month;
+            var day = referenceDate.Day;
+            var guidPart = Guid.NewGuid().ToString("N")[..6]; // أول 6 حروف بس
+
+            return $"DOC-{year}-{month}-{day}-{guidPart}";
+        }
     }
+
 }

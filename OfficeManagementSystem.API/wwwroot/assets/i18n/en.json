@@ -61,7 +61,7 @@
   },
   "travel": {
     "title": "External Participations Management",
-    "add_travel": "Add Travel",
+    "add_travel": "Add External Participation",
     "edit_travel": "Edit Travel",
     "search_label": "Search Travels",
     "is_completed": "Is Completed",
@@ -97,9 +97,9 @@
     "transport_mode": "Transport Mode",
     "accommodation": "Accommodation",
     "actions": "Actions",
-    "create": "Create Travel",
-    "update": "Update Travel",
-    "delete_travel": "Delete Travel",
+    "create": "Create External Participation",
+    "update": "Update External Participation",
+    "delete_travel": "Delete External Participation",
     "confirm_delete_travel": "Are you sure you want to delete the travel '%title%'?",
     "cancel": "Cancel",
     "title_placeholder": "Enter travel title",
@@ -122,7 +122,7 @@
     },
     "no_travels_found": "No external participations found",
     "get_started_message": "Get started by adding your first travel",
-    "details": "Travel Details",
+    "details": "External Participation Details",
     "load_error": "Error loading travel details",
     "pending": "Pending"
   },
@@ -130,6 +130,10 @@
     "overview": "Dashboard Overview",
     "welcome": "Welcome to EcoOffice Dashboard",
     "loading": "Loading dashboard data...",
+    "from_date":"From Date",
+    "to_date":"To Date",
+    "apply_filter":"Apply filters",
+    "reset":"Delete Filters",
     "error": "Error Loading Dashboard",
     "error_message": "There was an error loading the dashboard data. Please try refreshing the page.",
     "retry": "Retry",
@@ -185,6 +189,7 @@
     "type_out": "Out",
     "incoming_letters": "Incoming Letters",
     "outgoing_letters": "Outgoing Letters",
+    "total_letters": "Total Letters",
     "monthly_visits": "Monthly Visits",
     "created_tasks": "Created Tasks",
     "overdue_tasks": "Overdue Tasks",
@@ -312,7 +317,9 @@
     "add_success_title": "Visit Added Successfully",
     "add_success_message": "The visit has been added successfully.",
     "edit_success_title": "Visit Updated Successfully",
-    "edit_success_message": "The visit has been updated successfully."
+    "edit_success_message": "The visit has been updated successfully.",
+    "modified": "Modified",
+    "new": "New"
   },
   "reset_password": {
     "title": "Reset Password",
@@ -568,6 +575,7 @@
     "select_manager": "Select Manager",
     "search_manager": "Search for a manager...",
     "no_manager": "No Manager Assigned",
+    "search": "Search",
     "search_placeholder": "Search for a department...",
     "department_type": {
       "0": "Authority",
@@ -657,7 +665,13 @@
     "tasks": "Tasks",
     "visits": "Visits",
     "travels": "Travels",
-    "more": "more"
+    "more": "more",
+    "priority": {
+      "high": "High",
+      "medium": "Medium", 
+      "low": "Low",
+      "normal": "Normal"
+    }
   },
   "reminders": {
     "title": "Reminder Management",
@@ -689,7 +703,10 @@
     "delete": "Delete",
     "submit": "Submit",
     "cancel": "Cancel",
-    "update": "Update"
+    "update": "Update",
+    "completed": "Completed",
+    "scheduled": "Scheduled",
+    "created_by": "Created By"
   },
   "employees": {
     "title": "Employees",
@@ -787,6 +804,7 @@
     "to": "to",
     "add": "Add",
     "details": "Details",
+    "optional": "Optional",
     "updated_at": "Updated At",
     "delete_confirmation_message": "Are you sure you want to delete this item? This action cannot be undone.",
     "filters": "Filters",
@@ -972,7 +990,11 @@
     "active": "Active",
     "inactive": "Inactive",
     "search_partners": "Search partners...",
+    "search_filter": "Search Filter",
+    "category_filter": "Filter by Category",
     "no_partners_found": "No partners found",
+    "no_search_results": "No partners match your search",
+    "try_different_search": "Try adjusting your search criteria or filters",
     "get_started_message": "Get started by adding your first partner",
     "select_category": "Select Category",
     "select_country": "Select Country",
@@ -1227,6 +1249,7 @@
     "title": "Archive and Documentation",
     "subtitle": "Manage and organize all your documents",
     "add_document": "Add Document",
+    "reference_number": "Reference Number",
     "edit_document": "Edit Document",
     "delete_document": "Delete Document",
     "confirm_delete_document": "Are you sure you want to delete this document? This action cannot be undone.",
@@ -1258,7 +1281,6 @@
     "showing_results": "Showing",
     "documents_found": "documents found",
     "items_per_page": "Items per page",
-    "delete_constraint_error": "Cannot delete document. It may be linked to other records.",
     "download": "Download",
     "title_placeholder": "Enter document title",
     "description_placeholder": "Enter document description",
@@ -1531,6 +1553,7 @@
     },
     "all_tasks": {
       "title": "All Tasks",
+      "task_information":"Task Information",
       "subtitle": "View and filter all tasks across the organization",
       "filters": "Filters",
       "status": "Status",
