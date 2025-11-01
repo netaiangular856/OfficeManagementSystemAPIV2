@@ -12,7 +12,7 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
 
         // Recalculate KPI operations
         Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisAsync(RecalculateKpisRequestDto request);
-        Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisForPeriodAsync(DateOnly periodStart, DateOnly periodEnd);
+        Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisForPeriodAsync(DateTime periodStart, DateTime periodEnd);
         Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisForAllEmployeesAsync();
         
         // Background job operations

@@ -29,7 +29,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public async Task<IEnumerable<Reminder>> GetUserRemindersAsync(string userId)
         {
             return await _context.Reminders
-                .Where(r => r.UserId == userId)
+                .Where(r => r.UserId == userId&&r.IsSent==false)
                 .Include(r => r.User)
                 .OrderBy(r => r.ReminderTime)
                 .ToListAsync();

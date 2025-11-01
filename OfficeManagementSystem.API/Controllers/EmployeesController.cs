@@ -503,7 +503,7 @@ namespace OfficeManagementSystem.API.Controllers
 
 
         [HttpGet("names")]
-        public async Task<IActionResult> Subordinates()
+        public async Task<IActionResult> Subordinates([FromQuery] string? search)
         {
             try
             {
@@ -513,7 +513,7 @@ namespace OfficeManagementSystem.API.Controllers
                     return BadRequest();
                 }
 
-                var result = await _employeeService.GetSubordinatesAsync(userId);
+                var result = await _employeeService.GetSubordinatesAsync(userId, search);
                 if (!result.Success)
                 {
                     return NotFound(result);
@@ -522,8 +522,8 @@ namespace OfficeManagementSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while recalculating KPIs");
-                return StatusCode(500, "Internal server error occurred while recalculating KPIs");
+                _logger.LogError(ex, "Error occurred while fetching subordinates");
+                return StatusCode(500, "Internal server error occurred while fetching subordinates");
             }
         }
 

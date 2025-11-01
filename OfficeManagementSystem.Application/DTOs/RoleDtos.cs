@@ -15,6 +15,9 @@ namespace OfficeManagementSystem.Application.DTOs
 
         [MaxLength(200)]
         public string? Description { get; set; }
+
+        [MaxLength(100)]
+        public string? ArabicName { get; set; }
     }
 
     public class UpdateRoleDto
@@ -25,6 +28,9 @@ namespace OfficeManagementSystem.Application.DTOs
 
         [MaxLength(200)]
         public string? Description { get; set; }
+
+        [MaxLength(100)]
+        public string? ArabicName { get; set; }
     }
 
     public class RoleQueryDto
@@ -39,6 +45,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public string? ArabicName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<PermissionDto> AvailablePermissions { get; set; } = new List<PermissionDto>();

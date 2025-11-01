@@ -336,7 +336,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     var title = $"دعوة للمشاركة في زيارة: {visit.Title}";
                     var message = $"تمت دعوتك للمشاركة في زيارة '{visit.Title}' في {visit.VisitDate:dd/MM/yyyy}";
                     
-                    await _notificationService.SendNotificationAsync(title, message, participantUserIds, "Visit");
+                    await _notificationService.SendNotificationAsync(title, message, participantUserIds, "Visit", null, visit.Id, Domain.Enums.NotificationReferenceType.Visit);
                 }
 
                 // Send emails to external participants
@@ -375,7 +375,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     var title = $"دعوة للمشاركة في زيارة: {visit.Title}";
                     var message = $"تمت دعوتك للمشاركة في زيارة '{visit.Title}' في {visit.VisitDate:dd/MM/yyyy}";
 
-                    await _notificationService.SendNotificationAsync(title, message, new List<string> { participant.UserId }, "Visit");
+                    await _notificationService.SendNotificationAsync(title, message, new List<string> { participant.UserId }, "Visit", null, visit.Id, Domain.Enums.NotificationReferenceType.Visit);
                 }
 
                 // Send emails to external participants

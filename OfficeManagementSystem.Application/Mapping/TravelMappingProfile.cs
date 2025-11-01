@@ -8,10 +8,20 @@ namespace OfficeManagementSystem.Application.Mapping
     {
         public TravelMappingProfile()
         {
-            CreateMap<CreateTravelDto, Travel>();
-            CreateMap<UpdateTravelDto, Travel>();
+            // TravelPartner mappings
+            CreateMap<TravelPartnerDto, TravelPartner>()
+                .ReverseMap();
+
+            // Travel mappings
+            CreateMap<CreateTravelDto, Travel>()
+                .ForMember(dest => dest.Partners, opt => opt.MapFrom(src => src.Partners));
+
+            CreateMap<UpdateTravelDto, Travel>()
+                .ForMember(dest => dest.Partners, opt => opt.Ignore()); // نتعامل مع الشركاء بشكل منفصل في الـ Service
+
             CreateMap<Travel, TravelDto>()
-                .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.UserName : null));
+                .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.UserName : null))
+                .ForMember(dest => dest.Partners, opt => opt.MapFrom(src => src.Partners));
         }
     }
 }

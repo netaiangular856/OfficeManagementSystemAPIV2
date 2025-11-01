@@ -52,6 +52,12 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var travel = _mapper.Map<Travel>(createDto);
                 travel.CreatedBy = userId;
 
+                // إضافة الشركاء إذا كانت موجودة
+                if (createDto.Partners != null && createDto.Partners.Any())
+                {
+                    travel.Partners = _mapper.Map<List<TravelPartner>>(createDto.Partners);
+                }
+
                 var worklog = new WorkflowLog
                 {
                     EntityName = "Travel",
@@ -167,6 +173,27 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 _mapper.Map(updateDto, travel);
                 travel.UpdatedAt = DateTime.UtcNow;
+
+                // تحديث الشركاء
+                if (updateDto.Partners != null)
+                {
+                    // حذف الشركاء القدامى
+                    var existingPartners = await _unitOfWork.TravelPartnerRepository
+                        .GetAllAsync(p => p.TravelId == id);
+                    
+                    foreach (var partner in existingPartners)
+                    {
+                        await _unitOfWork.TravelPartnerRepository.DeleteAsync(partner.Id);
+                    }
+
+                    // إضافة الشركاء الجدد
+                    foreach (var partnerDto in updateDto.Partners)
+                    {
+                        var partner = _mapper.Map<TravelPartner>(partnerDto);
+                        partner.TravelId = id;
+                        await _unitOfWork.TravelPartnerRepository.AddAsync(partner);
+                    }
+                }
 
                 
                 var worklog = new WorkflowLog

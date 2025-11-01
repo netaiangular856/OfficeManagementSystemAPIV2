@@ -145,10 +145,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         public async Task SendEmail(string email, string? code, string? component, string subject, string message)
         {
+            string baseAuthUrl = _configuration["BaseAuthUrl"];
             var result = new EmailDTO(email,
                 _configuration["EmailSetting:From"],
                 subject,
-                EmailStringBodyRF.Send(email, code, component, message));
+                EmailStringBodyRF.Send(email, code, component, message, baseAuthUrl));
             await emailService.SendEmail(result);
         }
 

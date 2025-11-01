@@ -33,7 +33,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (!string.IsNullOrEmpty(queryDto.Search))
                 {
                     query = query.Where(r => r.Name.Contains(queryDto.Search) || 
-                                            r.Description!.Contains(queryDto.Search));
+                                            r.Description!.Contains(queryDto.Search) ||
+                                            r.ArabicName!.Contains(queryDto.Search));
                 }
 
                 query = query.OrderByDescending(r => r.CreatedAt);
@@ -48,6 +49,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         Id = r.Id,
                         Name = r.Name,
                         Description = r.Description,
+                        ArabicName = r.ArabicName,
                         CreatedAt = r.CreatedAt,
                         UpdatedAt = r.UpdatedAt
                     })
@@ -84,6 +86,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Id = role.Id,
                     Name = role.Name,
                     Description = role.Description,
+                    ArabicName = role.ArabicName,
                     CreatedAt = role.CreatedAt,
                     UpdatedAt = role.UpdatedAt
                 };
@@ -104,6 +107,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 {
                     Name = createDto.Name,
                     Description = createDto.Description,
+                    ArabicName = createDto.ArabicName,
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -119,6 +123,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Id = role.Id,
                     Name = role.Name,
                     Description = role.Description,
+                    ArabicName = role.ArabicName,
                     CreatedAt = role.CreatedAt,
                     UpdatedAt = role.UpdatedAt
                 };
@@ -143,6 +148,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 role.Name = updateDto.Name;
                 role.Description = updateDto.Description;
+                role.ArabicName = updateDto.ArabicName;
                 role.UpdatedAt = DateTime.UtcNow;
 
                 var result = await _roleManager.UpdateAsync(role);
@@ -157,6 +163,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Id = role.Id,
                     Name = role.Name,
                     Description = role.Description,
+                    ArabicName = role.ArabicName,
                     CreatedAt = role.CreatedAt,
                     UpdatedAt = role.UpdatedAt
                 };

@@ -96,11 +96,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto)
+        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto,string userId)
         {
             try
             {
                 Expression<Func<Letter, bool>>? filter = null;
+
+                // 🔹 فلترة بالـ userId (مستلم الرسالة)
+                var userFilter = (Expression<Func<Letter, bool>>)(l => l.CreatedByUserId == userId);
+                filter = userFilter;
 
                 if (!string.IsNullOrWhiteSpace(queryDto.Search))
                 {
@@ -109,6 +113,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                                  l.To.Contains(queryDto.Search) ||
                                  (l.ReferenceNumbers != null && l.ReferenceNumbers.Contains(queryDto.Search));
                 }
+
 
                 if (queryDto.Direction.HasValue)
                 {
@@ -162,11 +167,19 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto)
+        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto, string userId)
         {
             try
             {
                 Expression<Func<Letter, bool>>? filter = l => l.Status == LetterStatus.PendingApproval;
+
+                var userFilter = (Expression<Func<Letter, bool>>)(l =>
+                        l.CreatedBy != null &&
+                        l.CreatedBy.Department != null &&
+                        l.CreatedBy.Department.ManagerUserId != null &&
+                        l.CreatedBy.Department.ManagerUserId == userId
+                    );
+                filter = userFilter;
 
                 if (!string.IsNullOrWhiteSpace(queryDto.Search))
                 {

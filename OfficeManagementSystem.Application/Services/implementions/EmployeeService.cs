@@ -496,21 +496,36 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<IEnumerable<EmployeeNamesDto>>> GetSubordinatesAsync(string managerId)
+        public async Task<ApiResponse<IEnumerable<EmployeeNamesDto>>> GetSubordinatesAsync(string managerId, string? search = null )
         {
-            var Subordinates = await _userManager.Users.OfType<Employee>()
-                    .Where(e => e.ManagerId == managerId)
+            var query = _userManager.Users.OfType<Employee>()
+                .Include(m=>m.Department)
+                    .Where(e => e.ManagerId == managerId||e.Department.ManagerUserId==managerId);
+
+            // Apply name filter if provided
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(e => (e.FirstName + " " + e.LastName).Contains(search) || 
+                                         e.FirstName.Contains(search) || 
+                                         e.LastName.Contains(search) ||
+                                        e.Email.Contains(search) );
+            }
+
+            
+
+            var Subordinates = await query
                     .Select(m=>new EmployeeNamesDto
                     {
                         Id=m.Id,
-                        FullName=m.FirstName+m.LastName,
+                        FullName=m.FirstName+" "+m.LastName,
                         Email=m.Email,
                         JobTitle=m.JobTitle,
                         
                     })
+                    .OrderBy(e => e.FullName)
                     .ToListAsync();
 
-            if (Subordinates == null)
+            if (Subordinates == null || !Subordinates.Any())
             {
                 return ApiResponse<IEnumerable<EmployeeNamesDto>>.ErrorResponse("No Subordinates Employee Found");
             }

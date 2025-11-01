@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
     {
         // Main Letter operations
         Task<ApiResponse<LetterDto>> CreateAsync(CreateLetterDto createDto, string userId);
-        Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto);
+        Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto, string userId);
         Task<ApiResponse<LetterDto>> GetByIdAsync(int id);
         Task<ApiResponse<Letter>> GetByIdWithDetailsAsync(int id);
         Task<ApiResponse<LetterDto>> UpdateAsync(int id, UpdateLetterDto updateDto);
@@ -26,6 +26,6 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
 
         // Email Sending Methods
         Task<ApiResponse<LetterEmailStatusDto>> SendLetterEmailAsync(int letterId, SendLetterEmailDto emailDto, string senderUserId);
-        Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto);
+        Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto, string userId);
     }
 }

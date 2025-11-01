@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using OfficeManagementSystem.Domain.Entity;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -34,7 +35,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             ILogger<UserService> logger,
             IImageMangementService imageService,
             IConfiguration configuration,
-            IEmailService emailService)
+            IEmailService emailService
+            )
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -451,6 +453,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         Name=m.FirstName +" "+m.LastName,
                         DepartmentName= m.Department != null ? m.Department.NameAr :string.Empty
                     })
+                    .OrderBy(u => u.Name)
                     .ToListAsync();
 
                 if (!result.Any())
@@ -472,37 +475,63 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var users = await _userManager.GetUsersInRoleAsync("Manager");
+                
+                var departments = await _unitOfWork.DepartmentRepository.GetAllAsync(d => d.ManagerUserId != null);
 
+                
+                var managerIdsFromDepartments = departments
+                    .Select(d => d.ManagerUserId!)
+                    .Distinct()
+                    .ToList();
+
+                
+                var usersInManagerRole = await _userManager.GetUsersInRoleAsync("Manager");
+                var managerIdsFromRole = usersInManagerRole.Select(u => u.Id);
+
+                
+                var allManagerIds = managerIdsFromDepartments
+                    .Union(managerIdsFromRole)
+                    .Distinct()
+                    .ToList();
+
+                var usersQuery = _userManager.Users
+                    .OfType<AppUser>()
+                    .Where(u => allManagerIds.Contains(u.Id));
+
+               
                 if (!string.IsNullOrWhiteSpace(search))
                 {
-                    search = search.Trim().ToLower();
-                    users = users.Where(u =>
-                        (u.FirstName + " " + u.LastName).ToLower().Contains(search) ||
-                        u.UserName.ToLower().Contains(search))
-                        .ToList();
+                    var s = search.Trim().ToLower();
+
+                    usersQuery = usersQuery.Where(u =>
+                        (u.FirstName + " " + u.LastName).ToLower().Contains(s) ||
+                        u.UserName.ToLower().Contains(s));
                 }
 
-                var result = users.Select(m => new ManagerNameIdDto
-                {
-                    Id = m.Id,
-                    Name = m.FirstName + " " + m.LastName
-                })
-                .ToList();
+            
+                var result = await usersQuery
+                    .Select(m => new ManagerNameIdDto
+                    {
+                        Id = m.Id,
+                        Name = (m.FirstName ?? "") + " " + (m.LastName ?? "")
+                    })
+                    .OrderBy(m => m.Name)
+                    .ToListAsync();
 
                 if (!result.Any())
-                {
-                    return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse("no user to show");
-                }
+                    return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse("No managers found");
 
                 return ApiResponse<IEnumerable<ManagerNameIdDto>>.SuccessResponse(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while getting users");
-                return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse("An error occurred while retrieving users");
+                _logger.LogError(ex, "Error occurred while getting managers");
+                return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse($"An error occurred while retrieving managers: {ex.Message}");
             }
         }
+
+
+
 
     }
 }

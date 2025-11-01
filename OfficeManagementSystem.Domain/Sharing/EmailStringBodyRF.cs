@@ -8,7 +8,7 @@ namespace OfficeManagementSystem.Domain.Sharing
 {
     public static class EmailStringBodyRF
     {
-        public static string Send(string email, string token, string component, string message)
+        public static string Send(string email, string token, string component, string message, string baseAuthUrl)
         {
             string encodeToken = Uri.EscapeDataString(token);
             return $@"
@@ -128,7 +128,7 @@ namespace OfficeManagementSystem.Domain.Sharing
         
         .cta-button {{
             display: inline-block;
-            background: #1e40af;
+            background: #ffffff;
             color: white;
             padding: 14px 35px;
             font-size: 16px;
@@ -140,7 +140,7 @@ namespace OfficeManagementSystem.Domain.Sharing
         }}
         
         .cta-button:hover {{
-            background: #1d4ed8;
+            background: #d5d4d4;
             border-color: #1d4ed8;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
@@ -287,7 +287,7 @@ namespace OfficeManagementSystem.Domain.Sharing
             <div class=""token-section"">
                 <div class=""token-label"">رمز التأكيد الخاص بك:</div>
                 <div class=""token-code"">{token}</div>
-                <a class=""cta-button"" href=""http://localhost:4200/auth/{component}?email={email}&code={encodeToken}"" target=""_blank"">
+                <a class=""cta-button"" href=""{baseAuthUrl}{component}?email={email}&code={encodeToken}"" target=""_blank"">
                     تأكيد الحساب
                 </a>
             </div>

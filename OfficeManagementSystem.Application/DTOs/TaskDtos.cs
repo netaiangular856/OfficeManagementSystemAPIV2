@@ -86,6 +86,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public string? UserSearchId { get; set; }
+        public int? DepartmentId { get; set; }
     }
 
     // Task Update DTOs
@@ -174,7 +175,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public int TaskItemId { get; set; }
 
         public string EmployeeUserId { get; set; } = default!;
-        public string EmployeeName { get; set; } = default!; // ÚÔÇä ÊÚÑÖ ÇÓã ÇáãæÙÝ
+        public string EmployeeName { get; set; } = default!; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
         public string FeedbackText { get; set; } = default!;
 

@@ -335,5 +335,63 @@ namespace OfficeManagementSystem.API.Controllers
                 return StatusCode(500, new { message = "حدث خطأ أثناء جلب ملخص السفريات", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// الحصول على اتجاه KPI الأقسام
+        /// </summary>
+        /// <param name="fromDate">تاريخ البداية</param>
+        /// <param name="toDate">تاريخ النهاية</param>
+        /// <returns>اتجاه KPI الأقسام</returns>
+        [HttpGet("departments/kpi-trend")]
+        public async Task<ActionResult<DepartmentKpiTrendDto>> GetDepartmentKpiTrend(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var filter = new DashboardDateFilterDto
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate
+                };
+
+                var result = await _dashboardService.GetDepartmentKpiTrendAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "حدث خطأ أثناء جلب اتجاه KPI الأقسام", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// الحصول على قائمة متصدري الأقسام
+        /// </summary>
+        /// <param name="fromDate">تاريخ البداية</param>
+        /// <param name="toDate">تاريخ النهاية</param>
+        /// <returns>قائمة متصدري الأقسام</returns>
+        [HttpGet("departments/leaderboard")]
+        public async Task<ActionResult<DepartmentLeaderboardDto>> GetDepartmentLeaderboard(
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null)
+        {
+            try
+            {
+                var filter = new DashboardDateFilterDto
+                {
+                    FromDate = fromDate,
+                    ToDate = toDate
+                };
+
+                var result = await _dashboardService.GetDepartmentLeaderboardAsync(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // تسجيل الخطأ للتشخيص
+                Console.WriteLine($"Dashboard Department Leaderboard Error: {ex}");
+                return StatusCode(500, new { message = "حدث خطأ أثناء جلب قائمة متصدري الأقسام", error = ex.Message });
+            }
+        }
     }
 }

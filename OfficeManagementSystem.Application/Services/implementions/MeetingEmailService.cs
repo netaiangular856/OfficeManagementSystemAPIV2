@@ -28,98 +28,99 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         public async Task<bool> SendMeetingMinutesEmailAsync(Meeting meeting, MeetingMinutes minutes)
         {
-            try
-            {
+            //try
+            //{
                
                 
-                MimeMessage message = new MimeMessage();
-                message.From.Add(new MailboxAddress("نظام إدارة المكاتب", _smtpUsername));
+            //    MimeMessage message = new MimeMessage();
+            //    message.From.Add(new MailboxAddress("نظام إدارة المكاتب", _smtpUsername));
                 
-                // Set subject
-                message.Subject = $"محضر اجتماع - {meeting.Title}";
+            //    // Set subject
+            //    message.Subject = $"محضر اجتماع - {meeting.Title}";
 
-                // Add recipients (all attendees)
-                bool hasValidRecipients = false;
+            //    // Add recipients (all attendees)
+            //    bool hasValidRecipients = false;
 
-                if (meeting.Attendees != null && meeting.Attendees.Any())
-                {
-                    Console.WriteLine($"معالجة الحضور...");
-                    foreach (var attendee in meeting.Attendees)
-                    {
-                        string? email = null;
+            //    if (meeting.Attendees != null && meeting.Attendees.Any())
+            //    {
+            //        Console.WriteLine($"معالجة الحضور...");
+            //        foreach (var attendee in meeting.Attendees)
+            //        {
+            //            string? email = null;
 
-                        // للحضور الداخليين، استخدم بريد المستخدم
-                        if (attendee.Kind == AttendeeKind.Internal && attendee.User != null)
-                        {
-                            email = attendee.User.Email;
-                        }
-                        // للحضور الخارجيين، استخدم البريد المحفوظ
-                        else if (attendee.Kind == AttendeeKind.External && !string.IsNullOrEmpty(attendee.Email))
-                        {
-                            email = attendee.Email;
-                        }
+            //            // للحضور الداخليين، استخدم بريد المستخدم
+            //            if (attendee.Kind == AttendeeKind.Internal && attendee.User != null)
+            //            {
+            //                email = attendee.User.Email;
+            //            }
+            //            // للحضور الخارجيين، استخدم البريد المحفوظ
+            //            else if (attendee.Kind == AttendeeKind.External && !string.IsNullOrEmpty(attendee.Email))
+            //            {
+            //                email = attendee.Email;
+            //            }
 
-                        if (!string.IsNullOrEmpty(email) && IsValidEmail(email))
-                        {
-                            message.To.Add(new MailboxAddress(attendee.DisplayName ?? email, email));
-                            hasValidRecipients = true;
-                        }
-                        else
-                        {
-                            Console.WriteLine($"✗ بريد غير صالح أو مفقود للحاضر: {attendee.DisplayName ?? "غير محدد"}");
-                        }
-                    }
-                }
+            //            if (!string.IsNullOrEmpty(email) && IsValidEmail(email))
+            //            {
+            //                message.To.Add(new MailboxAddress(attendee.DisplayName ?? email, email));
+            //                hasValidRecipients = true;
+            //            }
+            //            else
+            //            {
+            //                Console.WriteLine($"✗ بريد غير صالح أو مفقود للحاضر: {attendee.DisplayName ?? "غير محدد"}");
+            //            }
+            //        }
+            //    }
                
 
-                if (!hasValidRecipients)
-                {
-                    return false;
-                }
+            //    if (!hasValidRecipients)
+            //    {
+            //        return false;
+            //    }
                 
 
-                // Generate email body with golden template
-                var emailBody = GenerateMeetingMinutesEmailBody(meeting, minutes);
+            //    // Generate email body with golden template
+            //    var emailBody = GenerateMeetingMinutesEmailBody(meeting, minutes);
 
-                var bodyPart = new TextPart(MimeKit.Text.TextFormat.Html)
-                {
-                    Text = emailBody
-                };
+            //    var bodyPart = new TextPart(MimeKit.Text.TextFormat.Html)
+            //    {
+            //        Text = emailBody
+            //    };
 
-                message.Body = bodyPart;
+            //    message.Body = bodyPart;
 
-                // Send email
-                using (var smtp = new SmtpClient())
-                {
-                    try
-                    {
-                        await smtp.ConnectAsync(_smtpHost, _smtpPort, true);
+            //    // Send email
+            //    using (var smtp = new SmtpClient())
+            //    {
+            //        try
+            //        {
+            //            await smtp.ConnectAsync(_smtpHost, _smtpPort, true);
                         
-                        await smtp.AuthenticateAsync(_smtpUsername, _smtpPassword);
+            //            await smtp.AuthenticateAsync(_smtpUsername, _smtpPassword);
                         
-                        await smtp.SendAsync(message);
+            //            await smtp.SendAsync(message);
 
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
+            //            return true;
+            //        }
+            //        catch (Exception ex)
+            //        {
                         
-                        return false;
-                    }
-                    finally
-                    {
-                        if (smtp.IsConnected)
-                        {
-                            await smtp.DisconnectAsync(true);
-                        }
-                        smtp.Dispose();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            //            return false;
+            //        }
+            //        finally
+            //        {
+            //            if (smtp.IsConnected)
+            //            {
+            //                await smtp.DisconnectAsync(true);
+            //            }
+            //            smtp.Dispose();
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    return false;
+            //}
+            return true;
         }
 
         private string GenerateMeetingMinutesEmailBody(Meeting meeting, MeetingMinutes minutes)
@@ -146,7 +147,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 foreach (var attendee in meeting.Attendees)
                 {
                     var name = attendee.Kind == AttendeeKind.Internal 
-                        ? (attendee.User?.UserName ?? attendee.DisplayName ?? "غير محدد")
+                        ? ((attendee.User?.FirstName +" "+attendee.User?.FirstName) ?? attendee.DisplayName ?? "غير محدد")
                         : attendee.DisplayName ?? "غير محدد";
                     
                     var roleIcon = attendee.Role switch
@@ -276,10 +277,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             {aiSummarySection}
 
             <!-- Attendees Section -->
-            <div style='padding:30px; background-color:#fafafa; border-bottom: 2px solid #f0f0f0;'>
-                <h3 style='color:#d4af37; margin: 0 0 15px 0; font-size: 20px;'>👥 الحضور ({meeting.Attendees?.Count ?? 0} شخص)</h3>
-                {attendeesList}
-            </div>
+            
 
             <!-- Minutes Notes Section -->
             <div style='padding:30px; border-bottom: 2px solid #f0f0f0;'>

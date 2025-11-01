@@ -35,6 +35,20 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Note { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        // Internal Coordinator Fields
+        [MaxLength(200)]
+        public string? InternalCoordinatorName { get; set; }
+
+        [EmailAddress]
+        [MaxLength(200)]
+        public string? InternalCoordinatorEmail { get; set; }
+
+        [MaxLength(20)]
+        public string? InternalCoordinatorPhone { get; set; }
+
+        [MaxLength(200)]
+        public string? InternalCoordinatorJobTitle { get; set; }
     }
 
     public class UpdatePartnerDto
@@ -66,6 +80,20 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Note { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        // Internal Coordinator Fields
+        [MaxLength(200)]
+        public string? InternalCoordinatorName { get; set; }
+
+        [EmailAddress]
+        [MaxLength(200)]
+        public string? InternalCoordinatorEmail { get; set; }
+
+        [MaxLength(20)]
+        public string? InternalCoordinatorPhone { get; set; }
+
+        [MaxLength(200)]
+        public string? InternalCoordinatorJobTitle { get; set; }
     }
 
     public class PartnerDto
@@ -85,6 +113,13 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime? UpdatedAt { get; set; }
         public bool IsActive { get; set; }
         public string? Note { get; set; }
+
+        // Internal Coordinator Fields
+        public string? InternalCoordinatorName { get; set; }
+        public string? InternalCoordinatorEmail { get; set; }
+        public string? InternalCoordinatorPhone { get; set; }
+        public string? InternalCoordinatorJobTitle { get; set; }
+
         public List<PartnerContactDto> Contacts { get; set; } = new();
     }
 

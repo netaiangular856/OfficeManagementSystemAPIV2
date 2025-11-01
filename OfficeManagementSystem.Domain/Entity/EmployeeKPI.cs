@@ -11,8 +11,8 @@ namespace OfficeManagementSystem.Domain.Entity
         public int Id { get; set; }
         public string EmployeeId { get; set; }
         public Employee Employee { get; set; } = default!;
-        public DateOnly PeriodStart { get; set; }
-        public DateOnly PeriodEnd { get; set; }
+        public DateTime PeriodStart { get; set; }
+        public DateTime PeriodEnd { get; set; }
         public int TasksAssigned { get; set; }
         public int TasksCompleted { get; set; }
         public int TasksLate { get; set; }

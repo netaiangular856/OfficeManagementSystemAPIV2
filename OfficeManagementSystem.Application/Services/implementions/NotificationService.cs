@@ -51,8 +51,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     Title = notificationDto.Title,
                     Message = notificationDto.Message,
                     Type = notificationDto.Type?? "General",
-                    CreatedAt = DateTime.UtcNow,
-
+                    CreatedAt = DateTime.Now,
+                    ReferenceId = notificationDto.ReferenceId,
+                    ReferenceType = notificationDto.ReferenceType
                 };
             var emailTasks = new List<Task>();
             foreach (var userid in notificationDto.UserIds)
@@ -92,7 +93,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
 
             var notifications=await _unitOfWork.NotificationRepository
-                .GetAllAsync(m=>m.UserNotifications.Any(un => un.UserId == userId)&&m.CreatedAt>= DateTime.UtcNow.Date.AddDays(-7),
+                .GetAllAsync(m=>m.UserNotifications.Any(un => un.UserId == userId && !un.IsRead)&&m.CreatedAt>= DateTime.UtcNow.Date.AddDays(-7),
                 m =>m.OrderByDescending(o=>o.CreatedAt),includeProperties: "UserNotifications");
 
             if (!notifications.Any())
@@ -101,6 +102,75 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var result= _mapper.Map<IEnumerable<NotificationDto>>(notifications);
 
             return ApiResponse<IEnumerable<NotificationDto>>.SuccessResponse(result);
+        }
+
+        public async Task<ApiResponse<PaginatedResult<NotificationDto>>> GetUserNotificationsWithFilter(string userId, NotificationFilterDto filter)
+        {
+            // Build the base query
+            var query = await _unitOfWork.NotificationRepository
+                .GetAllAsync(
+                    m => m.UserNotifications.Any(un => un.UserId == userId),
+                    m => m.OrderByDescending(o => o.CreatedAt),
+                    includeProperties: "UserNotifications"
+                );
+
+            // Apply filters
+            var filteredNotifications = query.AsQueryable();
+
+            // Filter by IsRead
+            if (filter.IsRead.HasValue)
+            {
+                filteredNotifications = filteredNotifications.Where(n => 
+                    n.UserNotifications.Any(un => un.UserId == userId && un.IsRead == filter.IsRead.Value));
+            }
+
+            // Filter by Type
+            if (!string.IsNullOrEmpty(filter.Type))
+            {
+                filteredNotifications = filteredNotifications.Where(n => 
+                    n.Type != null && n.Type.Contains(filter.Type, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Filter by SearchTerm (Title or Message)
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            {
+                filteredNotifications = filteredNotifications.Where(n => 
+                    n.Title.Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (n.Message != null && n.Message.Contains(filter.SearchTerm, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // Filter by Date Range
+            if (filter.FromDate.HasValue)
+            {
+                filteredNotifications = filteredNotifications.Where(n => n.CreatedAt >= filter.FromDate.Value);
+            }
+
+            if (filter.ToDate.HasValue)
+            {
+                filteredNotifications = filteredNotifications.Where(n => n.CreatedAt <= filter.ToDate.Value.AddDays(1));
+            }
+
+            // Get total count
+            var totalCount = filteredNotifications.Count();
+
+            // Apply pagination
+            var notifications = filteredNotifications
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToList();
+
+            if (!notifications.Any())
+                return ApiResponse<PaginatedResult<NotificationDto>>.ErrorResponse("No Notifications Found");
+
+            var result = new PaginatedResult<NotificationDto>
+            {
+                TotalCount = totalCount,
+                Page = filter.Page,
+                PageSize = filter.PageSize,
+                Items = _mapper.Map<List<NotificationDto>>(notifications)
+            };
+
+            return ApiResponse<PaginatedResult<NotificationDto>>.SuccessResponse(result);
         }
 
         public async Task<ApiResponse<NotificationDto>> MarkAsReadAsync(int id, string userId)
@@ -128,6 +198,30 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<bool>.ErrorResponse("No notifications to mark as read");
 
             return ApiResponse<bool>.SuccessResponse(true, "All notifications marked as read");
+        }
+
+        public async Task<ApiResponse<NotificationReferenceDto>> GetNotificationReference(int notificationId, string userId)
+        {
+            // Verify user has access to this notification
+            var userNotification = await _unitOfWork.NotificationRepository.GetUserNotificationById(notificationId, userId);
+            
+            if (userNotification == null)
+                return ApiResponse<NotificationReferenceDto>.ErrorResponse("Notification not found or access denied");
+
+            var notification = await _unitOfWork.NotificationRepository.GetByIdAsync(notificationId);
+            
+            if (notification == null)
+                return ApiResponse<NotificationReferenceDto>.ErrorResponse("Notification not found");
+
+            var result = new NotificationReferenceDto
+            {
+                NotificationId = notification.Id,
+                ReferenceId = notification.ReferenceId,
+                ReferenceType = notification.ReferenceType,
+                ReferenceTypeName = notification.ReferenceType.ToString()
+            };
+
+            return ApiResponse<NotificationReferenceDto>.SuccessResponse(result);
         }
     }
 }

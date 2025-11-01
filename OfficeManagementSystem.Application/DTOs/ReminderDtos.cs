@@ -11,6 +11,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? Description { get; set; }
         public DateTime EventTime { get; set; }
         public DateTime ReminderTime { get; set; }
+        
+
     }
     
     /// <summary>
@@ -41,6 +43,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime? SentAt { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        
+
     }
     
     /// <summary>
@@ -51,6 +55,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime EventTime { get; set; }
         public ReminderTimeOption TimeOption { get; set; }
         public string? CustomMessage { get; set; }
+        
+
     }
     
     /// <summary>

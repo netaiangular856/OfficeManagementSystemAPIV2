@@ -34,7 +34,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<EmployeeKPI>> GetKpisByPeriodAsync(DateOnly periodStart, DateOnly periodEnd)
+        public async Task<IEnumerable<EmployeeKPI>> GetKpisByPeriodAsync(DateTime periodStart, DateTime periodEnd)
         {
             return await _dbSet
                 .Include(k => k.Employee)
@@ -43,7 +43,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<EmployeeKPI?> GetKpiByEmployeeAndPeriodAsync(string employeeId, DateOnly periodStart, DateOnly periodEnd)
+        public async Task<EmployeeKPI?> GetKpiByEmployeeAndPeriodAsync(string employeeId, DateTime periodStart, DateTime periodEnd)
         {
             return await _dbSet
                 .Include(k => k.Employee)
@@ -52,7 +52,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
                                         k.PeriodEnd == periodEnd);
         }
 
-        public async Task<bool> ExistsKpiForPeriodAsync(string employeeId, DateOnly periodStart, DateOnly periodEnd)
+        public async Task<bool> ExistsKpiForPeriodAsync(string employeeId, DateTime periodStart, DateTime periodEnd)
         {
             return await _dbSet
                 .AnyAsync(k => k.EmployeeId == employeeId && 
@@ -74,7 +74,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
 
         public async Task DeleteOldKpisAsync(int monthsToKeep = 24)
         {
-            var cutoffDate = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-monthsToKeep));
+            var cutoffDate = DateTime.UtcNow.AddMonths(-monthsToKeep);
             
             var oldKpis = await _dbSet
                 .Where(k => k.PeriodEnd < cutoffDate)

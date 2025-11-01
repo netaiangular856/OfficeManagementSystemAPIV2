@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/environments/environment.ts"],
+  "sourcesContent": ["export const environment = {\r\n  production: false,\r\n  apiBaseUrl: 'https://officemanagementsystemv4.runasp.net/api',\r\n  apiUrl: 'https://officemanagementsystemv4.runasp.net'\r\n}\r\n\r\n"],
+  "mappings": ";AAAO,IAAM,cAAc;EACzB,YAAY;EACZ,YAAY;EACZ,QAAQ;;",
+  "names": []
+}

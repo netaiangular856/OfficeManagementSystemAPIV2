@@ -120,8 +120,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
             try
             {
-                var periodStart = request.PeriodStart ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
-                var periodEnd = request.PeriodEnd ?? DateOnly.FromDateTime(DateTime.UtcNow);
+                var periodStart = request.PeriodStart ??DateTime.UtcNow.AddMonths(-1);
+                var periodEnd = request.PeriodEnd ?? DateTime.UtcNow;
 
                 if (request.RecalculateAllEmployees)
                 {
@@ -154,7 +154,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisForPeriodAsync(DateOnly periodStart, DateOnly periodEnd)
+        public async Task<ApiResponse<RecalculateKpisResponseDto>> RecalculateKpisForPeriodAsync(DateTime periodStart, DateTime periodEnd)
         {
             var request = new RecalculateKpisRequestDto
             {
@@ -204,7 +204,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         #region Private Methods
 
-        private async Task<RecalculateKpisResponseDto> RecalculateKpisForAllEmployeesInPeriodAsync(DateOnly periodStart, DateOnly periodEnd)
+        private async Task<RecalculateKpisResponseDto> RecalculateKpisForAllEmployeesInPeriodAsync(DateTime periodStart, DateTime periodEnd)
         {
             var response = new RecalculateKpisResponseDto();
             var employees =  _userManager.Users.OfType<Employee>();
@@ -236,7 +236,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             return response;
         }
 
-        private async Task<RecalculateKpisResponseDto> RecalculateKpisForSpecificEmployeesAsync(List<string> employeeIds, DateOnly periodStart, DateOnly periodEnd)
+        private async Task<RecalculateKpisResponseDto> RecalculateKpisForSpecificEmployeesAsync(List<string> employeeIds, DateTime periodStart, DateTime periodEnd)
         {
             var response = new RecalculateKpisResponseDto();
             response.TotalEmployeesProcessed = employeeIds.Count;
@@ -266,7 +266,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             return response;
         }
 
-        private async Task<EmployeeKPI?> CalculateKpiForEmployeeAsync(string employeeId, DateOnly periodStart, DateOnly periodEnd)
+        private async Task<EmployeeKPI?> CalculateKpiForEmployeeAsync(string employeeId, DateTime periodStart, DateTime periodEnd)
         {
             try
             {
@@ -305,10 +305,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        private async Task UpdateKpiValuesAsync(EmployeeKPI kpi, string employeeId, DateOnly periodStart, DateOnly periodEnd)
+        private async Task UpdateKpiValuesAsync(EmployeeKPI kpi, string employeeId, DateTime periodStart, DateTime periodEnd)
         {
-            var periodStartDate = periodStart.ToDateTime(TimeOnly.MinValue);
-            var periodEndDate = periodEnd.ToDateTime(TimeOnly.MaxValue);
+            var periodStartDate = periodStart;
+            var periodEndDate = periodEnd;
 
             _logger.LogInformation($"=== KPI Calculation for Employee {employeeId} ({periodStart} - {periodEnd}) ===");
 

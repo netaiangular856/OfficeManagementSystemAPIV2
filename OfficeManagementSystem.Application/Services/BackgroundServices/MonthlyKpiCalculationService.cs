@@ -78,8 +78,8 @@ namespace OfficeManagementSystem.Application.Services.BackgroundServices
             {
                 // Calculate KPIs for the previous month
                 var previousMonth = DateTime.UtcNow.AddMonths(-1);
-                var periodStart = new DateOnly(previousMonth.Year, previousMonth.Month, 1);
-                var periodEnd = new DateOnly(previousMonth.Year, previousMonth.Month, 
+                var periodStart = new DateTime(previousMonth.Year, previousMonth.Month, 1);
+                var periodEnd = new DateTime(previousMonth.Year, previousMonth.Month, 
                     DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month));
 
                 var result = await kpiService.RecalculateKpisForPeriodAsync(periodStart, periodEnd);

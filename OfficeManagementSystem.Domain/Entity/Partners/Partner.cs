@@ -21,6 +21,12 @@ public class Partner
     public bool IsActive { get; set; } = true;
     public string? Note { get; set; }
 
+    // Internal Coordinator Fields
+    public string? InternalCoordinatorName { get; set; }
+    public string? InternalCoordinatorEmail { get; set; }
+    public string? InternalCoordinatorPhone { get; set; }
+    public string? InternalCoordinatorJobTitle { get; set; }
+
     public ICollection<PartnerContact> Contacts { get; set; } = new List<PartnerContact>();
     public ICollection<PartnerEmployee> Employees { get; set; } = new List<PartnerEmployee>();
 }

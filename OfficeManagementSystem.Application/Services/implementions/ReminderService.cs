@@ -100,10 +100,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<ReminderDto>.ErrorResponse("التذكير غير موجود");
                 }
 
-                if (reminder.IsSent)
-                {
-                    return ApiResponse<ReminderDto>.ErrorResponse("لا يمكن تعديل التذكير بعد إرساله");
-                }
+                //if (reminder.IsSent)
+                //{
+                //    return ApiResponse<ReminderDto>.ErrorResponse("لا يمكن تعديل التذكير بعد إرساله");
+                //}
 
                 reminder.Title = updateReminderDto.Title;
                 reminder.Description = updateReminderDto.Description;
@@ -150,15 +150,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
             try
             {
                 var reminders = await _unitOfWork.ReminderRepository.GetUserRemindersAsync(userId);
-                var reminderDtos = new List<ReminderDto>();
-
-                foreach (var reminder in reminders)
+                if(reminders == null)
                 {
-                    var reminderDto = _mapper.Map<ReminderDto>(reminder);
-                    reminderDto.UserName = reminder.User?.UserName ?? reminder.User?.Email ?? "غير محدد";
-                    reminderDtos.Add(reminderDto);
+                    return ApiResponse<List<ReminderDto>>.ErrorResponse($"لا يوجد اي تذكيرات للمستخدم");
                 }
 
+                
+                var reminderDtos = _mapper.Map<List<ReminderDto>>(reminders);
+                  
                 return ApiResponse<List<ReminderDto>>.SuccessResponse(reminderDtos);
             }
             catch (Exception ex)

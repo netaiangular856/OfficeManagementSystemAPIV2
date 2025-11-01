@@ -32,6 +32,9 @@ namespace OfficeManagementSystem.Domain.Entity.Visit
         public AppUser? CreatedByUser { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+
+        // شركاء السفر
+        public ICollection<TravelPartner> Partners { get; set; } = new List<TravelPartner>();
     }
 
 }

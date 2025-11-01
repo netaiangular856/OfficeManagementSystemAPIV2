@@ -42,7 +42,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     EntityId = task.Id,
                     ActionType = WorkflowActionType.Created,
                     Description = $"New Task Update to '{task.Title}  {taskUpdate.Note}",
-                    UserId = currentUserId // Ãæ ÎÏå ãä ÇáÜ Context ÍÓÈ ÇáãÓÊÎÏã ÇáÍÇáí
+                    UserId = currentUserId // ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ Context ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
@@ -55,7 +55,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 "New Task Update",
                 $"A new task Update has been Added to task {task.Title},Please check your task list for details.",
                 new List<string> { task.AssigneeUserId },
-                "Task"
+                "Task",
+                null,
+                task.Id,
+                Domain.Enums.NotificationReferenceType.Task
                 );
 
                 return ApiResponse<TaskUpdateDto>.SuccessResponse(taskUpdateDto, "Task update created successfully");

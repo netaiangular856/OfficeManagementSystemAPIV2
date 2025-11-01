@@ -60,5 +60,15 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
         /// </summary>
         Task<TravelsOverviewDto> GetTravelsOverviewAsync(DashboardDateFilterDto filter);
         Task<TasksOverviewDto> GetTasksOverviewForManagerAsync(DashboardDateFilterDto filter, string userId);
+
+        /// <summary>
+        /// الحصول على اتجاه KPI الأقسام
+        /// </summary>
+        Task<DepartmentKpiTrendDto> GetDepartmentKpiTrendAsync(DashboardDateFilterDto filter);
+
+        /// <summary>
+        /// الحصول على قائمة متصدري الأقسام
+        /// </summary>
+        Task<DepartmentLeaderboardDto> GetDepartmentLeaderboardAsync(DashboardDateFilterDto filter);
     }
 }

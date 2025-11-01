@@ -41,6 +41,19 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.Property(x => x.UpdatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
+            // Internal Coordinator Fields
+            builder.Property(x => x.InternalCoordinatorName)
+                .HasMaxLength(200);
+
+            builder.Property(x => x.InternalCoordinatorEmail)
+                .HasMaxLength(200);
+
+            builder.Property(x => x.InternalCoordinatorPhone)
+                .HasMaxLength(50);
+
+            builder.Property(x => x.InternalCoordinatorJobTitle)
+                .HasMaxLength(200);
+
             // Indexes
             builder.HasIndex(x => x.Name);
             builder.HasIndex(x => x.Category);

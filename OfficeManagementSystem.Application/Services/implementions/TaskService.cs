@@ -52,7 +52,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     EntityId = task.Id,
                     ActionType = WorkflowActionType.Created,
                     Description = $"New Task added '{task.Title}' and assgin to {task.AssigneeUserId}",
-                    UserId = task.CreatedByUserId // Ãæ ÎÏå ãä ÇáÜ Context ÍÓÈ ÇáãÓÊÎÏã ÇáÍÇáí
+                    UserId = task.CreatedByUserId // ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ Context ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
@@ -64,7 +64,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     "New Task Assigned",
                     $"A new task has been assigned to you: {task.Title} deadline : {task.DueDate},Please check your task list for details.",
                     new List<string> { task.AssigneeUserId },
-                    "Task"
+                    "Task",
+                    null,
+                    task.Id,
+                    Domain.Enums.NotificationReferenceType.Task
                 );
                 return ApiResponse<TaskDto>.SuccessResponse(taskDto, "Task created successfully");
             }
@@ -78,7 +81,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             try
             {
                 var allTasks = await _unitOfWork.TaskRepository
-                    .GetAllAsync( includeProperties: "Dept,Assignee,CreatedBy");
+                    .GetAllAsync( includeProperties: "Dept,Assignee,Assignee.Department,CreatedBy",
+                    orderBy:m=>m.OrderByDescending(t=>t.DueDate));
 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -93,7 +97,17 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filteredTasks = filteredTasks.Where(t => t.DueDate <= filter.DueDateTo.Value);
 
                 if (!string.IsNullOrEmpty(filter.UserSearchId))
-                    filteredTasks = filteredTasks.Where(t => t.Assignee.ManagerId == filter.UserSearchId);
+                {
+                    filteredTasks = filteredTasks.Where(t =>
+                        (t.Assignee != null &&
+                         t.Assignee.Department != null &&
+                         t.Assignee.Department.ManagerUserId == filter.UserSearchId)
+                        || t.AssigneeUserId == filter.UserSearchId
+                    );
+                }
+
+                if (filter.DepartmentId.HasValue)
+                    filteredTasks = filteredTasks.Where(t => t.DeptId == filter.DepartmentId.Value);
 
                 // Get total count
                 var totalCount = filteredTasks.Count();
@@ -128,7 +142,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
             try
             {
                 var allTasks = await _unitOfWork.TaskRepository
-                    .GetAllAsync(filter:m=>m.Assignee.ManagerId== managerId, includeProperties: "Dept,Assignee,CreatedBy");
+                    .GetAllAsync(filter: (m => m.Assignee.Department.ManagerUserId != null && m.Assignee.Department.ManagerUserId == managerId), 
+                    includeProperties: "Dept,Assignee,Assignee.Department,CreatedBy",
+                    orderBy: m => m.OrderByDescending(t => t.DueDate));
                 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -239,7 +255,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     EntityId = task.Id,
                     ActionType = WorkflowActionType.Deleted,
                     Description = $"Task '{task.Title}' deleted at {DateTime.UtcNow}",
-                    UserId = task.CreatedByUserId // Ãæ ÇáãÓÊÎÏã ÇáÍÇáí
+                    UserId = task.CreatedByUserId // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
@@ -262,11 +278,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (task == null)
                     return ApiResponse<bool>.ErrorResponse("Task not found");
 
-                if (task.Status == TaskStatus.Done || task.Status == TaskStatus.Stopped)
-                    return ApiResponse<bool>.ErrorResponse("Task is already closed");
+                //if (task.Status == TaskStatus.Done || task.Status == TaskStatus.Stopped)
+                //    return ApiResponse<bool>.ErrorResponse("Task is already closed");
 
-                if(task.Status==closeTaskDto.Status)
-                    return ApiResponse<bool>.ErrorResponse($"Task is already {task.Status}");
+                //if(task.Status==closeTaskDto.Status)
+                //    return ApiResponse<bool>.ErrorResponse($"Task is already {task.Status}");
 
                 task.Status = closeTaskDto.Status;
                 task.UpdatedAt = DateTime.UtcNow;
@@ -344,7 +360,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var worklog = new WorkflowLog
                 {
                     EntityName = "Task",
-                    EntityId = 0, // Ãæ ããßä ÊÎáíåÇ null / Ãæá TaskId
+                    EntityId = 0, // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ null / ï¿½ï¿½ï¿½ TaskId
                     ActionType = WorkflowActionType.Updated,
                     Description = $"{tasks.Count} tasks closed with status {bulkCloseDto.Status} at {DateTime.UtcNow}",
                     UserId = currentUserId
@@ -415,7 +431,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 "Tasks Reassigned",
                 $"A new tasks has been reassigned to you,Please check your task list for details.",
                 new List<string> { bulkReassignDto.NewAssigneeUserId },
-                "Task"
+                "Task",
+                null,
+                null,
+                Domain.Enums.NotificationReferenceType.Task
                 );
 
                 return ApiResponse<bool>.SuccessResponse(true, $"{tasks.Count} tasks reassigned successfully");
@@ -434,7 +453,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 var allTasks = await _unitOfWork.TaskRepository
                     .GetAllAsync(filter: m => (m.AssigneeUserId == employeeId)
                     &&(m.Status==TaskStatus.New|| m.Status == TaskStatus.In_Progress|| m.Status == TaskStatus.returned),
-                    includeProperties: "Dept,Assignee,CreatedBy");
+                    includeProperties: "Dept,Assignee,CreatedBy",
+                    orderBy: m => m.OrderByDescending(t => t.DueDate));
 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -518,7 +538,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     EntityId = task.Id,
                     ActionType = WorkflowActionType.Created,
                     Description = $"New Task Feedback to '{task.Title}",
-                    UserId = currentUserId // Ãæ ÎÏå ãä ÇáÜ Context ÍÓÈ ÇáãÓÊÎÏã ÇáÍÇáí
+                    UserId = currentUserId // ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ Context ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
@@ -531,7 +551,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 "New Task Feedback",
                 $"A new task feedback has been Added to task {task.Title},Please check your task list for details.",
                 new List<string> { task.CreatedByUserId },
-                "Task"
+                "Task",
+                null,
+                task.Id,
+                Domain.Enums.NotificationReferenceType.Task
                 );
 
                 return ApiResponse<TaskFeedbackDto>.SuccessResponse(taskFeedbackDto, "Task Feedback created successfully");

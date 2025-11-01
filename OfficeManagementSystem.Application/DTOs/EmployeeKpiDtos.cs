@@ -10,8 +10,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string EmployeeId { get; set; } = string.Empty;
         public string EmployeeName { get; set; } = string.Empty;
         public string JobTitle { get; set; } = string.Empty;
-        public DateOnly PeriodStart { get; set; }
-        public DateOnly PeriodEnd { get; set; }
+        public DateTime PeriodStart { get; set; }
+        public DateTime PeriodEnd { get; set; }
         public int TasksAssigned { get; set; }
         public int TasksCompleted { get; set; }
         public int TasksLate { get; set; }
@@ -35,8 +35,8 @@ namespace OfficeManagementSystem.Application.DTOs
 
     public class RecalculateKpisRequestDto
     {
-        public DateOnly? PeriodStart { get; set; }
-        public DateOnly? PeriodEnd { get; set; }
+        public DateTime? PeriodStart { get; set; }
+        public DateTime? PeriodEnd { get; set; }
         public bool RecalculateAllEmployees { get; set; } = true;
         public List<string>? SpecificEmployeeIds { get; set; }
     }

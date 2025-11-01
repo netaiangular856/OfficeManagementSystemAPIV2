@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using System;
 using System.Collections.Generic;
@@ -23,13 +24,15 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                var user = new AppUser
+                var user = new Employee
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
                     FirstName = "System",
                     LastName = "Admin",
                     EmailConfirmed = true,
+                    JobTitle = "System Administrator",
+                    HireDate = DateTime.UtcNow
                 };
 
                 var result = await userManager.CreateAsync(user, adminPassword);

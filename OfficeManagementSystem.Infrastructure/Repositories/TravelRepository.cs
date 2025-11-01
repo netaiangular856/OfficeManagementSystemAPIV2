@@ -16,6 +16,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         {
             return await _dbSet
                 .Include(t => t.CreatedByUser)
+                .Include(t=>t.Partners)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 

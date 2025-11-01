@@ -12,7 +12,9 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
     {
         Task<ApiResponse<NotificationDto>> AddNotification(CreateNotificationDto notificationDto);
         Task<ApiResponse<IEnumerable<NotificationDto>>> GetUserNotifications(string userId);
+        Task<ApiResponse<PaginatedResult<NotificationDto>>> GetUserNotificationsWithFilter(string userId, NotificationFilterDto filter);
         Task<ApiResponse<NotificationDto>> MarkAsReadAsync(int id, string userId);
         Task<ApiResponse<bool>> MarkAllAsReadAsync(string userId);
+        Task<ApiResponse<NotificationReferenceDto>> GetNotificationReference(int notificationId, string userId);
     }
 }

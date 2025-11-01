@@ -3,6 +3,23 @@ using OfficeManagementSystem.Application.DTOs.Common;
 
 namespace OfficeManagementSystem.Application.DTOs
 {
+    public class TravelPartnerDto
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "الاسم مطلوب")]
+        [MaxLength(200, ErrorMessage = "الاسم لا يمكن أن يتجاوز 200 حرف")]
+        public string Name { get; set; } = default!;
+
+        [MaxLength(200, ErrorMessage = "البريد الإلكتروني لا يمكن أن يتجاوز 200 حرف")]
+        [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صالح")]
+        public string? Email { get; set; }
+
+        [MaxLength(200, ErrorMessage = "المسمى الوظيفي لا يمكن أن يتجاوز 200 حرف")]
+        public string? JobTitle { get; set; }
+    }
+
+
     public class CreateTravelDto
     {
         [Required(ErrorMessage = "العنوان مطلوب")]
@@ -24,6 +41,8 @@ namespace OfficeManagementSystem.Application.DTOs
 
         public string? TransportMode { get; set; }
         public string? Accommodation { get; set; }
+
+        public List<TravelPartnerDto>? Partners { get; set; }
     }
 
     public class UpdateTravelDto
@@ -48,6 +67,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? TransportMode { get; set; }
         public string? Accommodation { get; set; }
         public bool IsCompleted { get; set; }
+
+        public List<TravelPartnerDto>? Partners { get; set; }
     }
 
     public class TravelDto
@@ -65,6 +86,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public bool IsCompleted { get; set; }
+
+        public List<TravelPartnerDto>? Partners { get; set; }
     }
 
     public class TravelQueryDto : PaginationDto

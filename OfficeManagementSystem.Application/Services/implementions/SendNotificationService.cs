@@ -5,6 +5,7 @@ using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Entity.Auth;
 using OfficeManagementSystem.Domain.Entity.Notifications;
+using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
 using OfficeManagementSystem.Domain.Sharing;
 using System;
@@ -34,14 +35,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _userManager = userManager;
         }
 
-        public async Task SendNotificationAsync(string title, string message, List<string> userIds,string? type,string? htmlContent=null)
+        public async Task SendNotificationAsync(string title, string message, List<string> userIds, string? type, string? htmlContent = null, int? referenceId = null, NotificationReferenceType referenceType = NotificationReferenceType.None)
         {
             var notification = new Notification
             {
                 Title = title,
                 Message = message,
                 CreatedAt = DateTime.UtcNow,
-                Type=type?? "General"
+                Type = type ?? "General",
+                ReferenceId = referenceId,
+                ReferenceType = referenceType
             };
 
             var users = await _userManager.Users

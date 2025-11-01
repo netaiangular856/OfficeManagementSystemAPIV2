@@ -17,7 +17,8 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
             CreateMap<Reminder, ReminderDto>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? (src.User.UserName ?? src.User.Email) : "غير محدد"));
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? ((src.User.FirstName+" "+ src.User.LastName) ?? src.User.Email) : "غير محدد"))
+                ;
 
             CreateMap<UpdateReminderDto, Reminder>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))

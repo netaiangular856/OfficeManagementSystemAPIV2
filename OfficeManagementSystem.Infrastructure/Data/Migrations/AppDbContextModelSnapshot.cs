@@ -133,6 +133,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("ArabicName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -489,11 +493,11 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<int>("MeetingsMissed")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("PeriodEnd")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateOnly>("PeriodStart")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("ResponseSpeedAvgHours")
                         .HasColumnType("decimal(18,2)");
@@ -514,7 +518,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("EmployeeKPIs");
+                    b.ToTable("EmployeeKPIs", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.EmployeeNote", b =>
@@ -912,6 +916,12 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReferenceType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -921,7 +931,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.UserNotification", b =>
@@ -951,7 +961,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserNotifications");
+                    b.ToTable("UserNotifications", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>
@@ -989,6 +999,22 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("InternalCoordinatorEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("InternalCoordinatorJobTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("InternalCoordinatorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("InternalCoordinatorPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -1225,7 +1251,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("TaskItemId");
 
-                    b.ToTable("TaskFeedbacks");
+                    b.ToTable("TaskFeedbacks", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
@@ -1351,12 +1377,12 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedByUserId")
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Destination")
@@ -1390,9 +1416,44 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CreatedBy");
 
-                    b.ToTable("Travels");
+                    b.HasIndex("EndDate");
+
+                    b.HasIndex("StartDate");
+
+                    b.ToTable("Travels", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelPartner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("JobTitle")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("TravelId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TravelId");
+
+                    b.ToTable("TravelPartners", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelResult", b =>
@@ -1420,7 +1481,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("TravelId");
 
-                    b.ToTable("TravelResults");
+                    b.ToTable("TravelResults", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
@@ -1557,7 +1618,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkflowLogs");
+                    b.ToTable("WorkflowLogs", (string)null);
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>
@@ -2002,9 +2063,21 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId");
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelPartner", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Visit.Travel", "Travel")
+                        .WithMany("Partners")
+                        .HasForeignKey("TravelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Travel");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.TravelResult", b =>
@@ -2128,6 +2201,11 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Feedbacks");
 
                     b.Navigation("Updates");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Travel", b =>
+                {
+                    b.Navigation("Partners");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>

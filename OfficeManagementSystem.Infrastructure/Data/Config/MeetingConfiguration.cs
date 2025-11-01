@@ -39,10 +39,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.Property(x => x.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            // Îáíå nullable ÈÏæä Defaultº åäÍÏøËå ãä ÇáßæÏ ÚäÏ ÇáÊÚÏíá
+            // ï¿½ï¿½ï¿½ï¿½ nullable ï¿½ï¿½ï¿½ï¿½ Defaultï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             builder.Property(x => x.UpdatedAt);
 
-            // ÚáÇÞÇÊ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             builder.HasOne(x => x.Organizer)
                 .WithMany()
                 .HasForeignKey(x => x.OrganizerUserId)
@@ -55,7 +55,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .OnDelete(DeleteBehavior.Cascade);
 
 
-            // ÝåÇÑÓ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½
             builder.HasIndex(x => x.Type);
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.StartAt);

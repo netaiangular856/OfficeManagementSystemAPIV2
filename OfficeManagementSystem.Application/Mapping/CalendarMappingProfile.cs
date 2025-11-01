@@ -29,7 +29,9 @@ namespace OfficeManagementSystem.Application.Mapping
                 src.Organizer.Department.NameEn))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 1))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => GetMeetingColor(src.Type)))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.OriginalEntityId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.EventTypeName, opt => opt.MapFrom(src => EventType.Meeting.ToString()));
 
             // Mapping for TaskItem to CalendarEventDto
             CreateMap<TaskItem, CalendarEventDto>()
@@ -46,7 +48,9 @@ namespace OfficeManagementSystem.Application.Mapping
                     src.Dept.NameEn))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => (int)src.Priority))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => GetTaskColor(src.Priority, src.Status)))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.OriginalEntityId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.EventTypeName, opt => opt.MapFrom(src => EventType.Task.ToString()));
 
             // Mapping for Visit to CalendarEventDto
             CreateMap<Visit, CalendarEventDto>()
@@ -64,7 +68,9 @@ namespace OfficeManagementSystem.Application.Mapping
                     src.CreatedByUser != null && src.CreatedByUser.Department != null ? src.CreatedByUser.Department.NameEn : ""))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 2))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => "#9C27B0")) // Purple for visits
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.OriginalEntityId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.EventTypeName, opt => opt.MapFrom(src => EventType.Visit.ToString()));
 
             // Mapping for Travel to CalendarEventDto
             CreateMap<Travel, CalendarEventDto>()
@@ -83,7 +89,9 @@ namespace OfficeManagementSystem.Application.Mapping
                     src.CreatedByUser != null && src.CreatedByUser.Department != null ? src.CreatedByUser.Department.NameEn : ""))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 3))
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => "#FF9800")) // Orange for travel
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.OriginalEntityId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.EventTypeName, opt => opt.MapFrom(src => EventType.Travel.ToString()));
         }
 
         private static EventStatus MapMeetingStatus(Domain.Enums.Meeting.MeetingStatus status)

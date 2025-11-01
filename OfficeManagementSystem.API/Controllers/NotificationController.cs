@@ -52,6 +52,22 @@ namespace OfficeManagementSystem.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("user/filtered")]
+        public async Task<IActionResult> GetUserNotificationWithFilter([FromQuery] NotificationFilterDto filter)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return NotFound();
+            }
+            var result = await _notificationService.GetUserNotificationsWithFilter(userId, filter);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result);
+        }
+
         [HttpPatch("{id}")]
         public async Task<IActionResult> MarkAsRead(int id)
         {
@@ -81,6 +97,24 @@ namespace OfficeManagementSystem.API.Controllers
                 return NotFound();
             }
             return Ok(notification);
+        }
+
+        [HttpGet("{id}/reference")]
+        public async Task<IActionResult> GetNotificationReference(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _notificationService.GetNotificationReference(id, userId);
+            if (!result.Success)
+            {
+                return NotFound(result.Message);
+            }
+
+            return Ok(result);
         }
     }
 }

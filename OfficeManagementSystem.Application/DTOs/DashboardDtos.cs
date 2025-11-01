@@ -298,4 +298,52 @@ namespace OfficeManagementSystem.Application.DTOs
         public int UpcomingTravels { get; set; }
         public int OngoingTravels { get; set; }
     }
+
+    /// <summary>
+    /// اتجاه KPI الأقسام
+    /// </summary>
+    public class DepartmentKpiTrendDto
+    {
+        public List<DepartmentKpiTrendDataDto> TrendData { get; set; } = new();
+    }
+
+    /// <summary>
+    /// بيانات اتجاه KPI الأقسام
+    /// </summary>
+    public class DepartmentKpiTrendDataDto
+    {
+        public DateTime Date { get; set; }
+        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; } = string.Empty;
+        public double AverageKpiScore { get; set; }
+        public int TotalEmployees { get; set; }
+        public int CompletedTasks { get; set; }
+        public int TotalTasks { get; set; }
+        public double TaskCompletionRate { get; set; }
+    }
+
+    /// <summary>
+    /// قائمة متصدري الأقسام
+    /// </summary>
+    public class DepartmentLeaderboardDto
+    {
+        public List<DepartmentLeaderboardItemDto> TopDepartments { get; set; } = new();
+    }
+
+    /// <summary>
+    /// عنصر قائمة متصدري الأقسام
+    /// </summary>
+    public class DepartmentLeaderboardItemDto
+    {
+        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; } = string.Empty;
+        public string DepartmentCode { get; set; } = string.Empty;
+        public string? ManagerName { get; set; }
+        public double AverageKpiScore { get; set; }
+        public int TotalEmployees { get; set; }
+        public int CompletedTasks { get; set; }
+        public int TotalTasks { get; set; }
+        public double TaskCompletionRate { get; set; }
+        public int Rank { get; set; }
+    }
 }

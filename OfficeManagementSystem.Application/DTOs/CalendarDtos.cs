@@ -22,6 +22,10 @@ namespace OfficeManagementSystem.Application.DTOs
         public int Priority { get; set; }
         public string Color { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        
+        // معلومات للتنقل إلى تفاصيل الحدث
+        public int OriginalEntityId { get; set; } // الـ ID الأصلي للحدث (Meeting ID, Task ID, إلخ)
+        public EventType EventTypeName { get; set; } // نوع الحدث
     }
 
     /// <summary>

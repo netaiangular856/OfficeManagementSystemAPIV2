@@ -996,7 +996,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
                         "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
 
-                    await _notificationService.SendNotificationAsync(title, message, attendeeUserIds, "Meeting");
+                    await _notificationService.SendNotificationAsync(title, message, attendeeUserIds, "Meeting", null, meeting.Id, NotificationReferenceType.Meeting);
                 }
 
                 // Send emails to external attendees
@@ -1048,7 +1048,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         $"⏰ الوقت: {meeting.StartAt:HH:mm}\n\n" +
                         "يرجى التأكيد على حضورك، وشكرًا لتعاونك.";
 
-                    await _notificationService.SendNotificationAsync(title, message, new List<string> { meetingAttendee.UserId }, "Meeting");
+                    await _notificationService.SendNotificationAsync(title, message, new List<string> { meetingAttendee.UserId }, "Meeting", null, meeting.Id, NotificationReferenceType.Meeting);
                 }
 
                 // Send emails to external attendees

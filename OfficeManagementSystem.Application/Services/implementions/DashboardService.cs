@@ -47,7 +47,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // المهام
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
+                    v => ((filter.FromDate == null && v.CreatedAt >= fromDate) || v.CreatedAt >= filter.FromDate) && (filter.ToDate == null || v.CreatedAt <= filter.ToDate));
 
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
@@ -176,7 +176,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    v => v.Assignee.ManagerId==userId &&( ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate)));
+                    v =>( v.Assignee.Department.ManagerUserId!=null &&  v.Assignee.Department.ManagerUserId== userId) && ( ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate)),
+                    includeProperties: ",Assignee,Assignee.Department,");
 
                 var totalTasks = tasks.Count();
                 var completedTasks = tasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done);
@@ -381,7 +382,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
             var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
             var toDate = filter.ToDate ?? DateTime.Now;
 
-            var kpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync();
+            var kpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(v => (
+            (filter.FromDate == null && v.PeriodStart >= fromDate) 
+            || v.PeriodStart >= filter.FromDate)
+            && (filter.ToDate == null || v.PeriodStart <= filter.ToDate));
             var employees = _userManager.Users.OfType<Employee>();
 
             var trendData = kpis
@@ -389,13 +393,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 .OrderBy(g => g.Key)
                 .Select(g => new EmployeeKpiTrendDataDto
                 {
-                    Date = g.Key.ToDateTime(TimeOnly.MinValue),
+                    Date = g.Key,
                     AverageKpiScore = (double)g.Average(k => k.Score),
                     TotalEmployees = employees.Count(),
                     HighPerformers = g.Count(k => k.Score >= 80),
                     AveragePerformers = g.Count(k => k.Score >= 60 && k.Score < 80),
                     LowPerformers = g.Count(k => k.Score < 60)
                 })
+                
                 .ToList();
 
             return new EmployeeKpiTrendDto { TrendData = trendData };
@@ -413,7 +418,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 // جلب كل الـ KPIs مع تفاصيل الموظفين
                 var allKpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
-                    includeProperties: "Employee,Employee.Department");
+                    filter:
+                    v => (
+            (filter.FromDate == null && v.PeriodStart >= fromDate)
+            || v.PeriodStart >= filter.FromDate)
+            && (filter.ToDate == null || v.PeriodStart <= filter.ToDate)
+                    ,
+                    includeProperties: "Employee,Employee.Department"
+                    );
 
                 // تجميع KPIs حسب الموظف وأخذ آخر واحد لكل موظف
                 var latestKpis = allKpis
@@ -591,6 +603,136 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 Console.WriteLine($"TravelsOverview Error: {ex}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// الحصول على اتجاه KPI الأقسام
+        /// </summary>
+        public async Task<DepartmentKpiTrendDto> GetDepartmentKpiTrendAsync(DashboardDateFilterDto filter)
+        {
+            try
+            {
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+
+                // جلب جميع الأقسام النشطة
+                var departments = await _unitOfWork.DepartmentRepository.GetAllAsync(
+                    d => d.IsActive,
+                    includeProperties: "Employees,ManagerUser"
+                );
+
+                // جلب KPIs للموظفين
+                var employeeKpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
+                    k => (filter.FromDate == null && k.PeriodStart >= fromDate || k.PeriodStart >= filter.FromDate) 
+                         && (filter.ToDate == null || k.PeriodStart <= filter.ToDate),
+                    includeProperties: "Employee"
+                );
+
+                // جلب المهام
+                var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
+                    t => (filter.FromDate == null && t.CreatedAt >= fromDate || t.CreatedAt >= filter.FromDate) 
+                         && (filter.ToDate == null || t.CreatedAt <= filter.ToDate)
+                );
+
+                var trendData = departments.Select(dept =>
+                {
+                    var deptEmployeeIds = dept.Employees.Select(e => e.Id).ToList();
+                    var deptKpis = employeeKpis.Where(k => deptEmployeeIds.Contains(k.EmployeeId)).ToList();
+                    var deptTasks = tasks.Where(t => t.DeptId == dept.Id).ToList();
+
+                    return new DepartmentKpiTrendDataDto
+                    {
+                        Date = DateTime.UtcNow,
+                        DepartmentId = dept.Id,
+                        DepartmentName = dept.NameAr,
+                        AverageKpiScore = deptKpis.Any() ? (double)deptKpis.Average(k => k.Score) : 0,
+                        TotalEmployees = deptEmployeeIds.Count,
+                        CompletedTasks = deptTasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done),
+                        TotalTasks = deptTasks.Count,
+                        TaskCompletionRate = deptTasks.Count > 0 
+                            ? (double)deptTasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done) / deptTasks.Count * 100 
+                            : 0
+                    };
+                }).ToList();
+
+                return new DepartmentKpiTrendDto { TrendData = trendData };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DepartmentKpiTrend Error: {ex}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// الحصول على قائمة متصدري الأقسام
+        /// </summary>
+        public async Task<DepartmentLeaderboardDto> GetDepartmentLeaderboardAsync(DashboardDateFilterDto filter)
+        {
+            try
+            {
+                var fromDate = filter.FromDate ?? DateTime.Now.AddMonths(-3);
+
+                // جلب جميع الأقسام النشطة
+                var departments = await _unitOfWork.DepartmentRepository.GetAllAsync(
+                    d => d.IsActive,
+                    includeProperties: "Employees,ManagerUser"
+                );
+
+                // جلب KPIs للموظفين
+                var employeeKpis = await _unitOfWork.EmployeeKpiRepository.GetAllAsync(
+                    k => (filter.FromDate == null && k.PeriodStart >= fromDate || k.PeriodStart >= filter.FromDate) 
+                         && (filter.ToDate == null || k.PeriodStart <= filter.ToDate),
+                    includeProperties: "Employee"
+                );
+
+                // جلب المهام
+                var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
+                    t => (filter.FromDate == null && t.CreatedAt >= fromDate || t.CreatedAt >= filter.FromDate) 
+                         && (filter.ToDate == null || t.CreatedAt <= filter.ToDate)
+                );
+
+                var leaderboard = departments.Select(dept =>
+                {
+                    var deptEmployeeIds = dept.Employees.Select(e => e.Id).ToList();
+                    var deptKpis = employeeKpis.Where(k => deptEmployeeIds.Contains(k.EmployeeId)).ToList();
+                    var deptTasks = tasks.Where(t => t.DeptId == dept.Id).ToList();
+
+                    return new DepartmentLeaderboardItemDto
+                    {
+                        DepartmentId = dept.Id,
+                        DepartmentName = dept.NameAr,
+                        DepartmentCode = dept.Code,
+                        ManagerName = dept.ManagerUser != null 
+                            ? $"{dept.ManagerUser.FirstName} {dept.ManagerUser.LastName}" 
+                            : "غير محدد",
+                        AverageKpiScore = deptKpis.Any() ? (double)deptKpis.Average(k => k.Score) : 0,
+                        TotalEmployees = deptEmployeeIds.Count,
+                        CompletedTasks = deptTasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done),
+                        TotalTasks = deptTasks.Count,
+                        TaskCompletionRate = deptTasks.Count > 0 
+                            ? (double)deptTasks.Count(t => t.Status == Domain.Enums.Tasks.TaskStatus.Done) / deptTasks.Count * 100 
+                            : 0,
+                        Rank = 0
+                    };
+                })
+                .OrderByDescending(d => d.AverageKpiScore)
+                .ThenByDescending(d => d.TaskCompletionRate)
+                .Take(10)
+                .ToList();
+
+                // إضافة الرتب
+                for (int i = 0; i < leaderboard.Count(); i++)
+                {
+                    leaderboard[i].Rank = i + 1;
+                }
+
+                return new DepartmentLeaderboardDto { TopDepartments = leaderboard };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DepartmentLeaderboard Error: {ex}");
                 throw;
             }
         }

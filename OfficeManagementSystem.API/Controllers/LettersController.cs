@@ -43,7 +43,12 @@ namespace OfficeManagementSystem.API.Controllers
         //[Authorize(Policy = "letter.index")]
         public async Task<IActionResult> GetAll([FromQuery] LetterQueryDto queryDto)
         {
-            var result = await _letterService.GetAllAsync(queryDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return NotFound();
+            }
+            var result = await _letterService.GetAllAsync(queryDto, userId);
             if (!result.Success)
                 return NotFound();
             return Ok(result);
@@ -52,7 +57,13 @@ namespace OfficeManagementSystem.API.Controllers
         [Authorize(Policy = "letterApproval.index")]
         public async Task<IActionResult> GetAllForApproval([FromQuery] LetterQueryDto queryDto)
         {
-            var result = await _letterService.GetAllForApprovalAsync(queryDto);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _letterService.GetAllForApprovalAsync(queryDto, userId);
             if (!result.Success)
                 return NotFound();
             return Ok(result);

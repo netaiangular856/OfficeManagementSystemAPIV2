@@ -4,6 +4,7 @@ using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Sharing;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace OfficeManagementSystem.API.Controllers
@@ -34,6 +35,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> GetUsers(
             [FromQuery] string? search,
             [FromQuery] int page = 1,
@@ -117,6 +119,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> GetUserById(string userId)
         {
             try
@@ -154,6 +157,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto createUserRequest)
         {
             try
@@ -237,6 +241,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             try
@@ -277,6 +282,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
+        [Authorize(Policy = "employee.index")]
         public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateUserRoleRequestDto updateRoleRequest)
         {
             try
@@ -321,7 +327,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-
+        
         public async Task<IActionResult> UpdateUserStatus(string userId, [FromBody] UpdateUserStatusRequestDto updateStatusRequest)
         {
             try
@@ -414,6 +420,7 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpGet("manager-names")]
         public async Task<ActionResult<ApiResponse<IEnumerable<ManagerNameIdDto>>>> GetManagerNames([FromQuery] string? search)
         {
+            
             var result = await _userService.GetManagerNameIdAsync(search);
             return result.Success ? Ok(result) : BadRequest(result);
         }

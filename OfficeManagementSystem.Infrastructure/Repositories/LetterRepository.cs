@@ -29,6 +29,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         {
             IQueryable<Letter> query = _dbSet
                 .Include(l => l.CreatedBy)
+                    .ThenInclude(d=>d.Department)
                 .Include(l => l.Attachments)
                     .ThenInclude(a => a.Document);
 
