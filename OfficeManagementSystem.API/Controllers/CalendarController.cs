@@ -31,7 +31,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// </summary>
         /// <returns>قائمة الأحداث للمستخدم</returns>
         [HttpGet("user/events")]
-        [Authorize(Policy = "calendar.index")]
+        [Authorize(Policy = "calendar.events.get")]
         [ProducesResponseType(typeof(ApiResponse<List<CalendarEventDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -60,7 +60,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// </summary>
         /// <returns>قائمة جميع الأحداث</returns>
         [HttpGet("system/events")]
-        [Authorize(Policy = "calendar.events.get")]
+        [Authorize(Policy = "calendar.index")]
         [ProducesResponseType(typeof(ApiResponse<List<CalendarEventDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -102,7 +102,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         (t.Assignee != null &&
                          t.Assignee.Department != null &&
                          t.Assignee.Department.ManagerUserId == filter.UserSearchId)
-                        || t.AssigneeUserId == filter.UserSearchId
+                        || t.AssigneeUserId == filter.UserSearchId||
+                        t.CreatedByUserId==filter.UserSearchId
                     );
                 }
 

@@ -20,7 +20,7 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.Partners, opt => opt.Ignore()); // نتعامل مع الشركاء بشكل منفصل في الـ Service
 
             CreateMap<Travel, TravelDto>()
-                .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.UserName : null))
+                .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.FirstName+' '+src.CreatedByUser.LastName : null))
                 .ForMember(dest => dest.Partners, opt => opt.MapFrom(src => src.Partners));
         }
     }

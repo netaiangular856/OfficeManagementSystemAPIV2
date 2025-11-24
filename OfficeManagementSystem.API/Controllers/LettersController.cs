@@ -40,7 +40,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب جميع الخطابات مع إمكانية البحث والتصفية
         /// </summary>
         [HttpGet]
-        //[Authorize(Policy = "letter.index")]
+        [Authorize(Policy = "letter.index")]
         public async Task<IActionResult> GetAll([FromQuery] LetterQueryDto queryDto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -73,8 +73,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب خطاب محدد بالمعرف
         /// </summary>
         [HttpGet("{id}")]
-        [Authorize(Policy = "letterApproval.index")]
-        [Authorize(Policy = "letter.index")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _letterService.GetByIdAsync(id);
@@ -109,8 +108,7 @@ namespace OfficeManagementSystem.API.Controllers
         /// جلب مرفقات الخطاب
         /// </summary>
         [HttpGet("{id}/attachments")]
-        [Authorize(Policy = "letterApproval.index")]
-        [Authorize(Policy = "letter.index")]
+        [Authorize]
         public async Task<IActionResult> GetAttachments(int id)
         {
             var result = await _letterService.GetAttachmentsAsync(id);
@@ -218,8 +216,7 @@ namespace OfficeManagementSystem.API.Controllers
         }
 
         [HttpGet("{id}/download-pdf")]
-        [Authorize(Policy = "letterApproval.index")]
-        [Authorize(Policy = "letter.index")]
+        [Authorize]
         public async Task<IActionResult> DownloadLetterPdf(int id)
         {
             try

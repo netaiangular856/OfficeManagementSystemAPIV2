@@ -498,17 +498,33 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         public async Task<ApiResponse<IEnumerable<EmployeeNamesDto>>> GetSubordinatesAsync(string managerId, string? search = null )
         {
+            var manager = await _userManager.Users.OfType<Employee>()
+                .FirstOrDefaultAsync(e => e.Id == managerId);
+
+            if (manager == null)
+            {
+                return ApiResponse<IEnumerable<EmployeeNamesDto>>.ErrorResponse("Manager not found");
+            }
+
+            var accessibleDepartmentIds = await GetManagedDepartmentHierarchyAsync(managerId, manager.DepartmentId);
+
             var query = _userManager.Users.OfType<Employee>()
-                .Include(m=>m.Department)
-                    .Where(e => e.ManagerId == managerId||e.Department.ManagerUserId==managerId);
+                .Include(m => m.Department)
+                .Where(e =>
+                    e.Id != managerId &&
+                    (e.ManagerId == managerId ||
+                     (e.DepartmentId.HasValue && accessibleDepartmentIds.Contains(e.DepartmentId.Value))));
 
             // Apply name filter if provided
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(e => (e.FirstName + " " + e.LastName).Contains(search) || 
-                                         e.FirstName.Contains(search) || 
-                                         e.LastName.Contains(search) ||
-                                        e.Email.Contains(search) );
+                var normalizedSearch = search.Trim().ToLower();
+                query = query.Where(e =>
+                    (e.FirstName + " " + e.LastName).ToLower().Contains(normalizedSearch) ||
+                    (e.LastName + " " + e.FirstName).ToLower().Contains(normalizedSearch) ||
+                    e.FirstName.ToLower().Contains(normalizedSearch) ||
+                    e.LastName.ToLower().Contains(normalizedSearch) ||
+                    e.Email.ToLower().Contains(normalizedSearch));
             }
 
             
@@ -530,6 +546,55 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 return ApiResponse<IEnumerable<EmployeeNamesDto>>.ErrorResponse("No Subordinates Employee Found");
             }
             return ApiResponse<IEnumerable<EmployeeNamesDto>>.SuccessResponse(Subordinates);
+        }
+
+        private async Task<HashSet<int>> GetManagedDepartmentHierarchyAsync(string managerId, int? directDepartmentId)
+        {
+            var departments = (await _unitOfWork.DepartmentRepository.GetAllAsync()).ToList();
+
+            var relevantDepartmentIds = new HashSet<int>();
+
+            if (directDepartmentId.HasValue)
+            {
+                relevantDepartmentIds.Add(directDepartmentId.Value);
+            }
+
+            foreach (var department in departments.Where(d => d.ManagerUserId == managerId))
+            {
+                relevantDepartmentIds.Add(department.Id);
+            }
+
+            if (!relevantDepartmentIds.Any())
+            {
+                return relevantDepartmentIds;
+            }
+
+            var childrenLookup = departments
+                .Where(d => d.ParentId.HasValue)
+                .GroupBy(d => d.ParentId!.Value)
+                .ToDictionary(g => g.Key, g => g.Select(child => child.Id).ToList());
+
+            var stack = new Stack<int>(relevantDepartmentIds);
+
+            while (stack.Count > 0)
+            {
+                var currentId = stack.Pop();
+
+                if (!childrenLookup.TryGetValue(currentId, out var children))
+                {
+                    continue;
+                }
+
+                foreach (var childId in children)
+                {
+                    if (relevantDepartmentIds.Add(childId))
+                    {
+                        stack.Push(childId);
+                    }
+                }
+            }
+
+            return relevantDepartmentIds;
         }
     }
 }

@@ -75,7 +75,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 filter = filter.And(x =>
                     x.EntityName.ToLower().Contains(searchLower) ||
                     x.Description.ToLower().Contains(searchLower) ||
-                    x.EntityId.ToString().ToLower().Contains(searchLower) 
+                    x.EntityId.ToString().ToLower().Contains(searchLower)
+                    
                 );
             }
 

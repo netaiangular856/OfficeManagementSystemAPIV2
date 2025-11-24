@@ -171,13 +171,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                Expression<Func<Letter, bool>>? filter = l => l.Status == LetterStatus.PendingApproval;
+                Expression<Func<Letter, bool>>? filter = null;
 
                 var userFilter = (Expression<Func<Letter, bool>>)(l =>
                         l.CreatedBy != null &&
                         l.CreatedBy.Department != null &&
                         l.CreatedBy.Department.ManagerUserId != null &&
-                        l.CreatedBy.Department.ManagerUserId == userId
+                        l.CreatedBy.Department.ManagerUserId == userId&&
+                        l.Status == LetterStatus.PendingApproval
                     );
                 filter = userFilter;
 

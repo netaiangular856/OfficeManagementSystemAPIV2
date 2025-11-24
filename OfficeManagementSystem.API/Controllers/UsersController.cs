@@ -35,7 +35,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
-        [Authorize(Policy = "employee.index")]
+
         public async Task<IActionResult> GetUsers(
             [FromQuery] string? search,
             [FromQuery] int page = 1,
@@ -119,7 +119,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
-        [Authorize(Policy = "employee.index")]
+
         public async Task<IActionResult> GetUserById(string userId)
         {
             try
@@ -157,7 +157,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
-        [Authorize(Policy = "employee.index")]
+
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequestDto createUserRequest)
         {
             try
@@ -241,7 +241,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
-        [Authorize(Policy = "employee.index")]
+
         public async Task<IActionResult> DeleteUser(string userId)
         {
             try
@@ -282,7 +282,7 @@ namespace OfficeManagementSystem.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Authorize(Policy = "user.index")]
-        [Authorize(Policy = "employee.index")]
+
         public async Task<IActionResult> UpdateUserRole(string userId, [FromBody] UpdateUserRoleRequestDto updateRoleRequest)
         {
             try
