@@ -139,11 +139,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     return ApiResponse<EmployeeDto>.ErrorResponse("Employee with this email already exists");
                 }
 
-                // Check if role exists
-                if (!await _roleManager.RoleExistsAsync(createEmployeeRequest.Role))
-                {
-                    return ApiResponse<EmployeeDto>.ErrorResponse($"Role '{createEmployeeRequest.Role}' does not exist");
-                }
+                //// Check if role exists
+                //if (!await _roleManager.RoleExistsAsync(createEmployeeRequest.Role))
+                //{
+                //    return ApiResponse<EmployeeDto>.ErrorResponse($"Role '{createEmployeeRequest.Role}' does not exist");
+                //}
 
                 // Check if manager exists (if provided)
                 if (!string.IsNullOrEmpty(createEmployeeRequest.ManagerId))
@@ -168,13 +168,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 }
 
                 // Assign role
-                var roleResult = await _userManager.AddToRoleAsync(employee, createEmployeeRequest.Role);
-                if (!roleResult.Succeeded)
+                if (await _roleManager.RoleExistsAsync(createEmployeeRequest.Role))
                 {
-                    // If role assignment fails, delete the employee
-                    await _userManager.DeleteAsync(employee);
-                    var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                    return ApiResponse<EmployeeDto>.ErrorResponse($"Failed to assign role: {errors}");
+                    var roleResult = await _userManager.AddToRoleAsync(employee, createEmployeeRequest.Role);
+                    if (!roleResult.Succeeded)
+                    {
+                        // If role assignment fails, delete the employee
+                        await _userManager.DeleteAsync(employee);
+                        var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        return ApiResponse<EmployeeDto>.ErrorResponse($"Failed to assign role: {errors}");
+                    }
                 }
 
                 // Get the created employee with roles
@@ -183,34 +186,34 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .Include(u => u.Manager)
                     .FirstOrDefaultAsync(u => u.Id == employee.Id);
 
-                //var emailBody = $@"
-                //<html>
-                //  <body style='font-family: Arial, sans-serif;'>
-                //    <h2>Welcome to Our System</h2>
-                //    <p>Dear {employee.FirstName} {employee.LastName},</p>
-                //    <p>Your employee account has been created successfully. Below are your login credentials:</p>
+                var emailBody = $@"
+                <html>
+                  <body style='font-family: Arial, sans-serif;'>
+                    <h2>Welcome to Our System</h2>
+                    <p>Dear {employee.FirstName} {employee.LastName},</p>
+                    <p>Your employee account has been created successfully. Below are your login credentials:</p>
 
-                //    <p><b>Email:</b> {employee.Email}</p>
-                //    <p><b>Password:</b> {createEmployeeRequest.Password}</p>
-                //    <p><b>Job Title:</b> {employee.JobTitle}</p>
+                    <p><b>Email:</b> {employee.Email}</p>
+                    <p><b>Password:</b> {createEmployeeRequest.Password}</p>
+                    <p><b>Job Title:</b> {employee.JobTitle}</p>
 
-                //    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
+                    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
 
-                //    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
+                    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
 
-                //    <br/>
-                //    <p>Best Regards,<br/>System Admin</p>
-                //  </body>
-                //</html>";
+                    <br/>
+                    <p>Best Regards,<br/>System Admin</p>
+                  </body>
+                </html>";
 
-                //var emaildto = new EmailDTO(
-                //employee.Email,
-                //_configuration["EmailSetting:From"],
-                //"Your Employee Account Details",
-                //emailBody
-                //);
+                var emaildto = new EmailDTO(
+                employee.Email,
+                _configuration["EmailSetting:From"],
+                "Your Employee Account Details",
+                emailBody
+                );
 
-                //await emailService.SendEmail(emaildto);
+                await emailService.SendEmail(emaildto);
 
                 var employeeDto = _mapper.Map<EmployeeDto>(createdEmployee);
                 employeeDto.Roles = await GetEmployeeRolesAsync(createdEmployee);
@@ -422,6 +425,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 if (updateProfileRequest.HireDate.HasValue)
                     employee.HireDate = updateProfileRequest.HireDate;
+
+                if (!string.IsNullOrWhiteSpace(updateProfileRequest.OfficeNumber))
+                    employee.OfficeNumber = updateProfileRequest.OfficeNumber;
 
 
                 employee.UpdatedAt = DateTime.UtcNow;

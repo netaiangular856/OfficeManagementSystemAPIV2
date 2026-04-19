@@ -17,7 +17,9 @@ namespace OfficeManagementSystem.Application.DTOs
         [MaxLength(2000)]
         public string? Description { get; set; }
           
-        public string? AssigneeUserId { get; set; }
+        [Required]
+        [MinLength(1, ErrorMessage = "At least one assignee is required")]
+        public List<string> AssigneeUserIds { get; set; } = new();
         
         [Required]
         public TaskPriority Priority { get; set; }
@@ -42,7 +44,7 @@ namespace OfficeManagementSystem.Application.DTOs
         
         
         
-        public string? AssigneeUserId { get; set; }
+        public List<string>? AssigneeUserIds { get; set; }
         
         [Required]
         public TaskPriority Priority { get; set; }
@@ -65,6 +67,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? DeptName { get; set; }
         public string? AssigneeUserId { get; set; }
         public string? AssigneeName { get; set; }
+        public List<TaskAssigneeDto> Assignees { get; set; } = new();
         public TaskPriority Priority { get; set; }
         public DateTime DueDate { get; set; }
         public TaskStatus Status { get; set; }
@@ -76,6 +79,15 @@ namespace OfficeManagementSystem.Application.DTOs
         public DateTime UpdatedAt { get; set; }
         public int UpdatesCount { get; set; }
         public int AttachmentsCount { get; set; }
+    }
+
+    public class TaskAssigneeDto
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? DepartmentName { get; set; }
+        public bool IsPrimary { get; set; }
     }
 
     public class TaskFilterDto
@@ -148,7 +160,8 @@ namespace OfficeManagementSystem.Application.DTOs
         public List<int> TaskIds { get; set; } = new();
         
         [Required]
-        public string NewAssigneeUserId { get; set; } = string.Empty;
+        [MinLength(1, ErrorMessage = "At least one new assignee is required")]
+        public List<string> NewAssigneeUserIds { get; set; } = new();
         
         [MaxLength(2000)]
         public string? Note { get; set; }

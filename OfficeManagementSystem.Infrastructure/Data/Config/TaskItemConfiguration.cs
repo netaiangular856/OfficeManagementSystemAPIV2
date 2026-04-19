@@ -19,9 +19,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
             builder.Property(x => x.Description)
                 .HasMaxLength(2000);
 
-            builder.Property(x => x.AssigneeUserId)
-                .HasMaxLength(450);
-
             builder.Property(x => x.CreatedByUserId)
                 .IsRequired()
                 .HasMaxLength(450);
@@ -38,11 +35,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
                 .HasForeignKey(x => x.DeptId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasOne(x => x.Assignee)
-                .WithMany()
-                .HasForeignKey(x => x.AssigneeUserId)
-                .OnDelete(DeleteBehavior.SetNull);
-
             builder.HasOne(x => x.CreatedBy)
                 .WithMany()
                 .HasForeignKey(x => x.CreatedByUserId)
@@ -50,7 +42,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             // Indexes
             builder.HasIndex(x => x.DeptId);
-            builder.HasIndex(x => x.AssigneeUserId);
             builder.HasIndex(x => x.Priority);
             builder.HasIndex(x => x.Status);
             builder.HasIndex(x => x.DueDate);

@@ -13,6 +13,7 @@ namespace OfficeManagementSystem.Domain.Entity
         public string? NationalId { get; set; }
 
         public DateTime? HireDate { get; set; }
+        public string? OfficeNumber { get; set; }
 
         public string? ManagerId { get; set; }
         public Employee? Manager { get; set; }

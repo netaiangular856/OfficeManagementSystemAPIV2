@@ -52,12 +52,8 @@ namespace OfficeManagementSystem.API.Controllers
         [Authorize(Policy = "task.index")]
         public async Task<ActionResult<ApiResponse<PaginatedResult<TaskDto>>>> GetTasks([FromQuery] TaskFilterDto filter)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(userId == null)
-            {
-                return BadRequest();
-            }
-            var result = await _taskService.GetTasksAsync(userId,filter);
+            
+            var result = await _taskService.GetTasksAsync(filter);
             
             if (!result.Success)
                 return BadRequest(result);

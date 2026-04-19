@@ -17,8 +17,7 @@ namespace OfficeManagementSystem.Domain.Entity.Tasks
         public string? Description { get; set; }
         public int? DeptId { get; set; }
         public Department Dept { get; set; } = default!;
-        public string? AssigneeUserId { get; set; } = default!;
-        public Employee Assignee { get; set; } = default!;
+        public ICollection<TaskAssignment> Assignees { get; set; } = new List<TaskAssignment>();
         public TaskPriority Priority { get; set; }
         public DateTime DueDate { get; set; }
         public TaskStatus Status { get; set; }

@@ -11,6 +11,7 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -54,18 +55,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                // التأكد من وجود مسار المكتبة
-                var wkhtmltoxPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "wkhtmltox");
-                if (!Directory.Exists(wkhtmltoxPath))
-                {
-                    throw new DirectoryNotFoundException($"wkhtmltox directory not found at: {wkhtmltoxPath}");
-                }
-
-                var dllPath = Path.Combine(wkhtmltoxPath, "libwkhtmltox.dll");
-                if (!File.Exists(dllPath))
-                {
-                    throw new FileNotFoundException($"libwkhtmltox.dll not found at: {dllPath}");
-                }
+                // المكتبة يتم تحميلها تلقائياً من PATH الذي تم إعداده في Program.cs
+                // لا حاجة للتحقق من المسار هنا لأن PdfTools() يتعامل مع ذلك
 
                 var globalSettings = new GlobalSettings
                 {
@@ -127,9 +118,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             // استخدام BodyHtml دائماً إذا كان موجود
             var bodyContent = letter.BodyHtml ?? "لا يوجد محتوى";
 
-            // تجهيز شعار الجهة من wwwroot/Images/logo.png لعرضه يمين ويسار الهيدر
-            string? logoRight = null;
-            string? logoLeft = null;
+            // تجهيز شعار الجهة من wwwroot/Images/logo.png لعرضه في المنتصف
+            string? logoCenter = null;
             try
             {
                 var logoPath = Path.Combine("wwwroot", "Images", "logo.png");
@@ -138,18 +128,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     var bytes = await File.ReadAllBytesAsync(logoPath);
                     var b64 = Convert.ToBase64String(bytes);
                     var dataUrl = $"data:image/png;base64,{b64}";
-                    var imgStyle = "max-height:60px; width:auto; display:block;";
-                    logoRight = "<img src='" + dataUrl + "' class='logo-img logo-right' style='" + imgStyle + "' alt='Logo'>";
-                    logoLeft  = "<img src='" + dataUrl + "' class='logo-img logo-left'  style='" + imgStyle + "' alt='Logo'>";
+                    var imgStyle = "max-height:60px; width:auto; display:block; margin: 0 auto;";
+                    logoCenter = "<img src='" + dataUrl + "' class='logo-img logo-center' style='" + imgStyle + "' alt='Logo'>";
                 }
             }
             catch { }
 
-            // Debug: طباعة المحتوى للتأكد (يمكن إزالته في الإنتاج)
-            if (string.IsNullOrWhiteSpace(letter.BodyHtml))
-            {
-                Console.WriteLine($"Warning: BodyHtml is empty, using Body instead");
-            }
+            // الحصول على التاريخ والرقم المرجعي
+            var letterDate = letter.LetterDate ?? letter.CreatedAt;
+            var referenceNumber = GenerateReferenceNumber(letter, letterDate);
+            var (hijriDate, hijriMonth, hijriYear) = ConvertToHijri(letterDate, isArabic);
+            var gregorianDate = letterDate.ToString("dd MMMM yyyy", new CultureInfo(isArabic ? "ar-SA" : "en-US"));
+            var hijriDateFormatted = $"{hijriDate} {hijriMonth} {hijriYear}";
 
             var html = new StringBuilder();
             html.AppendLine("<!DOCTYPE html>");
@@ -160,29 +150,69 @@ namespace OfficeManagementSystem.Application.Services.implementions
             html.AppendLine("<title>Letter</title>");
             html.AppendLine(GetAdvancedCSS());
             html.AppendLine("</head>");
-            html.AppendLine("<body style='font-family: Amiri, Arial, sans-serif; line-height: 1.6; color: #2C3E50;  min-height: 100vh; margin: 0; padding: 0;'>");
+            html.AppendLine("<body style='font-family: Amiri, Arial, sans-serif; line-height: 1.6; color: #000; min-height: 100vh; margin: 0; padding: 0;'>");
             html.AppendLine("<div class='page-container' style='background: white; overflow: visible; position: relative; width: 100%; min-height: 100vh; margin: 0; padding-bottom: 50px;'>");
 
-            // Professional Header using table layout for reliable left/right placement in wkhtmltopdf
-            html.AppendLine("<div class='letter-header' style='background: #D4AF37; padding: 20px; color: white; margin-bottom: 10px; border-bottom: 4px solid #A67C00;'>");
-            html.AppendLine("  <table style='width:100%; border-collapse:collapse;'><tr>");
+            // Header - White background with Arabic and English text
+            // Always: Arabic on right, English on left (regardless of letter language)
+            html.AppendLine("<div class='letter-header' style='background: white; padding: 20px; color: #000; margin-bottom: 20px; border-bottom: 1px solid #ddd; direction: ltr;'>");
+            html.AppendLine("  <table style='width:100%; border-collapse:collapse; direction: ltr;'><tr>");
+            
+            // First column - English text (always on left)
+            html.AppendLine("    <td style='width:35%; vertical-align:top; text-align:left; padding-left:15px; direction: ltr;'>");
+            html.AppendLine("      <div style='font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8; direction: ltr;'>");
+            html.AppendLine("        <div style='font-weight: bold;'>UNITED ARAB EMIRATES</div>");
+            html.AppendLine("        <div style='font-weight: bold;'>GOVERNMENT OF FUJAIRAH</div>");
+            html.AppendLine("        <div style='font-weight: bold;'>FUJAIRAH ENVIRONMENT AUTHORITY</div>");
+            html.AppendLine("      </div>");
+            html.AppendLine("    </td>");
 
-            // يمين
-            if (!string.IsNullOrEmpty(logoRight))
-                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:right;'>" + logoRight + "</td>");
-            else
-                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:right;'></td>");
+            // Center - Logo
+            html.AppendLine("    <td style='width:30%; vertical-align:middle; text-align:center; direction: ltr;'>");
+            if (!string.IsNullOrEmpty(logoCenter))
+                html.AppendLine("      " + logoCenter);
+            html.AppendLine("    </td>");
 
-            // العنوان وسط
-            html.AppendLine($"    <td style='text-align:center;'><h1 class='letter-title' style='font-size: 24px; font-weight: bold; margin: 0; font-family: Amiri, Arial, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); text-transform: uppercase; direction: rtl; unicode-bidi: bidi-override;'>{letter.Subject}</h1></td>");
-
-            // شمال
-            if (!string.IsNullOrEmpty(logoLeft))
-                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:left;'>" + logoLeft + "</td>");
-            else
-                html.AppendLine("    <td style='width:80px; vertical-align:middle; text-align:left;'></td>");
+            // Last column - Arabic text (always on right)
+            html.AppendLine("    <td style='width:35%; vertical-align:top; text-align:right; padding-right:15px; direction: rtl;'>");
+            html.AppendLine("      <div style='font-family: Amiri, Arial, sans-serif; font-size: 14px; line-height: 1.8; direction: rtl;'>");
+            html.AppendLine("        <div style='font-weight: bold;'>الإمارات العربية المتحدة</div>");
+            html.AppendLine("        <div style='font-weight: bold;'>حكومة الفجيرة</div>");
+            html.AppendLine("        <div style='font-weight: bold;'>هيئة الفجيرة للبيئة</div>");
+            html.AppendLine("      </div>");
+            html.AppendLine("    </td>");
 
             html.AppendLine("  </tr></table>");
+            html.AppendLine("</div>");
+
+            // Reference Number and Date Section
+            if (isArabic)
+            {
+                html.AppendLine("<div class='reference-section' style='text-align: right; margin-bottom: 20px; padding: 0 20px; direction: rtl;'>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>الرقم:</strong> {referenceNumber}</div>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>التاريخ:</strong> {gregorianDate}</div>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>الموافق:</strong> {hijriDateFormatted}</div>");
+                html.AppendLine("</div>");
+            }
+            else
+            {
+                html.AppendLine("<div class='reference-section' style='text-align: left; margin-bottom: 20px; padding: 0 20px; direction: ltr;'>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>No:</strong> {referenceNumber}</div>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>Date:</strong> {gregorianDate}</div>");
+                html.AppendLine($"  <div style='margin-bottom: 8px; font-size: 14px;'><strong>Hijri:</strong> {hijriDateFormatted}</div>");
+                html.AppendLine("</div>");
+            }
+
+            // Subject Section
+            html.AppendLine("<div class='subject-section' style='margin-bottom: 20px; padding: 0 20px;'>");
+            if (isArabic)
+            {
+                html.AppendLine($"  <div style='text-align: right; direction: rtl; font-size: 16px;'><strong>الموضوع:</strong> {letter.Subject}</div>");
+            }
+            else
+            {
+                html.AppendLine($"  <div style='text-align: left; direction: ltr; font-size: 16px;'><strong>Subject:</strong> {letter.Subject}</div>");
+            }
             html.AppendLine("</div>");
 
             // Professional Content
@@ -224,13 +254,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     catch (Exception ex)
                     {
                         Console.WriteLine($"خطأ في تحميل صورة التوقيع: {ex.Message}");
-                        html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;  color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
+                        html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;  color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[خطأ في تحميل صورة التوقيع]</div>");
                     }
                 }
                 else
                 {
                     // إذا لم توجد الصورة، أضف placeholder
-                    html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #D4AF37; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
+                    html.AppendLine("<div class='signature-placeholder' style='height: 80px; width: 300px; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: #6c757d; font-style: italic; border-radius: 4px; font-family: Amiri, Arial, sans-serif; margin-left: 0; margin-right: auto;'>[صورة التوقيع غير متوفرة]</div>");
                 }
 
                 // الاسم والوظيفة تحت الصورة
@@ -260,21 +290,22 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private string GetFooterHtmlUrl()
         {
             var footerPath = Path.Combine("wwwroot", "footer.html");
-            var footerHtml = @"
+            var creationDate = DateTime.Now.ToString("dd/MM/yyyy");
+            var footerHtml = $@"
 <!DOCTYPE html>
 <html dir='rtl' lang='ar'>
 <head>
 <meta charset='utf-8'>
 <style>
-  *{box-sizing:border-box}
-  .footer-wrap{
+  *{{box-sizing:border-box}}
+  .footer-wrap{{
     width:100%;
-    padding:20px 0;
+    padding:15px 0;
     font-family: 'Amiri', Arial, sans-serif;
-    font-size:12px;
-    color:#fff;
-    background:#D4AF37;
-    border-top:none;
+    font-size:11px;
+    color:#000;
+    background:white;
+    border-top:1px solid #ddd;
     text-align:center;
     letter-spacing:.3px;
     margin: 0 !important;
@@ -282,22 +313,36 @@ namespace OfficeManagementSystem.Application.Services.implementions
     left: 0;
     right: 0;
     bottom: -10px;
-  }
-  .footer-inner{
+  }}
+  .footer-inner{{
     display:flex;
+    flex-direction:column;
     justify-content:center;
     align-items:center;
-    gap:12px;
-    direction:rtl;
+    gap:5px;
+    direction:ltr;
     padding: 0 20px;
-  }
-  .center{white-space:nowrap; text-align:center}
+  }}
+  .footer-line{{
+    white-space:nowrap;
+    text-align:center;
+    color:#000;
+    
+  }}
+  .footer-reference{{
+    font-size:10px;
+    color:#666;
+    margin-top:2px;
+  }}
 </style>
 </head>
 <body>
   <div class='footer-wrap'>
     <div class='footer-inner'>
-      <div class='center'> تاريخ الانشاء: " + DateTime.Now.ToString("dd/MM/yyyy") + @"</div>
+   
+      <div class='footer-line'>UNITED ARAB EMIRATES, FUJAIRAH, ALHILAL TOWER, FLOOR 26 - EMAIL: INFO@FEA.GOV.AE, WWW.FEA.GOV.AE</div>
+      <div class='footer-line'>P.O.BOX: 10000 - TOLL FREE: 800368 - TEL: 092016333 - FAX: 092567088</div>
+      <div class='footer-reference'>FEA-MID-5D-PR-01-F-01</div>
     </div>
   </div>
 </body>
@@ -342,21 +387,19 @@ body {
     direction: rtl;
 }
 
-/* DinkToPdf Footer Styling */
+/* DinkToPdf Footer Styling - White background */
 .footer {
-    background: #D4AF37 !important;
-    color: white !important;
+    background: white !important;
+    color: #000 !important;
     font-family: 'Amiri', Arial, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: bold !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
     padding: 8px 20px !important;
-    border-top: 3px solid #A67C00 !important;
+    border-top: 1px solid #ddd !important;
     text-align: center !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0.3px !important;
     margin: 0 !important;
-    //box-shadow: 0 -2px 10px rgba(0,0,0,0.2) !important;
-    direction: rtl !important;
-    unicode-bidi: bidi-override !important;
+    direction: ltr !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
@@ -375,8 +418,8 @@ body {
     }
     
     .footer {
-        background: #D4AF37 !important;
-        color: white !important;
+        background: white !important;
+        color: #000 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
@@ -425,28 +468,17 @@ body {
         print-color-adjust: exact;
     }
     
-    /* Professional Header */
+    /* Professional Header - White background */
     .letter-header {
-        background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+        background: white;
         padding: 30px 20px;
         text-align: center;
-        color: white;
+        color: #000;
         margin-bottom: 10px;
-        border-bottom: 4px solid #A67C00;
-        //box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-bottom: 1px solid #ddd;
         position: relative;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-    }
-    
-    .letter-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #A67C00, #D4AF37, #A67C00);
     }
     
     .letter-title {
@@ -485,7 +517,7 @@ body {
     
     .letter-content h2 {
         font-size: 24px;
-        border-bottom: 2px solid #D4AF37;
+        border-bottom: 2px solid #ddd;
         padding-bottom: 10px;
     }
     
@@ -603,7 +635,7 @@ body {
     .signature-placeholder {
         height: 80px;
         width: 300px;
-        border: 2px dashed #D4AF37;
+        border: 2px dashed #ddd;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -798,7 +830,7 @@ body {
         page-break-before: always;
         break-before: page;
         margin: 0;
-        border-top: 2px solid #D4AF37;
+        border-top: 2px solid #ddd;
         padding-top: 20px;
     }
     
@@ -861,6 +893,68 @@ body {
                 return isArabic;
             }
             return false;
+        }
+
+        private string GenerateReferenceNumber(Letter letter, DateTime date)
+        {
+            var year = date.Year;
+            var quarter = GetQuarter(date.Month);
+            
+            // Extract sequence number from existing ReferenceNumbers or generate new
+            int sequence = 0;
+            if (!string.IsNullOrEmpty(letter.ReferenceNumbers))
+            {
+                // Try to extract sequence from existing reference number
+                var match = Regex.Match(letter.ReferenceNumbers, @"/(\d+)$");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out var seq))
+                {
+                    sequence = seq;
+                }
+            }
+            
+            // If no sequence found, generate based on letter ID or use 00
+            if (sequence == 0)
+            {
+                sequence = letter.Id > 0 ? letter.Id : 0;
+            }
+
+            return $"FEA/{year}/OUT/Q{quarter}/{sequence:D2}";
+        }
+
+        private int GetQuarter(int month)
+        {
+            return month switch
+            {
+                >= 1 and <= 3 => 1,
+                >= 4 and <= 6 => 2,
+                >= 7 and <= 9 => 3,
+                >= 10 and <= 12 => 4,
+                _ => 1
+            };
+        }
+
+        private (int day, string month, int year) ConvertToHijri(DateTime date, bool isArabic)
+        {
+            var hijriCalendar = new HijriCalendar();
+            var hijriYear = hijriCalendar.GetYear(date);
+            var hijriMonth = hijriCalendar.GetMonth(date);
+            var hijriDay = hijriCalendar.GetDayOfMonth(date);
+
+            var arabicMonths = new[]
+            {
+                "محرم", "صفر", "ربيع الأول", "ربيع الثاني", "جمادى الأولى", "جمادى الآخرة",
+                "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+            };
+
+            var englishMonths = new[]
+            {
+                "Muharram", "Safar", "Rabi' al-awwal", "Rabi' al-thani", "Jumada al-awwal", "Jumada al-thani",
+                "Rajab", "Sha'ban", "Ramadan", "Shawwal", "Dhu Al-Qidah", "Dhu Al-Hijjah"
+            };
+
+            var monthName = isArabic ? arabicMonths[hijriMonth - 1] : englishMonths[hijriMonth - 1];
+
+            return (hijriDay, monthName, hijriYear);
         }
     }
 }

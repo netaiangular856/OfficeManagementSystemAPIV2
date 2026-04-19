@@ -27,13 +27,13 @@ namespace OfficeManagementSystem.Application.DTOs
         [MaxLength(100, ErrorMessage = "Job title cannot exceed 100 characters")]
         public string JobTitle { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Role is required")]
         public string Role { get; set; } = string.Empty;
 
         public int? DepartmentId { get; set; }
         public string? PhoneNumber { get; set; }
         public string? NationalId { get; set; }
         public DateTime? HireDate { get; set; }
+        public string? OfficeNumber { get; set; }
         public string? ManagerId { get; set; }
         public string TimeZone { get; set; } = "Asia/Dubai";
     }
@@ -56,6 +56,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? PhoneNumber { get; set; }
         public string? NationalId { get; set; }
         public DateTime? HireDate { get; set; }
+        public string? OfficeNumber { get; set; }
         public string? ManagerId { get; set; }
         public string TimeZone { get; set; } = "Asia/Dubai";
     }
@@ -86,6 +87,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? PhoneNumber { get; set; }
         public string? NationalId { get; set; }
         public DateTime? HireDate { get; set; }
+        public string? OfficeNumber { get; set; }
         public IFormFile? NewImage { get; set; }
     }
 
@@ -100,6 +102,7 @@ namespace OfficeManagementSystem.Application.DTOs
         public string? PhoneNumber { get; set; }
         public string? NationalId { get; set; }
         public DateTime? HireDate { get; set; }
+        public string? OfficeNumber { get; set; }
         public string? ManagerId { get; set; }
         public string? ManagerName { get; set; }
         public int? DepartmentId { get; set; }

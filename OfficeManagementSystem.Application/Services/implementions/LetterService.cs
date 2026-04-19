@@ -96,15 +96,15 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto,string userId)
+        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllAsync(LetterQueryDto queryDto)
         {
             try
             {
                 Expression<Func<Letter, bool>>? filter = null;
 
                 // 🔹 فلترة بالـ userId (مستلم الرسالة)
-                var userFilter = (Expression<Func<Letter, bool>>)(l => l.CreatedByUserId == userId);
-                filter = userFilter;
+                //var userFilter = (Expression<Func<Letter, bool>>)(l => l.CreatedByUserId == userId);
+                //Expression<Func<Letter, bool>> ? filter = null; ;
 
                 if (!string.IsNullOrWhiteSpace(queryDto.Search))
                 {
@@ -167,17 +167,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto, string userId)
+        public async Task<ApiResponse<PaginatedResult<LetterDto>>> GetAllForApprovalAsync(LetterQueryDto queryDto)
         {
             try
             {
                 Expression<Func<Letter, bool>>? filter = null;
 
                 var userFilter = (Expression<Func<Letter, bool>>)(l =>
-                        l.CreatedBy != null &&
-                        l.CreatedBy.Department != null &&
-                        l.CreatedBy.Department.ManagerUserId != null &&
-                        l.CreatedBy.Department.ManagerUserId == userId&&
+                        
                         l.Status == LetterStatus.PendingApproval
                     );
                 filter = userFilter;

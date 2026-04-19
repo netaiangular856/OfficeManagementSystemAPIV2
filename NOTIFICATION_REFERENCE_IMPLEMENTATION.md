@@ -11,6 +11,7 @@
 ### 1. Domain Layer
 
 #### ✅ `NotificationReferenceType.cs` (جديد)
+
 ```csharp
 public enum NotificationReferenceType
 {
@@ -23,7 +24,9 @@ public enum NotificationReferenceType
 ```
 
 #### ✅ `Notification.cs`
+
 أضيف:
+
 - `int? ReferenceId` - معرف الحدث المرتبط
 - `NotificationReferenceType ReferenceType` - نوع الحدث
 
@@ -32,16 +35,21 @@ public enum NotificationReferenceType
 ### 2. Application Layer - DTOs
 
 #### ✅ `NotificationDto.cs`
+
 أضيف:
+
 - `int? ReferenceId`
 - `NotificationReferenceType ReferenceType`
 
 #### ✅ `CreateNotificationDto.cs`
+
 أضيف:
+
 - `int? ReferenceId`
 - `NotificationReferenceType ReferenceType = NotificationReferenceType.None`
 
 #### ✅ `NotificationReferenceDto.cs` (جديد)
+
 ```csharp
 public class NotificationReferenceDto
 {
@@ -57,29 +65,35 @@ public class NotificationReferenceDto
 ### 3. Application Layer - Services
 
 #### ✅ `ISendNotificationService.cs`
+
 تم تحديث الـ method signature:
+
 ```csharp
 Task SendNotificationAsync(
-    string title, 
-    string message, 
-    List<string> userIds, 
-    string? type, 
-    string? htmlContent = null, 
+    string title,
+    string message,
+    List<string> userIds,
+    string? type,
+    string? htmlContent = null,
     int? referenceId = null,                    // 👈 جديد
     NotificationReferenceType referenceType = NotificationReferenceType.None  // 👈 جديد
 );
 ```
 
 #### ✅ `SendNotificationService.cs`
+
 تم تحديث Implementation لحفظ ReferenceId و ReferenceType في قاعدة البيانات.
 
 #### ✅ `INotificationService.cs`
+
 أضيف method جديد:
+
 ```csharp
 Task<ApiResponse<NotificationReferenceDto>> GetNotificationReference(int notificationId, string userId);
 ```
 
 #### ✅ `NotificationService.cs`
+
 تم تنفيذ `GetNotificationReference` للحصول على معلومات الـ Reference.
 
 ---
@@ -87,35 +101,41 @@ Task<ApiResponse<NotificationReferenceDto>> GetNotificationReference(int notific
 ### 4. Application Layer - Service Implementations
 
 #### ✅ `MeetingService.cs`
+
 تم تحديث استدعاءات الإشعارات في:
+
 - `SendMeetingInvitationsAsync` - عند إنشاء meeting جديد
 - `SendMeetingInvitationsIndevedualAsync` - عند إضافة attendee جديد
 
 **مثال:**
+
 ```csharp
 await _notificationService.SendNotificationAsync(
-    title, 
-    message, 
-    attendeeUserIds, 
-    "Meeting", 
-    null, 
+    title,
+    message,
+    attendeeUserIds,
+    "Meeting",
+    null,
     meeting.Id,                          // 👈 معرف الاجتماع
     NotificationReferenceType.Meeting    // 👈 نوع الحدث
 );
 ```
 
 #### ✅ `TaskService.cs`
+
 تم تحديث استدعاءات الإشعارات في:
+
 - `CreateTaskAsync` - عند إنشاء task جديد
 - `BulkReassignTasksAsync` - عند إعادة تعيين tasks
 - `CreateTaskFeedbackAsync` - عند إضافة feedback
 
 **مثال:**
+
 ```csharp
 await _notificationService.SendNotificationAsync(
     "New Task Assigned",
     message,
-    new List<string> { task.AssigneeUserId },
+    task.Assignees.Select(a => a.EmployeeUserId).ToList(),
     "Task",
     null,
     task.Id,                           // 👈 معرف المهمة
@@ -124,15 +144,20 @@ await _notificationService.SendNotificationAsync(
 ```
 
 #### ✅ `TaskUpdateService.cs`
+
 تم تحديث:
+
 - `CreateTaskUpdateAsync` - عند إضافة تحديث للمهمة
 
 #### ✅ `VisitService.cs`
+
 تم تحديث استدعاءات الإشعارات في:
+
 - `SendVisitInvitationsAsync` - عند إنشاء visit جديد
 - `SendVisitInvitationIndividualAsync` - عند إضافة participant جديد
 
 **مثال:**
+
 ```csharp
 await _notificationService.SendNotificationAsync(
     title,
@@ -146,6 +171,7 @@ await _notificationService.SendNotificationAsync(
 ```
 
 #### ℹ️ `TravelService.cs` & `TravelResultService.cs`
+
 لا يرسلان إشعارات حالياً - جاهزون للاستخدام المستقبلي.
 
 ---
@@ -153,7 +179,9 @@ await _notificationService.SendNotificationAsync(
 ### 5. API Layer
 
 #### ✅ `NotificationController.cs`
+
 أضيف endpoint جديد:
+
 ```csharp
 [HttpGet("{id}/reference")]
 public async Task<IActionResult> GetNotificationReference(int id)
@@ -179,7 +207,9 @@ public async Task<IActionResult> GetNotificationReference(int id)
 ### 6. Infrastructure Layer
 
 #### ✅ Migration: `20251101145346_AddNotificationReference.cs`
+
 تم إنشاء migration لإضافة الحقول الجديدة:
+
 - `ReferenceId` (int, nullable)
 - `ReferenceType` (int, not null, default: 0)
 
@@ -218,10 +248,10 @@ interface Notification {
 
 function NotificationItem({ notification }: { notification: Notification }) {
   const navigate = useNavigate();
-  
+
   const handleGoToEvent = async () => {
     if (!notification.referenceId) return;
-    
+
     switch (notification.referenceType) {
       case 1: // Meeting
         navigate(`/meetings/${notification.referenceId}`);
@@ -237,15 +267,13 @@ function NotificationItem({ notification }: { notification: Notification }) {
         break;
     }
   };
-  
+
   return (
     <div className="notification">
       <h4>{notification.title}</h4>
       <p>{notification.message}</p>
       {notification.referenceId && (
-        <button onClick={handleGoToEvent}>
-          انتقل إلى الحدث
-        </button>
+        <button onClick={handleGoToEvent}>انتقل إلى الحدث</button>
       )}
     </div>
   );
@@ -258,15 +286,15 @@ function NotificationItem({ notification }: { notification: Notification }) {
 async function getNotificationReference(notificationId: number) {
   const response = await fetch(`/api/Notification/${notificationId}/reference`);
   const result = await response.json();
-  
+
   if (result.success) {
     return {
       referenceId: result.data.referenceId,
       referenceType: result.data.referenceType,
-      referenceTypeName: result.data.referenceTypeName
+      referenceTypeName: result.data.referenceTypeName,
     };
   }
-  
+
   return null;
 }
 ```
@@ -276,6 +304,7 @@ async function getNotificationReference(notificationId: number) {
 ## 📊 أمثلة على الإشعارات المرسلة
 
 ### Meeting Notification
+
 ```json
 {
   "title": "دعوة لحضور اجتماع: اجتماع الإدارة",
@@ -287,6 +316,7 @@ async function getNotificationReference(notificationId: number) {
 ```
 
 ### Task Notification
+
 ```json
 {
   "title": "New Task Assigned",
@@ -298,6 +328,7 @@ async function getNotificationReference(notificationId: number) {
 ```
 
 ### Visit Notification
+
 ```json
 {
   "title": "دعوة للمشاركة في زيارة: زيارة ميدانية",
@@ -313,6 +344,7 @@ async function getNotificationReference(notificationId: number) {
 ## 🎯 الخطوات التالية
 
 ### 1. تطبيق Migration
+
 ```bash
 cd OfficeManagementSystem.Infrastructure
 dotnet ef database update --startup-project ../OfficeManagementSystem.API/OfficeManagementSystem.API.csproj
@@ -321,6 +353,7 @@ dotnet ef database update --startup-project ../OfficeManagementSystem.API/Office
 ### 2. إضافة Notifications للـ Travel (إذا لزم الأمر)
 
 في `TravelService.cs`، يمكن إضافة:
+
 ```csharp
 await _notificationService.SendNotificationAsync(
     "إشعار سفر جديد",
@@ -361,4 +394,3 @@ await _notificationService.SendNotificationAsync(
 ---
 
 تم التنفيذ بنجاح! 🎉
-

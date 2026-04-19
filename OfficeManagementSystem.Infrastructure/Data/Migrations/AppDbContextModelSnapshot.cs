@@ -354,6 +354,134 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("RolePermissions", (string)null);
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Carbon.CarbonActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ActivityDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ActivityType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Destination")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Distance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("EmissionValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Origin")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ParticipantsCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RelatedEntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RelatedEntityType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("TransportType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityDate");
+
+                    b.HasIndex("ActivityType");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("TransportType");
+
+                    b.HasIndex("RelatedEntityType", "RelatedEntityId");
+
+                    b.ToTable("CarbonActivities", (string)null);
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Carbon.CarbonEmissionFactor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Factor")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TransportType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Unit")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("kg/km");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("TransportType", "IsActive");
+
+                    b.ToTable("CarbonEmissionFactors", (string)null);
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -518,7 +646,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("EmployeeKPIs", (string)null);
+                    b.ToTable("EmployeeKPIs");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.EmployeeNote", b =>
@@ -931,7 +1059,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Notifications.UserNotification", b =>
@@ -961,7 +1089,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserNotifications", (string)null);
+                    b.ToTable("UserNotifications");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Partners.Partner", b =>
@@ -1200,6 +1328,39 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.ToTable("Reminders", (string)null);
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("EmployeeUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TaskItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeUserId");
+
+                    b.HasIndex("TaskItemId", "EmployeeUserId");
+
+                    b.ToTable("TaskAssignments", (string)null);
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAttachment", b =>
                 {
                     b.Property<int>("Id")
@@ -1251,7 +1412,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("TaskItemId");
 
-                    b.ToTable("TaskFeedbacks", (string)null);
+                    b.ToTable("TaskFeedbacks");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
@@ -1261,10 +1422,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssigneeUserId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1309,8 +1466,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssigneeUserId");
 
                     b.HasIndex("CreatedAt");
 
@@ -1481,7 +1636,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("TravelId");
 
-                    b.ToTable("TravelResults", (string)null);
+                    b.ToTable("TravelResults");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Visit.Visit", b =>
@@ -1618,7 +1773,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkflowLogs", (string)null);
+                    b.ToTable("WorkflowLogs");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Employee", b =>
@@ -1637,6 +1792,10 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("NationalId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("OfficeNumber")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -1728,6 +1887,16 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Carbon.CarbonActivity", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Department", b =>
@@ -1977,6 +2146,25 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAssignment", b =>
+                {
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", "Task")
+                        .WithMany("Assignees")
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskAttachment", b =>
                 {
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Documents.Document", "Document")
@@ -2017,11 +2205,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
                 {
-                    b.HasOne("OfficeManagementSystem.Domain.Entity.Employee", "Assignee")
-                        .WithMany()
-                        .HasForeignKey("AssigneeUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("OfficeManagementSystem.Domain.Entity.Auth.AppUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
@@ -2032,8 +2215,6 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("DeptId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Assignee");
 
                     b.Navigation("CreatedBy");
 
@@ -2196,6 +2377,8 @@ namespace OfficeManagementSystem.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("OfficeManagementSystem.Domain.Entity.Tasks.TaskItem", b =>
                 {
+                    b.Navigation("Assignees");
+
                     b.Navigation("Attachments");
 
                     b.Navigation("Feedbacks");

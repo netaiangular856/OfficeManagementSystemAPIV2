@@ -167,7 +167,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<TasksOverviewDto> GetTasksOverviewForManagerAsync(DashboardDateFilterDto filter,string userId)
+        public async Task<TasksOverviewDto> GetTasksOverviewForManagerAsync(DashboardDateFilterDto filter)
         {
             try
             {
@@ -176,7 +176,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    v =>( v.Assignee.Department.ManagerUserId!=null &&  v.Assignee.Department.ManagerUserId== userId) && ( ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate)),
+                    v =>  ( ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate)),
                     includeProperties: ",Assignee,Assignee.Department,");
 
                 var totalTasks = tasks.Count();
@@ -434,7 +434,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .ToList();
 
                 var tasks = await _unitOfWork.TaskRepository.GetAllAsync(
-                    v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate));
+                    v => ((filter.FromDate == null && v.DueDate >= fromDate) || v.DueDate >= filter.FromDate) && (filter.ToDate == null || v.DueDate <= filter.ToDate),
+                    includeProperties: "Assignees");
 
                 var leaderboard = latestKpis
                     .Select(e => new EmployeeLeaderboardItemDto
@@ -443,10 +444,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         EmployeeName = $"{e.Employee?.FirstName} {e.Employee?.LastName}" ?? "غير محدد",
                         Department = e.Employee?.Department?.NameAr ?? "غير محدد",
                         KpiScore = (double)e.Score,
-                        CompletedTasks = tasks.Count(t => t.AssigneeUserId == e.EmployeeId && t.Status == Domain.Enums.Tasks.TaskStatus.Done),
-                        TotalTasks = tasks.Count(t => t.AssigneeUserId == e.EmployeeId),
-                        TaskCompletionRate = tasks.Count(t => t.AssigneeUserId == e.EmployeeId) > 0 
-                            ? (double)tasks.Count(t => t.AssigneeUserId == e.EmployeeId && t.Status == Domain.Enums.Tasks.TaskStatus.Done) / tasks.Count(t => t.AssigneeUserId == e.EmployeeId) * 100 
+                        CompletedTasks = tasks.Count(t => t.Assignees.Any(a => a.EmployeeUserId == e.EmployeeId) && t.Status == Domain.Enums.Tasks.TaskStatus.Done),
+                        TotalTasks = tasks.Count(t => t.Assignees.Any(a => a.EmployeeUserId == e.EmployeeId)),
+                        TaskCompletionRate = tasks.Count(t => t.Assignees.Any(a => a.EmployeeUserId == e.EmployeeId)) > 0 
+                            ? (double)tasks.Count(t => t.Assignees.Any(a => a.EmployeeUserId == e.EmployeeId) && t.Status == Domain.Enums.Tasks.TaskStatus.Done) 
+                                / tasks.Count(t => t.Assignees.Any(a => a.EmployeeUserId == e.EmployeeId)) * 100 
                             : 0,
                         Rank = 0
                     })

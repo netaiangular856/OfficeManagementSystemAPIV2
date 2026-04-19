@@ -1,0 +1,67 @@
+
+/* DinkToPdf Footer Styling */
+body {
+    margin-bottom: 50px !important;
+}
+
+.page-container {
+    padding-bottom: 50px !important;
+}
+
+/* Remove any existing footer styles since DinkToPdf handles footer */
+.letter-footer {
+    display: none !important;
+}
+
+/* Ensure content doesn't overlap with DinkToPdf footer */
+.letter-content {
+    margin-bottom: 15px !important;
+}
+
+.signature-section {
+    margin-bottom: 20px !important;
+}
+
+/* Fix Arabic text rendering */
+.letter-title, .signature-name, .signature-title {
+    unicode-bidi: bidi-override;
+    direction: rtl;
+}
+
+/* DinkToPdf Footer Styling - White background */
+.footer {
+    background: white !important;
+    color: #000 !important;
+    font-family: 'Amiri', Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    padding: 8px 20px !important;
+    border-top: 1px solid #ddd !important;
+    text-align: center !important;
+    letter-spacing: 0.3px !important;
+    margin: 0 !important;
+    direction: ltr !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+@media print {
+    body {
+        margin-bottom: 50px !important;
+    }
+    
+    .page-container {
+        padding-bottom: 50px !important;
+    }
+    
+    .letter-footer {
+        display: none !important;
+    }
+    
+    .footer {
+        background: white !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}

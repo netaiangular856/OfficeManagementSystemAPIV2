@@ -26,6 +26,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         public ITaskRepository TaskRepository { get; }
         public ITaskUpdateRepository TaskUpdateRepository { get; }
         public ITaskAttachmentRepository TaskAttachmentRepository { get; }
+        public IGenericRepository<TaskAssignment> TaskAssignmentRepository { get; }
         public ITaskFeedbackRepository TaskFeedbackRepository { get; }
 
         public IDocumentRepository DocumentRepository { get; }
@@ -72,6 +73,10 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         // Reminder repository
         public IReminderRepository ReminderRepository { get; }
 
+        // Carbon repositories
+        public ICarbonActivityRepository CarbonActivityRepository { get; }
+        public ICarbonEmissionFactorRepository CarbonEmissionFactorRepository { get; }
+
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -79,6 +84,7 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             TaskRepository = new TaskRepository(_context);
             TaskUpdateRepository = new TaskUpdateRepository(_context);
             TaskAttachmentRepository = new TaskAttachmentRepository(_context);
+            TaskAssignmentRepository = new GenericRepository<TaskAssignment>(_context);
             DocumentRepository = new DocumentRepository(_context);
             NotificationRepository = new NotificationRepository(_context);
             UserNotifications = new GenericRepository<UserNotification>(_context);
@@ -124,6 +130,10 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
             ReminderRepository = new ReminderRepository(_context);
 
             TaskFeedbackRepository= new TaskFeedbackRepository(_context);
+
+            // Carbon repositories
+            CarbonActivityRepository = new CarbonActivityRepository(_context);
+            CarbonEmissionFactorRepository = new CarbonEmissionFactorRepository(_context);
         }
 
         public Task<int> SaveAsync()

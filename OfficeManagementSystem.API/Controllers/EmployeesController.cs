@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
+using OfficeManagementSystem.Application.Services.implementions;
 using OfficeManagementSystem.Application.Services.Interfaces;
 using OfficeManagementSystem.Domain.Sharing;
 using System.Security.Claims;
@@ -16,12 +17,14 @@ namespace OfficeManagementSystem.API.Controllers
         private readonly IEmployeeService _employeeService;
         private readonly IEmployeeKpiService _employeeKpiService;
         private readonly ILogger<EmployeesController> _logger;
+        private readonly IUserService _userService;
 
-        public EmployeesController(IEmployeeService employeeService, IEmployeeKpiService employeeKpiService, ILogger<EmployeesController> logger)
+        public EmployeesController(IEmployeeService employeeService, IEmployeeKpiService employeeKpiService, ILogger<EmployeesController> logger,IUserService userService)
         {
             _employeeService = employeeService;
             _employeeKpiService = employeeKpiService;
             _logger = logger;
+            _userService = userService;
         }
 
         /// <summary>
@@ -505,26 +508,8 @@ namespace OfficeManagementSystem.API.Controllers
         [HttpGet("names")]
         public async Task<IActionResult> Subordinates([FromQuery] string? search)
         {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId==null)
-                {
-                    return BadRequest();
-                }
-
-                var result = await _employeeService.GetSubordinatesAsync(userId, search);
-                if (!result.Success)
-                {
-                    return NotFound(result);
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching subordinates");
-                return StatusCode(500, "Internal server error occurred while fetching subordinates");
-            }
+            var result = await _userService.GetUserNameIdAsync(search);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
 

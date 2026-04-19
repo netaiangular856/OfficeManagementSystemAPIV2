@@ -20,6 +20,7 @@ namespace OfficeManagementSystem.Infrastructure.Data.Config
 
             b.Property(x => x.JobTitle).IsRequired().HasMaxLength(120);
             b.Property(x => x.NationalId).HasMaxLength(50);
+            b.Property(x => x.OfficeNumber).HasMaxLength(50);
 
             // Self-reference: مدير → مرؤوسين
             b.HasOne(e => e.Manager)

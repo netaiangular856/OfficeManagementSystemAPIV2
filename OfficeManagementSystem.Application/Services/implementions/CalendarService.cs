@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
+using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Meeting;
 using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Entity.Visit;
@@ -202,10 +203,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         private async Task<IEnumerable<CalendarEventDto>> GetUserTasksAsync(string userId)
         {
-            var tasksQuery = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                (t.AssigneeUserId == userId || t.CreatedByUserId == userId) &&
-                (t.Status == Domain.Enums.Tasks.TaskStatus.New || 
-                 t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress)); // فقط المهام النشطة
+            var tasksQuery = await _unitOfWork.TaskRepository.GetAllAsync(t =>
+                (t.Assignees.Any(a => a.EmployeeUserId == userId) || t.CreatedByUserId == userId) &&
+                (t.Status == Domain.Enums.Tasks.TaskStatus.New ||
+                 t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress),
+                includeProperties: "Assignees,Assignees.Employee,Assignees.Employee.Department,Dept");
 
             return _mapper.Map<IEnumerable<CalendarEventDto>>(tasksQuery);
         }
@@ -220,9 +222,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         private async Task<IEnumerable<CalendarEventDto>> GetAllTasksAsync()
         {
-            var tasksQuery = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                t.Status == Domain.Enums.Tasks.TaskStatus.New || 
-                t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress); // فقط المهام النشطة
+            var tasksQuery = await _unitOfWork.TaskRepository.GetAllAsync(t =>
+                t.Status == Domain.Enums.Tasks.TaskStatus.New ||
+                t.Status == Domain.Enums.Tasks.TaskStatus.In_Progress,
+                includeProperties: "Assignees,Assignees.Employee,Assignees.Employee.Department,Dept");
 
             return _mapper.Map<IEnumerable<CalendarEventDto>>(tasksQuery);
         }
@@ -297,10 +300,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
         private async Task<int> GetTasksCountAsync(string userId, DateTime startDate, DateTime endDate)
         {
-            var tasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                (t.AssigneeUserId == userId || t.CreatedByUserId == userId) &&
+            var tasks = await _unitOfWork.TaskRepository.GetAllAsync(t =>
+                (t.Assignees.Any(a => a.EmployeeUserId == userId) || t.CreatedByUserId == userId) &&
                 t.CreatedAt >= startDate && t.CreatedAt <= endDate);
-            
+
             return tasks.Count();
         }
 
@@ -345,8 +348,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private async Task<List<DetailedCalendarEventDto>> GetUserDetailedTasksAsync(string userId, DateTime startDate, DateTime endDate)
         {
             var tasks = await _unitOfWork.TaskRepository.GetTasksWithDetailsAsync();
-            tasks = tasks.Where(t => 
-                (t.AssigneeUserId == userId || t.CreatedByUserId == userId) &&
+            tasks = tasks.Where(t =>
+                (t.Assignees.Any(a => a.EmployeeUserId == userId) || t.CreatedByUserId == userId) &&
                 t.CreatedAt >= startDate && t.CreatedAt <= endDate);
 
             var detailedEvents = new List<DetailedCalendarEventDto>();
@@ -355,10 +358,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
             {
                 var detailedEvent = await MapToDetailedEventAsync(task, EventType.Task);
                 detailedEvent.TaskCategory = null; // TaskItem doesn't have Category property
-                detailedEvent.AssignedEmployeeName = task.Assignee?.FirstName + " " + task.Assignee?.LastName ?? "";
-                detailedEvent.AssignedEmployeeEmail = task.Assignee?.Email ?? "";
-                detailedEvent.AssignedEmployeePhone = task.Assignee?.PhoneNumber ?? "";
-                detailedEvent.AssignedEmployeeDepartment = task.Assignee?.Department?.NameAr ?? "";
+                detailedEvent.AssignedEmployeeName = GetTaskAssigneeNames(task);
+                detailedEvent.AssignedEmployeeEmail = GetTaskAssigneeEmails(task);
+                detailedEvent.AssignedEmployeePhone = GetTaskAssigneePhones(task);
+                detailedEvent.AssignedEmployeeDepartment = GetTaskAssigneeDepartments(task);
                 detailedEvents.Add(detailedEvent);
             }
 
@@ -423,7 +426,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private async Task<List<DetailedCalendarEventDto>> GetAllDetailedTasksAsync(DateTime startDate, DateTime endDate)
         {
             var tasks = await _unitOfWork.TaskRepository.GetTasksWithDetailsAsync();
-            tasks = tasks.Where(t => 
+            tasks = tasks.Where(t =>
                 t.CreatedAt >= startDate && t.CreatedAt <= endDate);
 
             var detailedEvents = new List<DetailedCalendarEventDto>();
@@ -432,10 +435,10 @@ namespace OfficeManagementSystem.Application.Services.implementions
             {
                 var detailedEvent = await MapToDetailedEventAsync(task, EventType.Task);
                 detailedEvent.TaskCategory = null; // TaskItem doesn't have Category property
-                detailedEvent.AssignedEmployeeName = task.Assignee?.FirstName + " " + task.Assignee?.LastName ?? "";
-                detailedEvent.AssignedEmployeeEmail = task.Assignee?.Email ?? "";
-                detailedEvent.AssignedEmployeePhone = task.Assignee?.PhoneNumber ?? "";
-                detailedEvent.AssignedEmployeeDepartment = task.Assignee?.Department?.NameAr ?? "";
+                detailedEvent.AssignedEmployeeName = GetTaskAssigneeNames(task);
+                detailedEvent.AssignedEmployeeEmail = GetTaskAssigneeEmails(task);
+                detailedEvent.AssignedEmployeePhone = GetTaskAssigneePhones(task);
+                detailedEvent.AssignedEmployeeDepartment = GetTaskAssigneeDepartments(task);
                 detailedEvents.Add(detailedEvent);
             }
 
@@ -518,8 +521,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     detailedEvent.Location = null; // TaskItem doesn't have Location property
                     detailedEvent.Status = MapToEventStatus(task.Status);
                     detailedEvent.OrganizerName = task.CreatedBy?.FirstName + " " + task.CreatedBy?.LastName ?? "";
-                    detailedEvent.AssigneeName = task.Assignee?.FirstName + " " + task.Assignee?.LastName ?? "";
-                    detailedEvent.DepartmentName = task.Assignee?.Department?.NameAr ?? "";
+                    detailedEvent.AssigneeName = GetTaskAssigneeNames(task);
+                    detailedEvent.DepartmentName = GetTaskAssigneeDepartments(task);
                     detailedEvent.Priority = (int)task.Priority;
                     detailedEvent.PriorityText = GetPriorityText(detailedEvent.Priority);
                     detailedEvent.CreatedAt = task.CreatedAt;
@@ -681,6 +684,59 @@ namespace OfficeManagementSystem.Application.Services.implementions
             return locations.Count > 0 ? string.Join(" | ", locations) : "";
         }
 
+        private static IEnumerable<Employee> GetTaskAssigneeEmployees(Domain.Entity.Tasks.TaskItem task)
+        {
+            if (task.Assignees == null)
+            {
+                return Enumerable.Empty<Employee>();
+            }
+
+            return task.Assignees
+                .Select(a => a.Employee)
+                .Where(e => e != null)
+                .Cast<Employee>();
+        }
+
+        private static string GetTaskAssigneeNames(Domain.Entity.Tasks.TaskItem task)
+        {
+            var names = GetTaskAssigneeEmployees(task)
+                .Select(e => $"{e.FirstName} {e.LastName}".Trim())
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToList();
+
+            return names.Any() ? string.Join(", ", names) : string.Empty;
+        }
+
+        private static string GetTaskAssigneeEmails(Domain.Entity.Tasks.TaskItem task)
+        {
+            var emails = GetTaskAssigneeEmployees(task)
+                .Select(e => e.Email)
+                .Where(email => !string.IsNullOrWhiteSpace(email))
+                .ToList();
+
+            return emails.Any() ? string.Join(", ", emails) : string.Empty;
+        }
+
+        private static string GetTaskAssigneePhones(Domain.Entity.Tasks.TaskItem task)
+        {
+            var phones = GetTaskAssigneeEmployees(task)
+                .Select(e => e.PhoneNumber)
+                .Where(phone => !string.IsNullOrWhiteSpace(phone))
+                .ToList();
+
+            return phones.Any() ? string.Join(", ", phones) : string.Empty;
+        }
+
+        private static string GetTaskAssigneeDepartments(Domain.Entity.Tasks.TaskItem task)
+        {
+            var departments = GetTaskAssigneeEmployees(task)
+                .Select(e => e.Department?.NameAr ?? e.Department?.NameEn)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToList();
+
+            return departments.Any() ? string.Join(", ", departments) : string.Empty;
+        }
+
         #endregion
 
         #region Simple Calendar Events (جدول بسيط)
@@ -784,8 +840,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private async Task<List<SimpleCalendarEventDto>> GetUserSimpleTasksAsync(string userId, DateTime startDate, DateTime endDate)
         {
             var tasks = await _unitOfWork.TaskRepository.GetTasksWithDetailsAsync();
-            tasks = tasks.Where(t => 
-                (t.AssigneeUserId == userId || t.CreatedByUserId == userId) &&
+            tasks = tasks.Where(t =>
+                (t.Assignees.Any(a => a.EmployeeUserId == userId) || t.CreatedByUserId == userId) &&
                 t.CreatedAt >= startDate && t.CreatedAt <= endDate);
 
             return tasks.Select(task => new SimpleCalendarEventDto
@@ -795,7 +851,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 Subject = task.Title,
                 TimeFormatted = task.CreatedAt.ToString("hh:mm tt"),
                 Location = "",
-                AssignedEmployeeName = task.Assignee?.FirstName + " " + task.Assignee?.LastName ?? "",
+                AssignedEmployeeName = GetTaskAssigneeNames(task),
                 EventTypeName = "مهمة",
                 OriginalEntityId = task.Id
             }).ToList();
@@ -871,7 +927,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 Subject = task.Title,
                 TimeFormatted = task.CreatedAt.ToString("hh:mm tt"),
                 Location = "",
-                AssignedEmployeeName = task.Assignee?.FirstName + " " + task.Assignee?.LastName ?? "",
+                AssignedEmployeeName = GetTaskAssigneeNames(task),
                 EventTypeName = "مهمة",
                 OriginalEntityId = task.Id
             }).ToList();

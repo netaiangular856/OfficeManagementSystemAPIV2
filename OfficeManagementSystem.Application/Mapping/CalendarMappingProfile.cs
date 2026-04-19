@@ -42,8 +42,12 @@ namespace OfficeManagementSystem.Application.Mapping
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.DueDate))
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => EventType.Task))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => MapTaskStatus(src.Status)))
-                .ForMember(dest => dest.AssigneeName, opt => opt.MapFrom(src => 
-                    src.Assignee != null ? $"{src.Assignee.FirstName} {src.Assignee.LastName}" : ""))
+                .ForMember(dest => dest.AssigneeName, opt => opt.MapFrom(src =>
+                    src.Assignees != null
+                        ? string.Join(", ", src.Assignees
+                            .Select(a => a.Employee != null ? $"{a.Employee.FirstName} {a.Employee.LastName}" : string.Empty)
+                            .Where(name => !string.IsNullOrWhiteSpace(name)))
+                        : string.Empty))
                 .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => 
                     src.Dept.NameEn))
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => (int)src.Priority))

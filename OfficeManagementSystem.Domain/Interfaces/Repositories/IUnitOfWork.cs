@@ -20,6 +20,7 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         ITaskRepository TaskRepository { get; }
         ITaskUpdateRepository TaskUpdateRepository { get; }
         ITaskAttachmentRepository TaskAttachmentRepository { get; }
+        IGenericRepository<TaskAssignment> TaskAssignmentRepository { get; }
 
         IDocumentRepository DocumentRepository { get; }
         INotificationRepository NotificationRepository { get; }
@@ -66,6 +67,10 @@ namespace OfficeManagementSystem.Domain.Interfaces.Repositories
         IReminderRepository ReminderRepository { get; }
 
         ITaskFeedbackRepository TaskFeedbackRepository { get; }
+
+        // Carbon repositories
+        ICarbonActivityRepository CarbonActivityRepository { get; }
+        ICarbonEmissionFactorRepository CarbonEmissionFactorRepository { get; }
 
         Task<int> SaveAsync();
     }

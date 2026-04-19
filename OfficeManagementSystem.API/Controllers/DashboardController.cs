@@ -94,14 +94,9 @@ namespace OfficeManagementSystem.API.Controllers
                     FromDate = fromDate,
                     ToDate = toDate
                 };
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
 
-                if(userId == null)
-                {
-                    return NotFound();
-                }
-
-                var result = await _dashboardService.GetTasksOverviewForManagerAsync(filter, userId);
+                var result = await _dashboardService.GetTasksOverviewForManagerAsync(filter);
                 return Ok(result);
             }
             catch (Exception ex)

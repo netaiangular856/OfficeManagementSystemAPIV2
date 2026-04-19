@@ -6,25 +6,51 @@ using OfficeManagementSystem.Infrastructure.Data.Seed;
 using System.ComponentModel;
 using DinkToPdf;
 using DinkToPdf.Contracts;
+using Microsoft.Extensions.Logging;
 namespace OfficeManagementSystem.API
 {
     public class Program
     {
         public static async Task Main(string[] args)
         {
-            //إعداد مسار مكتبة wkhtmltox
-            var wkhtmltoxPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "wkhtmltox");
-            if (Directory.Exists(wkhtmltoxPath))
+            //إعداد مسار مكتبة wkhtmltox بناءً على بنية النظام
+            var wkhtmltoxBasePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "wkhtmltox");
+            if (Directory.Exists(wkhtmltoxBasePath))
             {
-                var dllPath = Path.Combine(wkhtmltoxPath, "libwkhtmltox.dll");
+                // تحديد بنية النظام (x86 أو x64)
+                var architecture = Environment.Is64BitProcess ? "x64" : "x86";
+                var architecturePath = Path.Combine(wkhtmltoxBasePath, architecture);
+                
+                // البحث عن الملف في المجلد المناسب للبنية
+                var dllPath = Path.Combine(architecturePath, "libwkhtmltox.dll");
+                
+                // إذا لم يوجد في المجلد المحدد، جرب البحث في المجلد الآخر كبديل
+                if (!File.Exists(dllPath))
+                {
+                    var alternativeArchitecture = architecture == "x64" ? "x86" : "x64";
+                    var alternativePath = Path.Combine(wkhtmltoxBasePath, alternativeArchitecture, "libwkhtmltox.dll");
+                    
+                    if (File.Exists(alternativePath))
+                    {
+                        architecturePath = Path.Combine(wkhtmltoxBasePath, alternativeArchitecture);
+                        dllPath = alternativePath;
+                        Console.WriteLine($"Warning: Using {alternativeArchitecture} library instead of {architecture}");
+                    }
+                }
+                
                 if (File.Exists(dllPath))
                 {
                     // إضافة المسار إلى PATH البيئة
                     var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
-                    if (!currentPath.Contains(wkhtmltoxPath))
+                    if (!currentPath.Contains(architecturePath))
                     {
-                        Environment.SetEnvironmentVariable("PATH", $"{wkhtmltoxPath};{currentPath}");
+                        Environment.SetEnvironmentVariable("PATH", $"{architecturePath};{currentPath}");
+                        Console.WriteLine($"Added wkhtmltox path to PATH: {architecturePath}");
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: libwkhtmltox.dll not found. Checked paths:\n- {dllPath}");
                 }
             }
 
@@ -98,21 +124,24 @@ namespace OfficeManagementSystem.API
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
 
-                    await context.Database.MigrateAsync();
+                    //await context.Database.MigrateAsync();
                     await PermissionSeeder.SeedAsync(context);
                     await RoleSeeder.SeedRoles(services);
 
                     await SeedEmail.SeedAsync(services);
                     await DepartmentTreeSeeder.SeedAsync(context);
+                    await CarbonEmissionFactorSeeder.SeedAsync(context);
+                    logger.LogInformation("Database seeding finished successfully.");
                 }
                 catch (Exception ex)
                 {
-                    // Log the exception if needed
-                    Console.WriteLine("Error during seeding: " + ex.Message);
+                    logger.LogError(ex, "An error occurred while initializing the database and seeding initial data");
+
                 }
             }
             app.Run();

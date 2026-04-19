@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Application.DTOs;
 using OfficeManagementSystem.Application.DTOs.Common;
 using OfficeManagementSystem.Application.Services.Interfaces;
@@ -9,6 +10,7 @@ using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using TaskStatus = OfficeManagementSystem.Domain.Enums.Tasks.TaskStatus;
@@ -34,10 +36,16 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
+                var normalizedAssignees = NormalizeAssigneeIds(createTaskDto.AssigneeUserIds);
+                if (!normalizedAssignees.Any())
+                {
+                    return ApiResponse<TaskDto>.ErrorResponse("At least one assignee is required");
+                }
+
                 var task = _mapper.Map<TaskItem>(createTaskDto);
 
-                var user=await _userManager.FindByIdAsync(currentUserId);
-                if(user == null)
+                var user = await _userManager.FindByIdAsync(currentUserId);
+                if (user == null)
                 {
                     return ApiResponse<TaskDto>.ErrorResponse("Manager Not Found");
                 }
@@ -45,25 +53,51 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 task.CreatedByUserId = currentUserId;
                 task.Status = TaskStatus.New;
                 task.DeptId = user.DepartmentId;
+                task.Assignees = normalizedAssignees
+                    .Select((userId, index) => new TaskAssignment
+                    {
+                        EmployeeUserId = userId,
+                        IsPrimary = index == 0
+                    })
+                    .ToList();
+
+                var assignees = await _userManager.Users
+                    .Where(u => normalizedAssignees.Contains(u.Id))
+                    .ToListAsync();
+
+                var assigneeNames = assignees
+                    .Select(u => $"{u.FirstName} {u.LastName}".Trim())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .ToList();
+
+                var assigneeDisplay = assigneeNames.Any()
+                    ? string.Join(", ", assigneeNames)
+                    : string.Join(", ", normalizedAssignees);
 
                 var worklog = new WorkflowLog
                 {
                     EntityName = "Task",
                     EntityId = task.Id,
                     ActionType = WorkflowActionType.Created,
-                    Description = $"New Task added '{task.Title}' and assgin to {task.AssigneeUserId}",
-                    UserId = task.CreatedByUserId // �� ��� �� ��� Context ��� �������� ������
+                    Description = $"New Task added '{task.Title}' and assigned to {assigneeDisplay}",
+                    UserId = task.CreatedByUserId
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
 
                 await _unitOfWork.TaskRepository.AddAsync(task);
                 await _unitOfWork.SaveAsync();
 
-                var taskDto = _mapper.Map<TaskDto>(task);
+                var createdTask = await _unitOfWork.TaskRepository.GetTaskWithDetailsAsync(task.Id);
+                if (createdTask == null)
+                {
+                    return ApiResponse<TaskDto>.ErrorResponse("Task created but failed to load details");
+                }
+
+                var taskDto = _mapper.Map<TaskDto>(createdTask);
                 await _notificationService.SendNotificationAsync(
                     "New Task Assigned",
                     $"A new task has been assigned to you: {task.Title} deadline : {task.DueDate},Please check your task list for details.",
-                    new List<string> { task.AssigneeUserId },
+                    normalizedAssignees,
                     "Task",
                     null,
                     task.Id,
@@ -81,8 +115,9 @@ namespace OfficeManagementSystem.Application.Services.implementions
             try
             {
                 var allTasks = await _unitOfWork.TaskRepository
-                    .GetAllAsync( includeProperties: "Dept,Assignee,Assignee.Department,CreatedBy",
-                    orderBy:m=>m.OrderByDescending(t=>t.DueDate));
+                    .GetAllAsync(
+                        includeProperties: "Dept,Assignees,Assignees.Employee,Assignees.Employee.Department,CreatedBy,CreatedBy.Department",
+                        orderBy: m => m.OrderByDescending(t => t.DueDate));
 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -99,11 +134,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 if (!string.IsNullOrEmpty(filter.UserSearchId))
                 {
                     filteredTasks = filteredTasks.Where(t =>
-                        (t.Assignee != null &&
-                         t.Assignee.Department != null &&
-                         t.Assignee.Department.ManagerUserId == filter.UserSearchId)
-                        || t.AssigneeUserId == filter.UserSearchId||
-                        t.CreatedByUserId==filter.UserSearchId
+                        t.Assignees.Any(a => a.Employee != null &&
+                                             a.Employee.Department != null &&
+                                             a.Employee.Department.ManagerUserId == filter.UserSearchId) ||
+                        t.Assignees.Any(a => a.EmployeeUserId == filter.UserSearchId) ||
+                        t.CreatedByUserId == filter.UserSearchId
                     );
                 }
 
@@ -138,14 +173,14 @@ namespace OfficeManagementSystem.Application.Services.implementions
             }
         }
 
-        public async Task<ApiResponse<PaginatedResult<TaskDto>>> GetTasksAsync(string managerId,TaskFilterDto filter)
+        public async Task<ApiResponse<PaginatedResult<TaskDto>>> GetTasksAsync(TaskFilterDto filter)
         {
             try
             {
                 var allTasks = await _unitOfWork.TaskRepository
-                    .GetAllAsync(filter: (m => m.Assignee.Department.ManagerUserId != null && m.Assignee.Department.ManagerUserId == managerId), 
-                    includeProperties: "Dept,Assignee,Assignee.Department,CreatedBy",
-                    orderBy: m => m.OrderByDescending(t => t.DueDate));
+                    .GetAllAsync(
+                        includeProperties: "Dept,Assignees,Assignees.Employee,Assignees.Employee.Department,CreatedBy,CreatedBy.Department",
+                        orderBy: m => m.OrderByDescending(t => t.DueDate));
                 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -160,7 +195,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     filteredTasks = filteredTasks.Where(t => t.DueDate <= filter.DueDateTo.Value);
 
                 if (!string.IsNullOrEmpty(filter.UserSearchId))
-                    filteredTasks = filteredTasks.Where(t => t.AssigneeUserId == filter.UserSearchId);
+                    filteredTasks = filteredTasks.Where(t => t.Assignees.Any(a => a.EmployeeUserId == filter.UserSearchId));
 
                 // Get total count
                 var totalCount = filteredTasks.Count();
@@ -211,14 +246,24 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var task = await _unitOfWork.TaskRepository.GetByIdAsync(id);
+                var task = await _unitOfWork.TaskRepository.GetTaskWithDetailsAsync(id);
                 if (task == null)
                     return ApiResponse<TaskDto>.ErrorResponse("Task not found");
 
                 _mapper.Map(updateTaskDto, task);
                 task.UpdatedAt = DateTime.UtcNow;
 
-                //  Workflow log
+                if (updateTaskDto.AssigneeUserIds != null)
+                {
+                    var normalizedAssignees = NormalizeAssigneeIds(updateTaskDto.AssigneeUserIds);
+                    if (!normalizedAssignees.Any())
+                    {
+                        return ApiResponse<TaskDto>.ErrorResponse("At least one assignee is required");
+                    }
+
+                    SyncTaskAssignments(task, normalizedAssignees);
+                }
+
                 var worklog = new WorkflowLog
                 {
                     EntityName = "Task",
@@ -232,7 +277,13 @@ namespace OfficeManagementSystem.Application.Services.implementions
                 await _unitOfWork.TaskRepository.UpdateAsync(task);
                 await _unitOfWork.SaveAsync();
 
-                var taskDto = _mapper.Map<TaskDto>(task);
+                var refreshedTask = await _unitOfWork.TaskRepository.GetTaskWithDetailsAsync(id);
+                if (refreshedTask == null)
+                {
+                    return ApiResponse<TaskDto>.ErrorResponse("Task updated but failed to load details");
+                }
+
+                var taskDto = _mapper.Map<TaskDto>(refreshedTask);
                 return ApiResponse<TaskDto>.SuccessResponse(taskDto, "Task updated successfully");
             }
             catch (Exception ex)
@@ -382,27 +433,32 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                var tasks = new List<TaskItem>();
+                var normalizedAssignees = NormalizeAssigneeIds(bulkReassignDto.NewAssigneeUserIds);
+                if (!normalizedAssignees.Any())
+                {
+                    return ApiResponse<bool>.ErrorResponse("At least one new assignee is required");
+                }
+
+                var tasks = (await _unitOfWork.TaskRepository.GetAllAsync(
+                    filter: t => bulkReassignDto.TaskIds.Contains(t.Id),
+                    includeProperties: "Assignees",
+                    disableTracking: false))
+                    .ToList();
                 var updates = new List<TaskUpdate>();
 
-                foreach (var taskId in bulkReassignDto.TaskIds)
+                foreach (var task in tasks)
                 {
-                    var task = await _unitOfWork.TaskRepository.GetByIdAsync(taskId);
-                    if (task != null)
-                    {
-                        task.AssigneeUserId = bulkReassignDto.NewAssigneeUserId;
-                        task.UpdatedAt = DateTime.UtcNow;
-                        tasks.Add(task);
+                    SyncTaskAssignments(task, normalizedAssignees);
+                    task.UpdatedAt = DateTime.UtcNow;
 
-                        var taskUpdate = new TaskUpdate
-                        {
-                            TaskItemId = taskId,
-                            Note = bulkReassignDto.Note ?? $"Task reassigned to new user",
-                            CreatedByUserId = currentUserId,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        updates.Add(taskUpdate);
-                    }
+                    var taskUpdate = new TaskUpdate
+                    {
+                        TaskItemId = task.Id,
+                        Note = bulkReassignDto.Note ?? "Task reassigned to new users",
+                        CreatedByUserId = currentUserId,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    updates.Add(taskUpdate);
                 }
 
                 foreach (var task in tasks)
@@ -421,7 +477,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     EntityName = "Task",
                     EntityId = 0,
                     ActionType = WorkflowActionType.Updated,
-                    Description = $"{tasks.Count} tasks reassigned to user {bulkReassignDto.NewAssigneeUserId} at {DateTime.UtcNow}",
+                    Description = $"{tasks.Count} tasks reassigned to users {string.Join(", ", normalizedAssignees)} at {DateTime.UtcNow}",
                     UserId = currentUserId
                 };
                 await _unitOfWork.WorkFlowLogRepository.AddAsync(worklog);
@@ -430,8 +486,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 await _notificationService.SendNotificationAsync(
                 "Tasks Reassigned",
-                $"A new tasks has been reassigned to you,Please check your task list for details.",
-                new List<string> { bulkReassignDto.NewAssigneeUserId },
+                $"Tasks have been reassigned to you. Please check your task list for details.",
+                normalizedAssignees,
                 "Task",
                 null,
                 null,
@@ -452,10 +508,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
             try
             {
                 var allTasks = await _unitOfWork.TaskRepository
-                    .GetAllAsync(filter: m => (m.AssigneeUserId == employeeId)
-                    &&(m.Status==TaskStatus.New|| m.Status == TaskStatus.In_Progress|| m.Status == TaskStatus.returned),
-                    includeProperties: "Dept,Assignee,CreatedBy",
-                    orderBy: m => m.OrderByDescending(t => t.DueDate));
+                    .GetAllAsync(
+                        filter: m => m.Assignees.Any(a => a.EmployeeUserId == employeeId)
+                            && (m.Status == TaskStatus.New || m.Status == TaskStatus.In_Progress || m.Status == TaskStatus.returned),
+                        includeProperties: "Dept,Assignees,Assignees.Employee,Assignees.Employee.Department,CreatedBy",
+                        orderBy: m => m.OrderByDescending(t => t.DueDate));
 
                 // Apply filters in memory
                 var filteredTasks = allTasks.AsQueryable();
@@ -563,6 +620,52 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 return ApiResponse<TaskFeedbackDto>.ErrorResponse($"Error creating task Feedback: {ex.Message}");
+            }
+        }
+
+        private static List<string> NormalizeAssigneeIds(IEnumerable<string>? assigneeIds)
+        {
+            if (assigneeIds == null)
+            {
+                return new List<string>();
+            }
+
+            return assigneeIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct()
+                .ToList();
+        }
+
+        private static void SyncTaskAssignments(TaskItem task, IReadOnlyList<string> desiredAssigneeIds)
+        {
+            if (task.Assignees == null)
+            {
+                task.Assignees = new List<TaskAssignment>();
+            }
+
+            var currentAssignments = task.Assignees.ToList();
+            foreach (var assignment in currentAssignments.Where(a => !desiredAssigneeIds.Contains(a.EmployeeUserId)))
+            {
+                task.Assignees.Remove(assignment);
+            }
+
+            foreach (var userId in desiredAssigneeIds)
+            {
+                if (task.Assignees.All(a => a.EmployeeUserId != userId))
+                {
+                    task.Assignees.Add(new TaskAssignment
+                    {
+                        EmployeeUserId = userId,
+                        AssignedAt = DateTime.UtcNow
+                    });
+                }
+            }
+
+            var primaryAssignee = desiredAssigneeIds.FirstOrDefault();
+            foreach (var assignment in task.Assignees)
+            {
+                assignment.IsPrimary = assignment.EmployeeUserId == primaryAssignee;
             }
         }
     }

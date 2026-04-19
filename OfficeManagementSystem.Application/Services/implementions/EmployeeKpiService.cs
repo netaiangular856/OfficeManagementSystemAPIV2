@@ -338,8 +338,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
             _logger.LogInformation($"  Period: {periodStart:yyyy-MM-dd HH:mm:ss} to {periodEnd:yyyy-MM-dd HH:mm:ss}");
             
             // Get all tasks assigned to this employee
-            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                t.AssigneeUserId == employeeId);
+            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t =>
+                t.Assignees.Any(a => a.EmployeeUserId == employeeId));
 
             _logger.LogInformation($"  Found {allTasks.Count()} total tasks for employee {employeeId}");
 
@@ -407,8 +407,8 @@ namespace OfficeManagementSystem.Application.Services.implementions
         private async Task CalculateResponseSpeedKpiAsync(EmployeeKPI kpi, string employeeId, DateTime periodStart, DateTime periodEnd)
         {
             // Get all tasks assigned to this employee
-            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t => 
-                t.AssigneeUserId == employeeId);
+            var allTasks = await _unitOfWork.TaskRepository.GetAllAsync(t =>
+                t.Assignees.Any(a => a.EmployeeUserId == employeeId));
 
             // Filter tasks that were active during the period
             var tasksInPeriod = allTasks.Where(t => 

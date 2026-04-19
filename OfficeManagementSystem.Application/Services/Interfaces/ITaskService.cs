@@ -7,7 +7,7 @@ namespace OfficeManagementSystem.Application.Services.Interfaces
     {
         Task<ApiResponse<TaskDto>> CreateTaskAsync(CreateTaskDto createTaskDto, string currentUserId);
         Task<ApiResponse<PaginatedResult<TaskDto>>> GetAllTasksAsync(TaskFilterDto filter);
-        Task<ApiResponse<PaginatedResult<TaskDto>>> GetTasksAsync(string managerId, TaskFilterDto filter);
+        Task<ApiResponse<PaginatedResult<TaskDto>>> GetTasksAsync( TaskFilterDto filter);
         Task<ApiResponse<TaskDto>> GetTaskByIdAsync(int id);
         Task<ApiResponse<TaskDto>> UpdateTaskAsync(int id, UpdateTaskDto updateTaskDto);
         Task<ApiResponse<bool>> DeleteTaskAsync(int id);

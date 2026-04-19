@@ -166,33 +166,33 @@ namespace OfficeManagementSystem.Application.Services.implementions
                     .FirstOrDefaultAsync(u => u.Id == user.Id);
 
 
-                //var emailBody = $@"
-                //<html>
-                //  <body style='font-family: Arial, sans-serif;'>
-                //    <h2>Welcome to Our System</h2>
-                //    <p>Dear {user.FirstName} {user.LastName},</p>
-                //    <p>Your account has been created successfully. Below are your login credentials:</p>
+                var emailBody = $@"
+                <html>
+                  <body style='font-family: Arial, sans-serif;'>
+                    <h2>Welcome to Our System</h2>
+                    <p>Dear {user.FirstName} {user.LastName},</p>
+                    <p>Your account has been created successfully. Below are your login credentials:</p>
 
-                //    <p><b>Email:</b> {user.Email}</p>
-                //    <p><b>Password:</b> {createUserRequest.Password}</p>
+                    <p><b>Email:</b> {user.Email}</p>
+                    <p><b>Password:</b> {createUserRequest.Password}</p>
 
-                //    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
+                    <p style='color: red;'><b>For security reasons, please change your password immediately after logging in.</b></p>
 
-                //    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
+                    <p>You can login here: <a href='{_configuration["AppSettings:LoginUrl"]}'>Login Page</a></p>
 
-                //    <br/>
-                //    <p>Best Regards,<br/>System Admin</p>
-                //  </body>
-                //</html>";
+                    <br/>
+                    <p>Best Regards,<br/>System Admin</p>
+                  </body>
+                </html>";
 
-                //var emaildto = new EmailDTO(
-                //user.Email,
-                //_configuration["EmailSetting:From"],
-                //"Your Account Details",
-                //emailBody
-                //);
+                var emaildto = new EmailDTO(
+                user.Email,
+                _configuration["EmailSetting:From"],
+                "Your Account Details",
+                emailBody
+                );
 
-                //await emailService.SendEmail(emaildto);
+                await emailService.SendEmail(emaildto);
 
                 var userDto = _mapper.Map<UserDto>(createdUser);
                 userDto.Roles = await GetUserRolesAsync(createdUser);
@@ -475,30 +475,41 @@ namespace OfficeManagementSystem.Application.Services.implementions
         {
             try
             {
-                
+                // 1) «·Õ’Ê· ⁄·Ï «·„œÌ—Ì‰ „‰ «·√ﬁ”«„
                 var departments = await _unitOfWork.DepartmentRepository.GetAllAsync(d => d.ManagerUserId != null);
 
-                
                 var managerIdsFromDepartments = departments
                     .Select(d => d.ManagerUserId!)
                     .Distinct()
                     .ToList();
 
-                
-                var usersInManagerRole = await _userManager.GetUsersInRoleAsync("Manager");
-                var managerIdsFromRole = usersInManagerRole.Select(u => u.Id);
+                // 2) «·Õ’Ê· ⁄·Ï ﬂ· «·—Ê·“ «· Ì  Õ ÊÌ ⁄·Ï ﬂ·„… Manager
+                var managerRoles = await _roleManager.Roles
+                    .Where(r => r.Name.ToLower().Contains("manager"))
+                    .Select(r => r.Name)
+                    .ToListAsync();
 
-                
+                // 3) «·Õ’Ê· ⁄·Ï ﬂ· «·„” Œœ„Ì‰ «·„ÊÃÊœÌ‰ ›Ì √Ì —Ê· ›ÌÂ« Manager
+                var managerIdsFromRoles = new List<string>();
+
+                foreach (var role in managerRoles)
+                {
+                    var users = await _userManager.GetUsersInRoleAsync(role);
+                    managerIdsFromRoles.AddRange(users.Select(u => u.Id));
+                }
+
+                // œ„Ã IDs »œÊ‰  ﬂ—«—
                 var allManagerIds = managerIdsFromDepartments
-                    .Union(managerIdsFromRole)
+                    .Union(managerIdsFromRoles)
                     .Distinct()
                     .ToList();
 
+                // 4) Query users
                 var usersQuery = _userManager.Users
                     .OfType<AppUser>()
                     .Where(u => allManagerIds.Contains(u.Id));
 
-               
+                // 5) Search
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var s = search.Trim().ToLower();
@@ -508,7 +519,7 @@ namespace OfficeManagementSystem.Application.Services.implementions
                         u.UserName.ToLower().Contains(s));
                 }
 
-            
+                // 6) Projection
                 var result = await usersQuery
                     .Select(m => new ManagerNameIdDto
                     {
@@ -526,9 +537,11 @@ namespace OfficeManagementSystem.Application.Services.implementions
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while getting managers");
-                return ApiResponse<IEnumerable<ManagerNameIdDto>>.ErrorResponse($"An error occurred while retrieving managers: {ex.Message}");
+                return ApiResponse<IEnumerable<ManagerNameIdDto>>
+                    .ErrorResponse($"An error occurred while retrieving managers: {ex.Message}");
             }
         }
+
 
 
 

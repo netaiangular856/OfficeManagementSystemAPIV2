@@ -15,8 +15,11 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         {
             return await _context.Tasks
                 .Include(t => t.Dept)
-                .Include(t => t.Assignee)
+                .Include(t => t.Assignees)
+                    .ThenInclude(a => a.Employee)
+                        .ThenInclude(e => e.Department)
                 .Include(t => t.CreatedBy)
+                    .ThenInclude(c => c.Department)
                 .Include(t => t.Updates)
                 .Include(t => t.Attachments)
                 .OrderByDescending(t => t.CreatedAt)
@@ -27,8 +30,11 @@ namespace OfficeManagementSystem.Infrastructure.Repositories
         {
             return await _context.Tasks
                 .Include(t => t.Dept)
-                .Include(t => t.Assignee)
+                .Include(t => t.Assignees)
+                    .ThenInclude(a => a.Employee)
+                        .ThenInclude(e => e.Department)
                 .Include(t => t.CreatedBy)
+                    .ThenInclude(c => c.Department)
                 .Include(t => t.Updates)
                     .ThenInclude(u => u.CreatedBy)
                 .Include(t => t.Attachments)

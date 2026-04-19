@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OfficeManagementSystem.Domain.Entity;
 using OfficeManagementSystem.Domain.Entity.Auth;
+using OfficeManagementSystem.Domain.Entity.Carbon;
 using OfficeManagementSystem.Domain.Entity.Documents;
 using OfficeManagementSystem.Domain.Entity.Letters;
 using OfficeManagementSystem.Domain.Entity.Meeting;
@@ -53,6 +54,7 @@ namespace OfficeManagementSystem.Infrastructure.Data
 
         // Tasks
         public virtual DbSet<TaskItem> Tasks { get; set; }
+        public virtual DbSet<TaskAssignment> TaskAssignments { get; set; }
         public virtual DbSet<TaskAttachment> TaskAttachments { get; set; }
         public virtual DbSet<TaskUpdate> TaskUpdates { get; set; }
         public virtual DbSet<TaskFeedback> TaskFeedbacks { get; set; }
@@ -72,6 +74,10 @@ namespace OfficeManagementSystem.Infrastructure.Data
 
         //Reminders
         public virtual DbSet<Reminder> Reminders { get; set; }
+
+        //Carbon
+        public virtual DbSet<CarbonActivity> CarbonActivities { get; set; }
+        public virtual DbSet<CarbonEmissionFactor> CarbonEmissionFactors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

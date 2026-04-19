@@ -18,10 +18,9 @@ namespace OfficeManagementSystem.Infrastructure.Data.Seed
 
             var roles = new List<AppRole>
             {
-                new AppRole { Name = "Admin", Description = "System Administrator with full permissions" },
-                new AppRole { Name = "Manager", Description = "Department Manager with elevated permissions" },
-                new AppRole { Name = "Secretary", Description = "Secretary with limited permissions for scheduling" },
-                new AppRole { Name = "Employee", Description = "Regular employee with basic permissions" }
+                new AppRole { Name = "Admin",ArabicName="مدير النظام", Description = "System Administrator with full permissions" },
+                new AppRole { Name = "General Manager",ArabicName="المدير العام", Description = "Department Manager with elevated permissions" },
+                new AppRole { Name = "office manager",ArabicName="مدير مكتب", Description = "Secretary with limited permissions for scheduling" },
             };
 
             foreach (var role in roles)

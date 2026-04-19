@@ -7,6 +7,7 @@ using OfficeManagementSystem.Domain.Entity.Tasks;
 using OfficeManagementSystem.Domain.Enums;
 using OfficeManagementSystem.Domain.Enums.Tasks;
 using OfficeManagementSystem.Domain.Interfaces.Repositories;
+using System.Linq;
 
 namespace OfficeManagementSystem.Application.Services.implementions
 {
@@ -51,10 +52,18 @@ namespace OfficeManagementSystem.Application.Services.implementions
 
                 var taskUpdateDto = _mapper.Map<TaskUpdateDto>(taskUpdate);
 
+                var taskAssignments = await _unitOfWork.TaskAssignmentRepository.GetAllAsync(
+                    filter: a => a.TaskItemId == taskId);
+                var recipientIds = taskAssignments.Select(a => a.EmployeeUserId).Distinct().ToList();
+                if (!recipientIds.Any() && !string.IsNullOrEmpty(task.CreatedByUserId))
+                {
+                    recipientIds.Add(task.CreatedByUserId);
+                }
+
                 await _notificationService.SendNotificationAsync(
                 "New Task Update",
-                $"A new task Update has been Added to task {task.Title},Please check your task list for details.",
-                new List<string> { task.AssigneeUserId },
+                $"A new task update has been added to task {task.Title}, Please review the details.",
+                recipientIds,
                 "Task",
                 null,
                 task.Id,

@@ -192,7 +192,7 @@ namespace OfficeManagementSystem.API.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
                 IsEssential = true,
                 //Domain = "localhost",
@@ -206,7 +206,7 @@ namespace OfficeManagementSystem.API.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
                 IsEssential = true,
                 //Domain = "localhost",

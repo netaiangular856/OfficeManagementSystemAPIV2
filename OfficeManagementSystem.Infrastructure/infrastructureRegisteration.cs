@@ -94,6 +94,9 @@ namespace OfficeManagementSystem.Infrastructure
             
             // Reminder services
             services.AddScoped<IReminderService, ReminderService>();
+            
+            // Carbon services
+            services.AddScoped<ICarbonService, CarbonService>();
 
 
 
